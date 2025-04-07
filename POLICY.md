@@ -3,7 +3,7 @@
 _Last Updated: [27/03/2025]_
 
 ## **1. Introduction**
-We warmly welcome **ABotmo**. This Privacy Policy outlines how we collect, use, and protect your information while you interact with our open-source Discord bot. By using **ABotmo**, you agree to the terms outlined in the following sections.
+We warmly welcome **ABotmo**. This Privacy Policy outlines how we collect, use, and protect your information while you interact with our ~~open-source~~ Discord bot. By using **ABotmo**, you agree to the terms outlined in the following sections.
 
 ## **2. Data Acquisition**
 **ABotmo** does not gather, store, or share any personal data except for what is necessary for its operational processes. However, in the course of its operation, the bot might temporarily process the following data:
@@ -44,5 +44,5 @@ If your server has the ability to log operations, recorded data will remain unti
 This policy is revised from time to time. Users will be notified of significant changes via the bot's **GitHub repository** or an announcement on the **Discord server**.
 
 ## **8. Contact Information** If you have any questions or concerns about this Privacy Policy, please do not hesitate to contact us:
-- **GitHub Issues**: [Issue Page](https://github.com/VeraVeemo/ABotmo/issues)]
+- **GitHub Issues**: [Issue Page](https://github.com/Veemoworks/ABotmo/issues)
 - **Discord Support Server**: [Veemocord™](https://discord.gg/GzWWqHxRap)
