@@ -10,8 +10,8 @@ A bot for Veemocord™: A fork of Vesktop
 
 The bot includes:
 - 8 moderation commands
-- 8 miscellanous commands
-- 6 fun commands
+- 14 miscellanous commands
+- 9 fun commands
 - Saving user roles and reapplying to them on rejoin
 - Databases
 - Moderation logging
