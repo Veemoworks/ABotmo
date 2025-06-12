@@ -12,7 +12,7 @@ The bot includes:
 - 11 moderation commands
 - 14 miscellanous commands
 - 11 fun commands
-- 2 server commands
+- 4 server commands
 - Saving user roles and reapplying to them on rejoin
 - Databases
 - Moderation logging
@@ -22,6 +22,7 @@ The bot includes:
 - Permission checking
 - Reaction Roles
 - Music
+- Ranks / Level-Up system
 - & more, soon...
 
 ## Key Info
