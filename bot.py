@@ -1,7 +1,7 @@
 import discord, os, platform, Cogs.Methods.asynchronous.botStatus, sys
 from discord.ext import commands
 from dotenv import load_dotenv
-from Cogs.Methods.asynchronous.botEvents import on_command_error, on_app_command_error
+from Cogs.Methods.asynchronous.botEvents import command_error, app_command_error
 from Cogs.Methods.methods import handle_exception
 
 load_dotenv()
@@ -29,11 +29,13 @@ async def on_ready():
 
 @bot.event
 async def on_command_error_event(ctx, error):
-    await on_command_error(bot, ctx, error)
+    await command_error(ctx, error)
+
 
 @bot.tree.error
 async def on_app_command_error_event(interaction, error):
-    await on_app_command_error(bot, interaction, error)
+    await app_command_error(interaction, error)
+
 
 sys.excepthook = handle_exception
 

@@ -11,7 +11,10 @@ class Server(commands.Cog):
     @app_commands.describe(role="Add a Moderator/Admin role")
     @app_commands.guild_only()
     async def serverconfig(self, interaction: discord.Interaction, role: discord.Role):
-        server_settings(True, interaction, role.id)
+        if interaction.user.guild_permissions.administrator:
+            await interaction.response.send_message(server_settings(True, interaction, role.id), ephemeral=True)
+        else:
+            await interaction.response.send_message("You do not have permission to run this command!")
 
 async def setup(bot):
     await bot.add_cog(Server(bot))

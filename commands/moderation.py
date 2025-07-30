@@ -2,6 +2,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 from datetime import datetime
+from Cogs.Methods.methods import permission_check
 from DataBases.database import warnings
 
 class Moderation(commands.Cog):
@@ -11,6 +12,7 @@ class Moderation(commands.Cog):
     @app_commands.command(name="warn", description="Give a warning to a user")
     @app_commands.describe(user="Enter a user", reason="Enter a reason", message="Optional Message")
     @app_commands.guild_only()
+    @permission_check()
     async def warn(self, interaction: discord.Interaction, user: discord.Member, reason: str, message: str = None):
         print(f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name}! {datetime.now().strftime("[%d|%m|%y] : [%H:%M]")}")
         if user.bot:

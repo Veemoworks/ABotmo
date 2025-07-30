@@ -4,17 +4,17 @@ def warnings(save, interaction, data = None):
     msg = None
     con = sqlite3.connect("DataBases/warnings.db")
     cur = con.cursor()
-
-    cur.execute("""
+    guild_id = str(interaction.guild.id)
+    cur.execute(f"""
                 SELECT name
                 FROM sqlite_master
                 WHERE type = 'table'
-                AND name = ?;
-                """, (str(interaction.guild_id),))
+                  AND name = {guild_id};
+                """)
 
     if not cur.fetchone():
         cur.execute(f"""
-            CREATE TABLE '{str(interaction.guild_id)}' (
+            CREATE TABLE '{guild_id}' (
                 user TEXT,
                 mod TEXT,
                 reason TEXT,
@@ -25,11 +25,11 @@ def warnings(save, interaction, data = None):
 
     if save and data:
         cur.execute(f"""
-            INSERT INTO "{str(interaction.guild_id)}" (user, mod, reason, message, timestamp)
+            INSERT INTO "{guild_id}" (user, mod, reason, message, timestamp)
             VALUES (?, ?, ?, ?, ?);
         """, data)
         cur.execute(f"""
-            SELECT * FROM '{str(interaction.guild_id)}'
+            SELECT * FROM '{guild_id}'
             WHERE user = '{str(data[0])}';
             """)
         msg = f"Successfully warned <@{data[0]}>, they now have {len(cur.fetchall())} warnings!"
@@ -43,32 +43,41 @@ def server_settings(save, interaction, role = None):
     msg = None
     con = sqlite3.connect("DataBases/serverconfigs.db")
     cur = con.cursor()
-
-    cur.execute("""
+    guild_id = str(interaction.guild.id)
+    cur.execute(f"""
                 SELECT name
                 FROM sqlite_master
                 WHERE type = 'table'
-                  AND name = ?;
-                """, (str(interaction.guild_id),))
+                  AND name = '{guild_id}';
+                """,)
 
     if not cur.fetchone():
         cur.execute(f"""
-                CREATE TABLE '{str(interaction.guild_id)}' (
-                    roles TEXT,
+                CREATE TABLE '{guild_id}' (
+                    roles TEXT
                 );
             """)
 
     if save:
         cur.execute(f"""
-            INSERT INTO "{str(interaction.guild_id)}" (roles)
-            VALUES (role);
+            SELECT *
+            FROM '{guild_id}'
+            WHERE roles = '{role}'
             """)
+        if cur.fetchone():
+            cur.execute(f"""DELETE FROM '{guild_id}' WHERE roles = '{role}';""")
+            msg = f"Successfully deleted <@&{role}> from the server configuration!"
+        else:
+            cur.execute(f"""
+                INSERT INTO '{guild_id}'(roles)
+                VALUES ({role});
+                """)
+            msg = f"Successfully added <@&{role}> to the server configuration!"
 
     else:
         cur.execute(f"""
-            SELECT * FROM '{str(interaction.guild_id)}'
+            SELECT * FROM '{guild_id}'
             """)
-        msg = cur.fetchall()
 
     con.commit()
     con.close()
