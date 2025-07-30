@@ -1,4 +1,8 @@
-from imports import *
+import discord, os, platform, Cogs.Methods.asynchronous.botStatus, sys
+from discord.ext import commands
+from dotenv import load_dotenv
+from Cogs.Methods.asynchronous.botEvents import on_command_error, on_app_command_error
+from Cogs.Methods.methods import handle_unhandled_exception
 
 load_dotenv()
 bot = commands.Bot(command_prefix=";;", intents=discord.Intents.all())
@@ -6,7 +10,7 @@ bot = commands.Bot(command_prefix=";;", intents=discord.Intents.all())
 @bot.event
 async def on_ready():
     try:
-        cogs = [ "commands.fun" ]
+        cogs = [ "commands.fun", "commands.utils", "commands.moderation", ]
         for cog in cogs:
             await bot.load_extension(cog)
         try:
@@ -19,46 +23,19 @@ async def on_ready():
                   f"Running on: {platform.system()} {platform.release()} ({os.name})\n------------", sep="\n------------\n")
         except Exception as e:
             print(f"❌ Sync Error: {e}")
+        bot.loop.create_task(Cogs.Methods.asynchronous.botStatus.status(bot))
     except Exception as e:
         print(f"Error occurred in starting up the bot!: {e}")
 
 @bot.event
-async def on_command_error(ctx, error):
-    print(f"Fatal error occurred: {error}")
-    try:
-        embed = discord.Embed(title="BOT STATUS!", colour=discord.Colour.purple())
-        embed.add_field(name="Bot has encountered an error!", value=str(error)[:1024])
-        embed.set_thumbnail(url=warm)
-        embed.timestamp = datetime.now()
-
-        channel = await bot.fetch_channel(1399721716606963843)
-        await channel.send(embed=embed)
-    except Exception as e:
-        print(f"Failed to send error message: {e}")
-    errorembed = discord.Embed(title="Bot Error!", description="An error occurred while running this command!\n### Possible reasons:\n- A freak error. Try again.\n- This command is in beta/outdated.\n- I'm slow at responding, check </status:1396646022314328106>.\n- If this error lasts for days, shoot us a </bugreport:1396647997290319905>!", color=discord.Color.dark_green())
-    errorembed.set_thumbnail(url=warm)
-    errorembed.add_field(name="Exception:", value=error)
-    await ctx.reply(embed=errorembed, mention_author=False)
+async def on_command_error_event(ctx, error):
+    await on_command_error(bot, ctx, error)
 
 @bot.tree.error
-async def on_app_command_error(interaction: discord.Interaction, error):
-    print(f"Fatal error occurred: {error}")
-    try:
-        embed = discord.Embed(title="BOT ERROR!", description=str(error)[:1024], colour=discord.Colour.purple())
-        embed.set_thumbnail(url=warm)
-        embed.timestamp = datetime.now()
+async def on_app_command_error_event(interaction, error):
+    await on_app_command_error(bot, interaction, error)
 
-        channel = await bot.fetch_channel(1399721716606963843)
-        await channel.send(embed=embed)
-    except Exception as e:
-        print(f"Failed to send error message: {e}")
-    errorembed = discord.Embed(title="Bot Error!", description="An error occurred while running this command!\n### Possible reasons:\n- A freak error. Try again.\n- This command is in beta/outdated.\n- I'm slow at responding, check </status:1396646022314328106>.\n- If this error lasts for days, shoot us a </bugreport:1396647997290319905>!", color=discord.Color.dark_green())
-    errorembed.set_thumbnail(url=warm)
-    errorembed.add_field(name="Exception:", value=error)
-    try:
-        await interaction.response.send_message(embed=errorembed)
-    except discord.errors.InteractionResponded:
-        await interaction.followup.send(embed=errorembed)
+sys.excepthook = handle_unhandled_exception
 
 if __name__ == "__main__":
     bot.run(os.getenv("TOKEN"))
