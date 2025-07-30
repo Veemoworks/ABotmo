@@ -2,7 +2,7 @@ import discord, os, platform, Cogs.Methods.asynchronous.botStatus, sys
 from discord.ext import commands
 from dotenv import load_dotenv
 from Cogs.Methods.asynchronous.botEvents import on_command_error, on_app_command_error
-from Cogs.Methods.methods import handle_unhandled_exception
+from Cogs.Methods.methods import handle_exception
 
 load_dotenv()
 bot = commands.Bot(command_prefix=";;", intents=discord.Intents.all())
@@ -10,9 +10,9 @@ bot = commands.Bot(command_prefix=";;", intents=discord.Intents.all())
 @bot.event
 async def on_ready():
     try:
-        cogs = [ "commands.fun", "commands.utils", "commands.moderation", ]
+        cogs = [ "fun", "utils", "moderation", "server" ]
         for cog in cogs:
-            await bot.load_extension(cog)
+            await bot.load_extension(f"commands.{cog}")
         try:
             synced = await bot.tree.sync()
             cmds = await bot.tree.fetch_commands()
@@ -35,7 +35,7 @@ async def on_command_error_event(ctx, error):
 async def on_app_command_error_event(interaction, error):
     await on_app_command_error(bot, interaction, error)
 
-sys.excepthook = handle_unhandled_exception
+sys.excepthook = handle_exception
 
 if __name__ == "__main__":
     bot.run(os.getenv("TOKEN"))

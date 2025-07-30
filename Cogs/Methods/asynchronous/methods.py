@@ -9,7 +9,7 @@ async def crash(error):
         data = {
             "embeds": [
                 {
-                    "title": "BOT STATUS!",
+                    "title": "BOT ERROR!",
                     "description": str(error)[:1024],
                     "color": 0x9B59B6,
                     "thumbnail": {
