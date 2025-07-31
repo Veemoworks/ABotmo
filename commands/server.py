@@ -1,8 +1,8 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-from datetime import datetime
 from DataBases.database import server_settings
+from Cogs.Methods.methods import log
 from Cogs.Classes.DiscordViews import Config
 
 class Server(commands.Cog):
@@ -12,7 +12,7 @@ class Server(commands.Cog):
     @app_commands.command(name="serverconfig", description="Change the configuration of the server for the bot.")
     @app_commands.guild_only()
     async def serverconfig(self, interaction: discord.Interaction):
-        print(f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] {interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name}!")
+        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id}!"))
         if not interaction.user.guild_permissions.administrator:
             await interaction.response.send_message("You do not have permission to run this command!", ephemeral=True)
             return

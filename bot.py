@@ -5,9 +5,11 @@ from dotenv import load_dotenv
 from Cogs.Methods.methods import crash
 from Cogs.Methods.asynchronous.botEvents import command_error, app_command_error
 from Cogs.Methods.asynchronous.botStatus import status
-from Cogs.Methods.methods import handle_exception
+from Cogs.Methods.methods import handle_exception, log
 
 load_dotenv()
+with open("output.txt", "w") as f:
+    f.write(f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] discord.client: logging in using static token\n[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] discord.gateway: Shard ID None has connected to Gateway (Session ID: this is written manually and not automatically lol).\n")
 bot = commands.Bot(command_prefix=";;", intents=discord.Intents.all())
 
 @bot.event
@@ -18,21 +20,19 @@ async def on_ready():
             await bot.load_extension(f"commands.{cog}")
         try:
             synced = await bot.tree.sync()
-            print(f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] ABOTMO ONLINE",
-                  f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] Logged in as {bot.user}",
-                  f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] Synced {len(synced)} commands",
-                  f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] PyCord version: {discord.__version__}",
-                  f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] Python version: {platform.python_version()}",
-                  f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] Running on: {platform.system()} {platform.release()} ({os.name})", sep="\n")
+            thing = f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] ABOTMO ONLINE\n[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] Logged in as {bot.user}\n[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] Synced {len(synced)} commands\n[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] PyCord version: {discord.__version__}\n[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] Python version: {platform.python_version()}\n[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] Running on: {platform.system()} {platform.release()} ({os.name})"
+            print("\033[92m" + thing)
+            with open("output.txt", "a") as r:
+                r.write(thing + "\n")
             cmds = await bot.tree.fetch_commands()
             for command in cmds:
-                print(f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] Command {command.name} (</{command.name}:{command.id}>) Registered!", sep="\n")
+                print(log(False, f"Command {command.name} (</{command.name}:{command.id}>) Registered!"))
         except Exception as e:
-            raise Exception(f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [ERROR    ] Sync Error: {e}")
+            print(log(True, f"Sync Error: {e}"))
         bot.loop.create_task(status(bot))
     except Exception as e:
         await crash(e)
-        raise Exception(f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [ERROR    ] Error occurred in starting up the bot!: {e}")
+        print(log(True,f"Error occurred in starting up the bot!: {e}"))
 
 @bot.event
 async def on_command_error_event(ctx, error):

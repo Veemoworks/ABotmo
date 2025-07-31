@@ -1,7 +1,7 @@
 import discord, random, asyncio
 from discord import app_commands
 from discord.ext import commands
-from datetime import datetime
+from Cogs.Methods.methods import log
 
 class Fun(commands.Cog):
     def __init__(self, bot):
@@ -10,7 +10,7 @@ class Fun(commands.Cog):
     @app_commands.command(name="silly", description="Get your silliness percentage")
     @app_commands.describe(user="Enter a user")
     async def silly(self, interaction: discord.Interaction, user: discord.Member = None):
-        print(f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] {interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name}!")
+        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id}!"))
         resuser = f"{user.mention} is"
         dynevil = ""
         if user == None:

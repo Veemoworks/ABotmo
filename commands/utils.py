@@ -1,9 +1,9 @@
 import discord, psutil, requests, time, ping3
 from discord import app_commands
 from discord.ext import commands
-from datetime import datetime
 from resources.dictionaries import hosts, script_urls
 from resources.links import avatar
+from Cogs.Methods.methods import log
 from ping3 import ping
 
 ping3.EXCEPTIONS = True
@@ -11,9 +11,10 @@ ping3.EXCEPTIONS = True
 class Utils(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
     @app_commands.command(name="status", description="Check the statuses of many services")
     async def status(self, interaction: discord.Interaction):
-        print(f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] {interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name}!")
+        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id}!"))
         await interaction.response.defer()
         msg = ""
         amount = 1
@@ -56,7 +57,7 @@ class Utils(commands.Cog):
 
         msg += f"### Python Scripts:\n✅ `ABotmo` ({round(self.bot.latency * 1000)}ms)\n"
 
-        '''for name, url in script_urls.items():
+        for name, url in script_urls.items():
             url = f"http://127.0.0.1:{url}/health"
             try:
                 start = time.perf_counter()
@@ -68,7 +69,7 @@ class Utils(commands.Cog):
                 amount += 1
             except Exception as ex:
                 msg += f"❌ `{name}` Error: {ex}\n"
-        '''
+
         msg += "❌ `Channel Topic Updater` Shutdown\n❌ `Minecraft Console Link` Shutdown\n"
 
         embed = discord.Embed(
@@ -80,7 +81,7 @@ class Utils(commands.Cog):
 
     @app_commands.command(name="ping", description="Check the bot's latency")
     async def ping(self, interaction: discord.Interaction):
-        print(f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] {interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name}!")
+        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id}!"))
         embed = discord.Embed(title="Bot is online!", description=f"Latency is {round(self.bot.latency * 1000)}ms!", color=discord.Color.brand_green())
         embed.set_thumbnail(url=avatar)
         await interaction.response.send_message(embed=embed)

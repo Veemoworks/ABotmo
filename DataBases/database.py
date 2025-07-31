@@ -1,8 +1,8 @@
-import sqlite3
+import sqlite3, discord
 
-def warnings(save, interaction, data = None):
+def modlog(save, interaction, data = None, user: discord.Member = None):
     msg = None
-    con = sqlite3.connect("DataBases/warnings.db")
+    con = sqlite3.connect("DataBases/modlogs.db")
     cur = con.cursor()
     guild_id = str(interaction.guild.id)
     cur.execute(f"""
@@ -19,24 +19,39 @@ def warnings(save, interaction, data = None):
                 mod TEXT,
                 reason TEXT,
                 message TEXT,
+                type TEXT,
                 timestamp TEXT
             );
         """)
 
     if save and data:
         cur.execute(f"""
-            INSERT INTO "{guild_id}" (user, mod, reason, message, timestamp)
-            VALUES (?, ?, ?, ?, ?);
+            INSERT INTO "{guild_id}" (user, mod, reason, message, type, timestamp)
+            VALUES (?, ?, ?, ?, ?, ?);
         """, data)
+        con.commit()
         cur.execute(f"""
             SELECT * FROM '{guild_id}'
             WHERE user = '{str(data[0])}';
             """)
-        msg = f"Successfully warned <@{data[0]}>, they now have {len(cur.fetchall())} warnings!"
-
-    con.commit()
+        msg = f"Successfully warned <@{data[0]}>, they now have {len(cur.fetchall())} modlogs!"
+    else:
+        cur.execute(f"""
+            SELECT type, reason, message, timestamp, mod
+            FROM '{guild_id}'
+            WHERE user = '{user.id}'
+        """)
+        rows = cur.fetchall()
+        msg = discord.Embed(color=discord.Color.dark_green())
+        msg.set_author(name=user.name, icon_url=user.display_avatar.url)
+        if not rows == []:
+            amount = 0
+            for row in rows:
+                amount += 1
+                msg.add_field(name=f"{amount}. {row[3]}", value=f"{row[0]} | \"{row[1]}\" | MSG: \"{row[2]}\" ~ <@{row[4]}>", inline=False)
+        else:
+            msg.description = f"No modlogs found for {user.mention}!"
     con.close()
-
     return msg
 
 def server_settings(save, interaction, role=None):

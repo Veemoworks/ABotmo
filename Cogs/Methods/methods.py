@@ -1,4 +1,5 @@
 import sys, asyncio, traceback, discord
+from datetime import datetime
 from discord import app_commands
 from Cogs.Methods.asynchronous.methods import crash
 from DataBases.database import server_settings
@@ -24,3 +25,16 @@ def handle_exception(exc_type, exc_value, exc_traceback, bot):
         return
     error_msg = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
     asyncio.run_coroutine_threadsafe(crash(Exception(error_msg)), bot.loop)
+
+def log(error, msg):
+    color = None
+    returning = None
+    if error:
+        color = "\033[31m"
+        returning = f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [ERROR   ] {msg}"
+    else:
+        color = "\033[92m"
+        returning = f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] {msg}"
+    with open("output.txt", "a") as f:
+        f.write(returning + "\n")
+    return f"{color}{returning}"

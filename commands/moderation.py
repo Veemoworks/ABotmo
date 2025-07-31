@@ -1,9 +1,9 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-from datetime import datetime
-from Cogs.Methods.methods import permission_check
-from DataBases.database import warnings
+from datetime import datetime, timezone
+from Cogs.Methods.methods import permission_check, log
+from DataBases.database import modlog
 
 class Moderation(commands.Cog):
     def __init__(self, bot):
@@ -14,12 +14,23 @@ class Moderation(commands.Cog):
     @app_commands.guild_only()
     @permission_check()
     async def warn(self, interaction: discord.Interaction, user: discord.Member, reason: str, message: str = None):
-        print(f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] {interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name}!")
+        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id}!"))
         if user.bot:
             await interaction.response.send_message(f"You can not warn {user.mention}, they are a bot!", ephemeral=True)
             return
-        data = ( user.id, interaction.user.id, reason, message, datetime.now().strftime("[%d|%m|%y] : [%H:%M]"))
-        await interaction.response.send_message(warnings(True, interaction, data), ephemeral=True)
+        data = ( user.id, interaction.user.id, reason, message, "WARNING", datetime.now().astimezone(timezone.utc).strftime("[%d|%m|%y] : [%H:%M]"))
+        await interaction.response.send_message(modlog(True, interaction, data), ephemeral=True)
+
+    @app_commands.command(name="modlogs", description="View the moderation log of a member (Timezone: UTC)")
+    @app_commands.describe(user="Enter a user")
+    @app_commands.guild_only()
+    @permission_check()
+    async def modlogs(self, interaction: discord.Interaction, user: discord.Member):
+        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id}!"))
+        if user.bot:
+            await interaction.response.send_message(f"You can not view the warnings of {user.mention}, they are a bot!", ephemeral=True)
+            return
+        await interaction.response.send_message(embed=modlog(False, interaction, user=user), ephemeral=True)
 
 async def setup(bot):
     await bot.add_cog(Moderation(bot))
