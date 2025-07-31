@@ -10,7 +10,7 @@ class Fun(commands.Cog):
     @app_commands.command(name="silly", description="Get your silliness percentage")
     @app_commands.describe(user="Enter a user")
     async def silly(self, interaction: discord.Interaction, user: discord.Member = None):
-        print(f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name}! {datetime.now().strftime("[%d|%m|%y] : [%H:%M]")}")
+        print(f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] {interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name}!")
         resuser = f"{user.mention} is"
         dynevil = ""
         if user == None:

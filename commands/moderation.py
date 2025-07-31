@@ -14,7 +14,7 @@ class Moderation(commands.Cog):
     @app_commands.guild_only()
     @permission_check()
     async def warn(self, interaction: discord.Interaction, user: discord.Member, reason: str, message: str = None):
-        print(f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name}! {datetime.now().strftime("[%d|%m|%y] : [%H:%M]")}")
+        print(f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] {interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name}!")
         if user.bot:
             await interaction.response.send_message(f"You can not warn {user.mention}, they are a bot!", ephemeral=True)
             return

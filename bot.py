@@ -1,7 +1,10 @@
-import discord, os, platform, Cogs.Methods.asynchronous.botStatus, sys
+import discord, os, platform, sys
 from discord.ext import commands
+from datetime import datetime
 from dotenv import load_dotenv
+from Cogs.Methods.methods import crash
 from Cogs.Methods.asynchronous.botEvents import command_error, app_command_error
+from Cogs.Methods.asynchronous.botStatus import status
 from Cogs.Methods.methods import handle_exception
 
 load_dotenv()
@@ -15,17 +18,21 @@ async def on_ready():
             await bot.load_extension(f"commands.{cog}")
         try:
             synced = await bot.tree.sync()
+            print(f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] ABOTMO ONLINE",
+                  f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] Logged in as {bot.user}",
+                  f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] Synced {len(synced)} commands",
+                  f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] PyCord version: {discord.__version__}",
+                  f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] Python version: {platform.python_version()}",
+                  f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] Running on: {platform.system()} {platform.release()} ({os.name})", sep="\n")
             cmds = await bot.tree.fetch_commands()
             for command in cmds:
-                print(f"Registered Slash Command {command.name} (MD: </{command.name}:{command.id}>)")
-            print(f"------------\nABOTMO ONLINE", f"Logged in as {bot.user}", f"✅ Synced {len(synced)} commands", f"PyCord version: {discord.__version__}",
-                  f"Python version: {platform.python_version()}",
-                  f"Running on: {platform.system()} {platform.release()} ({os.name})\n------------", sep="\n------------\n")
+                print(f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] Command {command.name} (</{command.name}:{command.id}>) Registered!", sep="\n")
         except Exception as e:
-            print(f"❌ Sync Error: {e}")
-        bot.loop.create_task(Cogs.Methods.asynchronous.botStatus.status(bot))
+            raise Exception(f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [ERROR    ] Sync Error: {e}")
+        bot.loop.create_task(status(bot))
     except Exception as e:
-        print(f"Error occurred in starting up the bot!: {e}")
+        await crash(e)
+        raise Exception(f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [ERROR    ] Error occurred in starting up the bot!: {e}")
 
 @bot.event
 async def on_command_error_event(ctx, error):

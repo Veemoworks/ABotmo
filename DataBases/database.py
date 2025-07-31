@@ -39,46 +39,41 @@ def warnings(save, interaction, data = None):
 
     return msg
 
-def server_settings(save, interaction, role = None):
-    msg = None
+def server_settings(save, interaction, role=None):
     con = sqlite3.connect("DataBases/serverconfigs.db")
     cur = con.cursor()
     guild_id = str(interaction.guild.id)
     cur.execute(f"""
-                SELECT name
-                FROM sqlite_master
-                WHERE type = 'table'
-                  AND name = '{guild_id}';
-                """,)
-
+        SELECT name FROM sqlite_master
+        WHERE type = 'table' AND name = '{guild_id}';
+    """)
     if not cur.fetchone():
         cur.execute(f"""
-                CREATE TABLE '{guild_id}' (
-                    roles TEXT
-                );
-            """)
+            CREATE TABLE '{guild_id}' (
+                roles TEXT
+            );
+        """)
 
-    if save:
+    if save and role:
         cur.execute(f"""
-            SELECT *
-            FROM '{guild_id}'
-            WHERE roles = '{role}'
-            """)
-        if cur.fetchone():
-            cur.execute(f"""DELETE FROM '{guild_id}' WHERE roles = '{role}';""")
-            msg = f"Successfully deleted <@&{role}> from the server configuration!"
+            SELECT * FROM '{guild_id}' WHERE roles = ?;
+        """, (str(role),))
+        exists = cur.fetchone()
+
+        if exists:
+            cur.execute(f"""
+                DELETE FROM '{guild_id}' WHERE roles = ?;
+            """, (str(role),))
+            msg = f"Removed <@&{role}> from the server config."
         else:
             cur.execute(f"""
-                INSERT INTO '{guild_id}'(roles)
-                VALUES ({role});
-                """)
-            msg = f"Successfully added <@&{role}> to the server configuration!"
-
-    else:
-        cur.execute(f"""
-            SELECT * FROM '{guild_id}'
-            """)
-
-    con.commit()
+                INSERT INTO '{guild_id}' (roles) VALUES (?);
+            """, (str(role),))
+            msg = f"Added <@&{role}> to the server config."
+        con.commit()
+        con.close()
+        return msg
+    cur.execute(f"SELECT roles FROM '{guild_id}'")
+    rows = cur.fetchall()
     con.close()
-    return msg
+    return [row[0] for row in rows]
