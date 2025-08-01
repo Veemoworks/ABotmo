@@ -1,6 +1,26 @@
-import discord
+import discord, aiohttp
+from discord.ext import tasks
 from Cogs.Methods.asynchronous.methods import crash
 from resources.links import warm
+
+@tasks.loop(seconds=297)
+async def kuma(bot):
+    url = "https://status.veraveemo.uk/api/push/iww8FLEbXL"
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f"{url}?status=up&ping={round(bot.latency * 1000)}") as resp:
+                if resp.status == 200:
+                    print("[KUMA] Status ping successful")
+                else:
+                    print(f"[KUMA] Unexpected response: {resp.status}")
+    except Exception as e:
+        print(f"[KUMA] Failed to ping: {e}")
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(f"{url}?status=down&msg={str(e)}") as resp:
+                    print(f"[KUMA] Sent fail status: {resp.status}")
+        except Exception as e2:
+            print(f"[KUMA] Failed to send fail status: {e2}")
 
 async def command_error(ctx, error):
     await crash(error)

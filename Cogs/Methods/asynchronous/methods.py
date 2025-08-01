@@ -4,7 +4,7 @@ from resources.dictionaries import headers
 from datetime import datetime
 
 async def crash(error):
-    print(f"\033[31m[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [ERROR    ] Fatal error occurred: {error}")
+    print(f"\033[31m[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [ERROR   ] Fatal error occurred: {error}")
     try:
         data = {
             "embeds": [

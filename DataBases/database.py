@@ -40,6 +40,7 @@ def modlog(save, interaction, data = None, user: discord.Member = None):
             SELECT type, reason, message, timestamp, mod
             FROM '{guild_id}'
             WHERE user = '{user.id}'
+            LIMIT 25;
         """)
         rows = cur.fetchall()
         msg = discord.Embed(color=discord.Color.dark_green())
@@ -49,6 +50,15 @@ def modlog(save, interaction, data = None, user: discord.Member = None):
             for row in rows:
                 amount += 1
                 msg.add_field(name=f"{amount}. {row[3]}", value=f"{row[0]} | \"{row[1]}\" | MSG: \"{row[2]}\" ~ <@{row[4]}>", inline=False)
+            cur.execute(f"""
+                SELECT type, reason, message, timestamp, mod
+                FROM '{guild_id}'
+                WHERE user = '{user.id}'
+            """)
+            rows = cur.fetchall()
+            if len(rows) > 25:
+                msg.description = (f"{user.mention} has {len(rows)} modlogs, only displaying the top 25.\n"
+                                   f"-# *Why? Read [here](<https://www.pythondiscord.com/pages/guides/python-guides/discord-embed-limits/> \"A redirect to PythonDiscord\").*")
         else:
             msg.description = f"No modlogs found for {user.mention}!"
     con.close()

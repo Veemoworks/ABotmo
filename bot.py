@@ -3,13 +3,13 @@ from discord.ext import commands
 from datetime import datetime
 from dotenv import load_dotenv
 from Cogs.Methods.methods import crash
-from Cogs.Methods.asynchronous.botEvents import command_error, app_command_error
+from Cogs.Methods.asynchronous.botEvents import command_error, app_command_error, kuma
 from Cogs.Methods.asynchronous.botStatus import status
 from Cogs.Methods.methods import handle_exception, log
 
 load_dotenv()
 with open("output.txt", "w") as f:
-    f.write(f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] discord.client: logging in using static token\n[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] discord.gateway: Shard ID None has connected to Gateway (Session ID: this is written manually and not automatically lol).\n")
+    f.write(f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] \"Running bot.py\"...\n")
 bot = commands.Bot(command_prefix=";;", intents=discord.Intents.all())
 
 @bot.event
@@ -30,6 +30,7 @@ async def on_ready():
         except Exception as e:
             print(log(True, f"Sync Error: {e}"))
         bot.loop.create_task(status(bot))
+        # kuma.start(bot)
     except Exception as e:
         await crash(e)
         print(log(True,f"Error occurred in starting up the bot!: {e}"))

@@ -29,9 +29,7 @@ class Server(commands.Cog):
                         inline=False
                         )
         current_roles = server_settings(False, interaction)
-        view = Config(interaction, current_roles)
-
-        await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+        await interaction.response.send_message(embed=embed, view=Config(interaction, current_roles), ephemeral=True)
 
 
 async def setup(bot):

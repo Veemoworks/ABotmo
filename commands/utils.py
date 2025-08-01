@@ -1,7 +1,9 @@
 import discord, psutil, requests, time, ping3
 from discord import app_commands
 from discord.ext import commands
-from resources.dictionaries import hosts, script_urls
+from Cogs.Classes.DiscordModals import BugReport, BotSuggest
+from resources.arrays import veemoworksdevs
+from resources.dictionaries import hosts, script_urls, botbadges
 from resources.links import avatar
 from Cogs.Methods.methods import log
 from ping3 import ping
@@ -11,6 +13,99 @@ ping3.EXCEPTIONS = True
 class Utils(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    @app_commands.command(name="whois", description="Get info about a user")
+    @app_commands.describe(user="User to get info from", ephemeral="Set to ephemeral?")
+    async def whois(self, interaction: discord.Interaction, user: discord.User = None, ephemeral: bool = None):
+        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id}!"))
+        if ephemeral == None:
+            ephemeral = True
+        if user == None:
+            user = interaction.user
+        user = await self.bot.fetch_user(user.id)
+
+        class Buttons(discord.ui.View):
+            def __init__(self, user: discord.User):
+                super().__init__(timeout=180)
+                self.user = user
+                self.add_item(discord.ui.Button(label="View Profile (WEB)", url=f"https://discord.com/users/{user.id}", style=discord.ButtonStyle.link, row=1))
+                self.add_item(discord.ui.Button(label="View Profile (CLIENT)", url=f"discord://-/users/{user.id}", style=discord.ButtonStyle.link, row=1))
+
+                if user.banner:
+                    banner_button = discord.ui.Button(label="View Banner", style=discord.ButtonStyle.primary)
+                    banner_button.callback = self.callback
+                    self.add_item(banner_button)
+
+            async def on_timeout(self):
+                for item in self.children:
+                    item.disabled = True
+                await interaction.edit_original_response(view=self)
+
+            @discord.ui.button(label="View Avatar", style=discord.ButtonStyle.primary)
+            async def avatar_callback(self, interaction: discord.Interaction, button: discord.ui.Button):
+                embed = discord.Embed(color=discord.Color.brand_green())
+                embed.set_image(url=self.user.avatar.url)
+                embed.set_author(name=f"@{self.user}", icon_url=self.user.avatar.url)
+
+                view = discord.ui.View()
+                view.add_item(
+                    discord.ui.Button(label="Image URL", style=discord.ButtonStyle.link, url=self.user.avatar.url))
+                await interaction.response.send_message(embed=embed, view=view, ephemeral=ephemeral)
+
+            async def callback(self, interaction: discord.Interaction):
+                embed = discord.Embed(color=discord.Color.brand_green())
+                embed.set_image(url=self.user.banner.url)
+                embed.set_author(name=f"@{self.user}", icon_url=self.user.avatar.url)
+                view2 = discord.ui.View()
+                view2.add_item(
+                    discord.ui.Button(label="Image URL", style=discord.ButtonStyle.link, url=self.user.banner.url))
+                await interaction.response.send_message(embed=embed, view=view2, ephemeral=ephemeral)
+
+        badges = []
+        if user.public_flags:
+            for flag, emoji in botbadges.items():
+                if getattr(user.public_flags, flag, False):
+                    badges.append(emoji)
+        badge_text = " ".join(badges) if badges else " "
+        created_at = f"<t:{int(user.created_at.timestamp())}:R>"
+
+        embed = discord.Embed(title=f"{user.name}'s Profile", color=discord.Color.brand_green())
+        embed.set_thumbnail(url=user.avatar.url)
+        if user.banner:
+            embed.set_image(url=user.banner.url)
+        embed.add_field(name="Display Name:", value=f"**{user.display_name}**", inline=False)
+        embed.add_field(name="Username:", value=f"`@{user.name}`", inline=False)
+        embed.add_field(name="Account Created:", value=created_at, inline=False)
+        embed.add_field(name="Badges:", value=badge_text, inline=False)
+        embed.set_footer(text=f"ID: {user.id}")
+
+        if user.id == 333585549837336577:
+            embed.set_field_at(3, name="Badges:",
+                               value=f"{badge_text} <:VeraVeemo:1400816211620659272> <:VeemoworksDev:1400816284526051369> <:Python:1400816361189675038> <:dev:1400815766814589080> <:hypesquad:1400816053675884624> <:partner:1400816107325096016> <:bughunter2:1400815976127135874>",
+                               inline=False)
+        elif user.id in veemoworksdevs:
+            embed.set_field_at(3, name="Badges:", value=f"{badge_text} <:VeemoworksDev:1400816284526051369>",
+                               inline=False)
+        elif user.id == 299914704594403329:
+            embed.set_field_at(3, name="Badges:", value=f"{badge_text} <:Chomperling:1400816246160756809>",
+                               inline=False)
+        elif user.id == 566996607455723522:
+            embed.set_field_at(3, name="Badges:", value=f"{badge_text} <:PedroStudios:1400816325311336478>",
+                               inline=False)
+
+        await interaction.response.send_message(embed=embed, view=Buttons(user), ephemeral=ephemeral)
+
+    @app_commands.command(name="applications", description="Provides an application for Veemoworks")
+    async def applications(self, interaction: discord.Interaction):
+        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id}!"))
+        app_embed = discord.Embed(title="Veemoworks Applications",
+                                  description="Hi there!\n"
+                                              "We have have an always active application for the Veemoworks project! However sometimes we change the application likely becase we changed to a different provider or our system is full, so make sure to double check with AVeemo if you're unsure.",
+                                  color=discord.Color.brand_green())
+        app_embed.add_field(name="Link:",
+                            value="https://forms.gle/HuKAiytkbuc2e7NG7")
+        app_embed.set_footer(text="As of: 19/03/25 (Verified: 01/08/25) | (DD/MM/YY)")
+        await interaction.response.send_message(embed=app_embed)
 
     @app_commands.command(name="status", description="Check the statuses of many services")
     async def status(self, interaction: discord.Interaction):
@@ -79,12 +174,28 @@ class Utils(commands.Cog):
         )
         await interaction.followup.send(embed=embed)
 
-    @app_commands.command(name="ping", description="Check the bot's latency")
+    @app_commands.command(name="ping", description="Get the bot's current ping")
     async def ping(self, interaction: discord.Interaction):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id}!"))
         embed = discord.Embed(title="Bot is online!", description=f"Latency is {round(self.bot.latency * 1000)}ms!", color=discord.Color.brand_green())
         embed.set_thumbnail(url=avatar)
         await interaction.response.send_message(embed=embed)
+
+    @app_commands.command(name="links", description="Get all links related to the bot")
+    async def invite(self, interaction: discord.Interaction):
+        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id}!"))
+        await interaction.response.send_message("[**`Install Link`**](<https://bot.veraveemo.uk/invite> \"Install Veemocord™ as an External App\")\n[`Discord Server`](<https://discord.gg/GzWWqHxRap> \"Join the Discord Server and get access to all features and beta access!\") | [`Donate`](<https://ko-fi.com/veraveemo> \"Donate to AVeemo to help support them and their project(s)!\") | [`Bot Info`](<https://bot.veraveemo.uk> \"Get all the info from this bot that you need, or just run /help!\")")
+
+    @app_commands.command(name="bugreport", description="Report a ABotmo Bot bug")
+    async def bugreport(self, interaction: discord.Interaction):
+        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id}!"))
+        await interaction.response.send_modal(BugReport())
+
+    @app_commands.command(name="suggestion", description="Give an ABotmo feature to add")
+    async def suggestion(self, interaction: discord.Interaction):
+        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id}!"))
+        await interaction.response.send_modal(BotSuggest())
+
 
 async def setup(bot):
     await bot.add_cog(Utils(bot))
