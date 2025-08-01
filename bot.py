@@ -1,4 +1,6 @@
 import discord, os, platform, sys
+from threading import Thread
+from Cogs.flaskServer import run_flask
 from discord.ext import commands
 from datetime import datetime
 from dotenv import load_dotenv
@@ -48,4 +50,6 @@ async def on_app_command_error_event(interaction, error):
 sys.excepthook = handle_exception
 
 if __name__ == "__main__":
+    flask_thread = Thread(target=run_flask, daemon=True)
+    flask_thread.start()
     bot.run(os.getenv("TOKEN"))

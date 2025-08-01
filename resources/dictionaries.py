@@ -6,6 +6,7 @@ hosts = {
     "Blogs":"blogs.veraveemo.uk",
 }
 script_urls = {
+    "Veemocord™ Bot": "8006",
     "Presence": "8001",
     "Mrrp Meow": "8002",
     "Discord Time Status": "8003",
