@@ -1,7 +1,7 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-from DataBases.database import server_settings
+from DataBases.database import server_roles
 from Cogs.Methods.methods import log
 from Cogs.Classes.DiscordViews import Config
 
@@ -28,9 +28,8 @@ class Server(commands.Cog):
                               "You can add multiple and remove multiple roles.",
                         inline=False
                         )
-        current_roles = server_settings(False, interaction)
+        current_roles = server_roles(False, interaction)
         await interaction.response.send_message(embed=embed, view=Config(interaction, current_roles), ephemeral=True)
-
 
 async def setup(bot):
     await bot.add_cog(Server(bot))

@@ -64,8 +64,8 @@ def modlog(save, interaction, data = None, user: discord.Member = None):
     con.close()
     return msg
 
-def server_settings(save, interaction, role=None):
-    con = sqlite3.connect("DataBases/serverconfigs.db")
+def server_roles(save, interaction, role=None):
+    con = sqlite3.connect("DataBases/role.db")
     cur = con.cursor()
     guild_id = str(interaction.guild.id)
     cur.execute(f"""

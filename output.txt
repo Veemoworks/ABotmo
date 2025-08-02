@@ -1,0 +1,25 @@
+[02-08-2025 17:29:23] [INFO    ] "Running bot.py"...
+[02-08-2025 17:29:26] [INFO    ] ABOTMO ONLINE
+[02-08-2025 17:29:26] [INFO    ] Logged in as ABotmo#9330
+[02-08-2025 17:29:26] [INFO    ] Synced 14 commands
+[02-08-2025 17:29:26] [INFO    ] PyCord version: 2.5.2
+[02-08-2025 17:29:26] [INFO    ] Python version: 3.13.5
+[02-08-2025 17:29:26] [INFO    ] Running on: Windows 11 (nt)
+[02-08-2025 17:29:27] [INFO    ] Command silly (</silly:1399764476961624248>) Registered!
+[02-08-2025 17:29:27] [INFO    ] Command status (</status:1399850020668444813>) Registered!
+[02-08-2025 17:29:27] [INFO    ] Command ping (</ping:1400064514686324747>) Registered!
+[02-08-2025 17:29:27] [INFO    ] Command warn (</warn:1400083690586898527>) Registered!
+[02-08-2025 17:29:27] [INFO    ] Command serverconfig (</serverconfig:1400176415638556684>) Registered!
+[02-08-2025 17:29:27] [INFO    ] Command modlogs (</modlogs:1400564269199917087>) Registered!
+[02-08-2025 17:29:27] [INFO    ] Command playlists (</playlists:1400817625608753262>) Registered!
+[02-08-2025 17:29:27] [INFO    ] Command whois (</whois:1400817625608753263>) Registered!
+[02-08-2025 17:29:27] [INFO    ] Command applications (</applications:1400817625608753264>) Registered!
+[02-08-2025 17:29:27] [INFO    ] Command links (</links:1400817625608753265>) Registered!
+[02-08-2025 17:29:27] [INFO    ] Command discography (</discography:1400826613729460234>) Registered!
+[02-08-2025 17:29:27] [INFO    ] Command evil (</evil:1400826613729460235>) Registered!
+[02-08-2025 17:29:27] [INFO    ] Command bugreport (</bugreport:1400826613729460236>) Registered!
+[02-08-2025 17:29:27] [INFO    ] Command suggestion (</suggestion:1400828322237255813>) Registered!
+[02-08-2025 17:29:27] [INFO    ] Successfully changed status with 1 server!
+[02-08-2025 17:29:27] [ERROR   ] Failed to write bot ping to file!: [Errno 2] No such file or directory: 'Files\\ABotmo_ping.txt'
+[02-08-2025 17:29:57] [INFO    ] Wrote bot ping to file! Current ping is 99ms.
+[02-08-2025 17:30:27] [INFO    ] Wrote bot ping to file! Current ping is 95ms.

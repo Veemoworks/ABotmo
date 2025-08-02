@@ -2,7 +2,7 @@ import discord, psutil, requests, time, ping3
 from discord import app_commands
 from discord.ext import commands
 from Cogs.Classes.DiscordModals import BugReport, BotSuggest
-from resources.arrays import veemoworksdevs
+from resources.arrays import veemoworksdevs, recnetdb
 from resources.dictionaries import hosts, script_urls, botbadges
 from resources.links import avatar
 from Cogs.Methods.methods import log
@@ -69,6 +69,17 @@ class Utils(commands.Cog):
         badge_text = " ".join(badges) if badges else " "
         created_at = f"<t:{int(user.created_at.timestamp())}:R>"
 
+        if user.id == 333585549837336577:
+            badge_text += " <:VeraVeemo:1400816211620659272> <:VeemoworksDev:1400816284526051369> <:RecNetDB:1401234874848907365> <:Python:1400816361189675038> <:dev:1400815766814589080> <:hypesquad:1400816053675884624> <:partner:1400816107325096016> <:bughunter2:1400815976127135874>"
+        elif user.id == 299914704594403329:
+            badge_text += " <:Chomperling:1400816246160756809>"
+        elif user.id == 566996607455723522:
+            badge_text += " <:PedroStudios:1400816325311336478>"
+        if user.id in veemoworksdevs:
+            badge_text += " <:VeemoworksDev:1400816284526051369>"
+            if user.id in recnetdb:
+                badge_text += " <:RecNetDB:1401234874848907365>"
+
         embed = discord.Embed(title=f"{user.name}'s Profile", color=discord.Color.brand_green())
         embed.set_thumbnail(url=user.avatar.url)
         if user.banner:
@@ -78,20 +89,6 @@ class Utils(commands.Cog):
         embed.add_field(name="Account Created:", value=created_at, inline=False)
         embed.add_field(name="Badges:", value=badge_text, inline=False)
         embed.set_footer(text=f"ID: {user.id}")
-
-        if user.id == 333585549837336577:
-            embed.set_field_at(3, name="Badges:",
-                               value=f"{badge_text} <:VeraVeemo:1400816211620659272> <:VeemoworksDev:1400816284526051369> <:Python:1400816361189675038> <:dev:1400815766814589080> <:hypesquad:1400816053675884624> <:partner:1400816107325096016> <:bughunter2:1400815976127135874>",
-                               inline=False)
-        elif user.id in veemoworksdevs:
-            embed.set_field_at(3, name="Badges:", value=f"{badge_text} <:VeemoworksDev:1400816284526051369>",
-                               inline=False)
-        elif user.id == 299914704594403329:
-            embed.set_field_at(3, name="Badges:", value=f"{badge_text} <:Chomperling:1400816246160756809>",
-                               inline=False)
-        elif user.id == 566996607455723522:
-            embed.set_field_at(3, name="Badges:", value=f"{badge_text} <:PedroStudios:1400816325311336478>",
-                               inline=False)
 
         await interaction.response.send_message(embed=embed, view=Buttons(user), ephemeral=ephemeral)
 

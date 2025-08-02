@@ -1,6 +1,6 @@
 import discord
 from discord.ui import View, Select
-from DataBases.database import server_settings
+from DataBases.database import server_roles
 
 class Config(View):
     def __init__(self, interaction: discord.Interaction, configured_roles):
@@ -39,9 +39,9 @@ class Role(Select):
         changes = []
 
         for role_id in added_roles.union(removed_roles):
-            msg = server_settings(True, interaction, role_id)
+            msg = server_roles(True, interaction, role_id)
             changes.append(msg)
-        new_config = server_settings(False, interaction)
+        new_config = server_roles(False, interaction)
         view = Config(interaction, new_config)
         change_summary = "\n".join(changes) if changes else "No changes made."
 

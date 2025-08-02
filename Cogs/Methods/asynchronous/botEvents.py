@@ -1,7 +1,17 @@
 import discord, aiohttp
 from discord.ext import tasks
+from Cogs.Methods.methods import log
 from Cogs.Methods.asynchronous.methods import crash
 from resources.links import warm
+
+@tasks.loop(seconds=300)
+async def bot_ping(bot):
+    try:
+        with open(r"..\Files\ABotmo_ping.txt", "w") as file:
+            file.write(str(round(bot.latency * 1000)))
+        print(log(False, f"Wrote bot ping to file! Current ping is {round(bot.latency * 1000)}ms."))
+    except Exception as e:
+        print(log(True, f"Failed to write bot ping to file!: {e}"))
 
 @tasks.loop(seconds=297)
 async def kuma(bot):

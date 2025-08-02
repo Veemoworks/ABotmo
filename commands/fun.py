@@ -64,13 +64,9 @@ class Fun(commands.Cog):
     @app_commands.describe(user="Enter a user")
     async def silly(self, interaction: discord.Interaction, user: discord.Member = None):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id}!"))
-        resuser = f"{user.mention} is"
         dynevil = ""
         if user == None:
             user = interaction.user
-
-        if user.id == interaction.user.id:
-            resuser = f"{interaction.user.mention}, you are"
 
         rand = random.randint(0, 115)
         if rand > 100:
@@ -107,20 +103,16 @@ class Fun(commands.Cog):
         evil.remove_field(0)
         await interaction.edit_original_response(embed=evil)
         await asyncio.sleep(2)
-        evil.add_field(name="", value=f"{resuser} {rand}% {dynevil}")
+        evil.add_field(name="", value=f"{user.mention} is {rand}% {dynevil}")
         await interaction.edit_original_response(embed=evil)
 
     @app_commands.command(name="evil", description="Get your evilness percentage")
     @app_commands.describe(user="Enter a user")
     async def evil(self, interaction: discord.Interaction, user: discord.Member = None):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id}!"))
-        resuser = f"{user.mention} is"
         dynevil = ""
         if user == None:
             user = interaction.user
-
-        if user.id == interaction.user.id:
-            resuser = f"{interaction.user.mention}, you are"
 
         rand = random.randint(0, 115)
 
@@ -155,7 +147,7 @@ class Fun(commands.Cog):
         evil.remove_field(0)
         await interaction.edit_original_response(embed=evil)
         await asyncio.sleep(2)
-        evil.add_field(name="", value=f"{resuser} {rand}% {dynevil}")
+        evil.add_field(name="", value=f"{user.mention} is {rand}% {dynevil}")
         await interaction.edit_original_response(embed=evil)
 
 async def setup(bot):
