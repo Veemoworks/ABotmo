@@ -5,12 +5,13 @@ from dotenv import load_dotenv
 from Cogs.Methods.methods import crash
 from Cogs.Methods.asynchronous.botEvents import command_error, app_command_error, kuma, bot_ping
 from Cogs.Methods.asynchronous.botStatus import status
-from Cogs.Methods.methods import handle_exception, log
+from Cogs.Methods.asynchronous.methods import get_prefix
+from Cogs.Methods.methods import handle_exception, log, close_bot
 
 load_dotenv()
 with open("output.txt", "w") as f:
-    f.write(f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] \"Running bot.py\"...\n")
-bot = commands.Bot(command_prefix=";;", intents=discord.Intents.all())
+    f.write(f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] Initializing...\n")
+bot = commands.Bot(command_prefix=get_prefix, intents=discord.Intents.all())
 
 @bot.event
 async def on_ready():
@@ -36,7 +37,7 @@ async def on_ready():
             print(log(True, f"Sync Error: {e}"))
         bot.loop.create_task(status(bot))
         bot_ping.start(bot)
-        # kuma.start(bot)
+        kuma.start(bot)
     except Exception as e:
         await crash(e)
         print(log(True,f"Error occurred in starting up the bot!: {e}"))
@@ -54,3 +55,4 @@ sys.excepthook = handle_exception
 
 if __name__ == "__main__":
     bot.run(os.getenv("TOKEN"))
+    close_bot(bot)

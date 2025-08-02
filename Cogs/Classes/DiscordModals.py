@@ -1,4 +1,5 @@
 import discord, requests, json
+from DataBases.database import server_prefix
 from resources.dictionaries import headers
 from discord.ui import Modal, TextInput
 
@@ -87,3 +88,16 @@ class BotSuggest(Modal):
             requests.post("https://discord.com/api/webhooks/1400827797391544320/JvOL7xx8DWZ9EswPK9-zHvv-TC881bfoW2N2bueT64MrbPWfaeB_3eB5lu2QCfMNK1Y-", data=json.dumps(data), headers=headers)
         except requests.RequestException as e:
             print(f"Failed to send bugreport: {e}")
+
+class PrefixChange(Modal):
+    def __init__(self):
+        super().__init__(title="Enter a prefix")
+        self.add_item(TextInput(
+            label="Prefix",
+            placeholder="Enter a prefix, default is \";;\"",
+            style=discord.TextStyle.short
+        ))
+
+    async def on_submit(self, interaction: discord.Interaction):
+        for field in self.children:
+            await interaction.response.send_message(server_prefix(True, interaction.guild, field.value), ephemeral=True)

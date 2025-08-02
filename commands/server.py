@@ -28,6 +28,10 @@ class Server(commands.Cog):
                               "You can add multiple and remove multiple roles.",
                         inline=False
                         )
+        embed.add_field(name="Prefix",
+                        value="Press the \"Change Prefix\" button to change your server prefix.\n"
+                              "A text input will pop up and simply enter whatever prefix you awnt for your server.",
+                        inline=False)
         current_roles = server_roles(False, interaction)
         await interaction.response.send_message(embed=embed, view=Config(interaction, current_roles), ephemeral=True)
 

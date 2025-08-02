@@ -1,4 +1,5 @@
 import requests, json
+from DataBases.database import server_prefix
 from resources.links import warm
 from resources.dictionaries import headers
 from datetime import datetime
@@ -25,3 +26,10 @@ async def crash(error):
         print(f"\033[92m[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] {res.status_code}: Error message sent successfully.")
     except Exception as e:
         print(f"\033[31m[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [ERROR   ] Failed to send error message: {e}")
+
+async def get_prefix(bot, message):
+    if not message.guild:
+        return ";;"
+
+    prefix = server_prefix(False, message.guild)
+    return prefix or ";;"

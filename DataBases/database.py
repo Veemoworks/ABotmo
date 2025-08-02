@@ -102,3 +102,34 @@ def server_roles(save, interaction, role=None):
     rows = cur.fetchall()
     con.close()
     return [row[0] for row in rows]
+
+def server_prefix(save, guild, prefix=None):
+    con = sqlite3.connect("DataBases/prefix.db")
+    cur = con.cursor()
+    guild_id = str(guild.id)
+    if save:
+        cur.execute(f"""
+                SELECT * FROM 'Main'
+                WHERE 'guild_id' = '{guild_id}';
+            """)
+        if not cur.fetchone():
+            cur.execute(f"""
+                    INSERT INTO 'Main' (guild_id) VALUES ('{guild_id}');
+                    """)
+            con.commit()
+
+        cur.execute(f"""
+                UPDATE 'Main'
+                SET prefix = '{prefix}'
+                WHERE guild_id = '{guild_id}';
+                """)
+        con.commit()
+        con.close()
+        return f"Your server configuration for bot prefix has been updated to \"{prefix}\"."
+    else:
+        cur.execute(f"""
+                SELECT prefix FROM 'Main' WHERE guild_id = '{guild_id}';
+                """)
+        yeah = cur.fetchone()[0]
+        con.close()
+        return yeah

@@ -1,14 +1,22 @@
 import discord
-from discord.ui import View, Select
+from Cogs.Classes.DiscordButtons import PrefixChangeButton
 from DataBases.database import server_roles
+from discord.ui import View, Select
 
 class Config(View):
     def __init__(self, interaction: discord.Interaction, configured_roles):
-        super().__init__(timeout=60)
+        super().__init__(timeout=180)
         self.interaction = interaction
         self.configured_roles = configured_roles
         self.add_item(Role(interaction.guild.roles, configured_roles))
+        self.add_item(PrefixChangeButton())
 
+    async def on_timeout(self):
+        for item in self.children:
+            item.disabled = True
+        await self.interaction.edit_original_response(view=self)
+
+# ui.Select here due to a circular import in Cogs.Classes.DiscordSelects.py
 class Role(Select):
     def __init__(self, all_roles, configured_roles):
         options = []

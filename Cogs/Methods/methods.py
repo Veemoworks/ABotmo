@@ -33,3 +33,9 @@ def log(error, msg):
         return f"\033[31m[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [ERROR   ] {msg}"
     else:
         return f"\033[92m[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] {msg}"
+
+def close_bot(bot):
+    with open("output.txt", "w") as f:
+        f.write(f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] Bot session was ended.\n")
+        with open(r"Files\last_shutdown.txt", "w") as f:
+            f.write(str(datetime.now().strftime("%d-%m-%Y %H:%M:%S")))
