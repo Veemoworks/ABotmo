@@ -4,6 +4,9 @@ from resources.links import warm
 from resources.dictionaries import headers
 from datetime import datetime
 
+# All asynchronous methods
+
+# Send embed to a webhook whenever an error occurs
 async def crash(error):
     print(f"\033[31m[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [ERROR   ] Fatal error occurred: {error}")
     try:
@@ -27,6 +30,7 @@ async def crash(error):
     except Exception as e:
         print(f"\033[31m[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [ERROR   ] Failed to send error message: {e}")
 
+# Get bot prefix for a guild
 async def get_prefix(bot, message):
     if not message.guild:
         return ";;"

@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 Files/
 output.txt
+.db
 # C extensions
 *.so
 

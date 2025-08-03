@@ -4,6 +4,9 @@ from discord import app_commands
 from Cogs.Methods.asynchronous.methods import crash
 from DataBases.database import server_roles
 
+# Regular functions here
+
+# Permission check on commands
 def permission_check():
     async def predicate(interaction: discord.Interaction):
         user = interaction.guild.get_member(interaction.user.id)
@@ -19,6 +22,7 @@ def permission_check():
 
     return app_commands.check(predicate)
 
+# Exception handle for sys exceptions
 def handle_exception(exc_type, exc_value, exc_traceback, bot):
     if issubclass(exc_type, KeyboardInterrupt):
         sys.__excepthook__(exc_type, exc_value, exc_traceback)
@@ -26,6 +30,7 @@ def handle_exception(exc_type, exc_value, exc_traceback, bot):
     error_msg = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
     asyncio.run_coroutine_threadsafe(crash(Exception(error_msg)), bot.loop)
 
+# Log to a file
 def log(error, msg):
     with open("output.txt", "a") as f:
         f.write(msg + "\n")
@@ -34,8 +39,9 @@ def log(error, msg):
     else:
         return f"\033[92m[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] {msg}"
 
+# Log to a file and close the bot
 def close_bot(bot):
-    with open("output.txt", "w") as f:
+    with open("output.txt", "a") as f:
         f.write(f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] Bot session was ended.\n")
         with open(r"Files\last_shutdown.txt", "w") as f:
             f.write(str(datetime.now().strftime("%d-%m-%Y %H:%M:%S")))

@@ -3,6 +3,7 @@ from DataBases.database import server_prefix
 from resources.dictionaries import headers
 from discord.ui import Modal, TextInput
 
+# All of discord.ui.modal here
 class BugReport(Modal):
     def __init__(self):
         super().__init__(title="Send a bug report")

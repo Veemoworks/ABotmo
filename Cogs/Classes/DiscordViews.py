@@ -3,6 +3,7 @@ from Cogs.Classes.DiscordButtons import PrefixChangeButton
 from DataBases.database import server_roles
 from discord.ui import View, Select
 
+# All of discord.ui.view here
 class Config(View):
     def __init__(self, interaction: discord.Interaction, configured_roles):
         super().__init__(timeout=180)
