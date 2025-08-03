@@ -110,14 +110,19 @@ def server_prefix(save, guild, prefix=None):
     if save:
         cur.execute(f"""
                 SELECT * FROM 'Main'
-                WHERE 'guild_id' = '{guild_id}';
+                WHERE guild_id = '{guild_id}';
             """)
         if not cur.fetchone():
             cur.execute(f"""
                     INSERT INTO 'Main' (guild_id) VALUES ('{guild_id}');
                     """)
-            con.commit()
-
+        else:
+            cur.execute(f"""
+                    UPDATE Main
+                    SET prefix = NULL
+                    WHERE guild_id = '{guild_id}'
+                      AND prefix IS NOT NULL;
+                    """)
         cur.execute(f"""
                 UPDATE 'Main'
                 SET prefix = '{prefix}'
