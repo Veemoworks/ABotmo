@@ -43,5 +43,7 @@ def log(error, msg):
 def close_bot(bot):
     with open("output.txt", "a") as f:
         f.write(f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] Bot session was ended.\n")
-        with open(r"Files\last_shutdown.txt", "w") as f:
-            f.write(str(datetime.now().strftime("%d-%m-%Y %H:%M:%S")))
+    with open(r"Files\last_shutdown.txt", "w") as f:
+        f.write(str(datetime.now().strftime("%d-%m-%Y %H:%M:%S")))
+    with open(r"Files\ABotmo_ping.txt", "w") as f:
+        f.write("Offline")
