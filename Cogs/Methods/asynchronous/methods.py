@@ -38,3 +38,11 @@ async def get_prefix(bot, message):
 
     prefix = server_prefix(False, message.guild)
     return prefix or ";;"
+
+# Get a list of commands
+async def command_autocomplete(self, interaction: discord.Interaction, current: str):
+    choices = []
+    for cmd in self.bot.tree.walk_commands():
+        if cmd.parent is None and current.lower() in cmd.name.lower():
+            choices.append(app_commands.Choice(name=cmd.name, value=cmd.name))
+    return choices
