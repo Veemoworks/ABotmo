@@ -227,7 +227,7 @@ class Utils(commands.Cog):
         command = self.bot.tree.get_command(command)
         embed.title = f"Command: /{command.name}"
         embed.description = f"**Description**: {command.description or "No Description"}\n**Markdown**: </{command.name}:{cmdid}>\n{cmduae[command.name]}"
-        embed.set_footer(text=f"ID: {cmdid}""| Key: [] = Optional : {} = Required")
+        embed.set_footer(text=f"ID: {cmdid} ""| Key: [] = Optional : {} = Required")
         await interaction.followup.send(embed=embed)
 
 async def setup(bot):
