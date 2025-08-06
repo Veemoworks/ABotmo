@@ -35,7 +35,7 @@ async def on_ready():
                          f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] Running on: {platform.system()} {platform.release()} ({os.name})\n")
                 print(thing, end="")
                 with open("output.txt", "a") as r:
-                    r.write(thing.lstrip("\033[92m") + "[")
+                    r.write("[" + thing.lstrip("\033[92m"))
                 cmds = await bot.tree.fetch_commands()
                 for command in cmds:
                     print(log(False, f"Command {command.name} (</{command.name}:{command.id}>) Registered!"))

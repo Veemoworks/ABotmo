@@ -1,7 +1,7 @@
 import discord, psutil, requests, time, ping3
 from discord import app_commands
 from discord.ext import commands
-from Cogs.Methods.asynchronous.methods import get_prefix, command_autocomplete
+from Cogs.Methods.asynchronous.methods import get_prefix
 from Cogs.Classes.DiscordModals import BugReport, BotSuggest
 from resources.arrays import veemoworksdevs, recnetdb
 from resources.dictionaries import hosts, script_urls, botbadges, cmduae
