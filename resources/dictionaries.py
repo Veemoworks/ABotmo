@@ -31,9 +31,9 @@ botbadges = {
 cmduae = {
     "playlists":"**Usages**:\n/playlists {user}\n**Examples**:\n/playlists AVeemo",
     "discography":"**Usages**:\n/discography {artist}\n**Examples**:\n/discography Korn",
-    "silly":"**Usages**:\n/silly {user}\n**Examples**:\n/silly AVeemo",
-    "evil":"**Usages**:\n/evil {user}\n**Examples**:\n/evil AVeemo",
-    "whois":"**Usages**:\n/whois {user} [ephemeral]\n**Examples**:\n/whois AVeemo",
+    "silly":"**Usages**:\n/silly [user]\n**Examples**:\n/silly AVeemo",
+    "evil":"**Usages**:\n/evil [user]\n**Examples**:\n/evil AVeemo",
+    "whois":"**Usages**:\n/whois [user] [ephemeral]\n**Examples**:\n/whois AVeemo",
     "applications":"**Usages**:\n/applications\n**Examples**:\n/applications",
     "status":"**Usages**:\n/status\n**Examples**:\n/status",
     "ping":"**Usages**:\n/ping\n**Examples**:\n/ping",
