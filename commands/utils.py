@@ -15,6 +15,14 @@ class Utils(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    # Get a list of commands
+    async def command_autocomplete(self, interaction: discord.Interaction, current: str):
+        choices = []
+        for cmd in self.bot.tree.walk_commands():
+            if cmd.parent is None and current.lower() in cmd.name.lower():
+                choices.append(app_commands.Choice(name=cmd.name, value=cmd.name))
+        return choices
+
     @app_commands.command(name="whois", description="Get info about a user")
     @app_commands.describe(user="User to get info from", ephemeral="Set to ephemeral?")
     async def whois(self, interaction: discord.Interaction, user: discord.User = None, ephemeral: bool = None):
