@@ -1,4 +1,5 @@
-import requests, json
+import requests, json, discord
+from discord import app_commands
 from DataBases.database import server_prefix
 from resources.links import warm
 from resources.dictionaries import headers

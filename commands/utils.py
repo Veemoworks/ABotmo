@@ -1,9 +1,10 @@
 import discord, psutil, requests, time, ping3
 from discord import app_commands
 from discord.ext import commands
+from Cogs.Methods.asynchronous.methods import get_prefix
 from Cogs.Classes.DiscordModals import BugReport, BotSuggest
 from resources.arrays import veemoworksdevs, recnetdb
-from resources.dictionaries import hosts, script_urls, botbadges
+from resources.dictionaries import hosts, script_urls, botbadges, cmduae
 from resources.links import avatar
 from Cogs.Methods.methods import log
 from ping3 import ping
@@ -13,6 +14,13 @@ ping3.EXCEPTIONS = True
 class Utils(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    async def command_autocomplete(self, interaction: discord.Interaction, current: str):
+        choices = []
+        for cmd in self.bot.tree.walk_commands():
+            if cmd.parent is None and current.lower() in cmd.name.lower():
+                choices.append(app_commands.Choice(name=cmd.name, value=cmd.name))
+        return choices[:25]
 
     @app_commands.command(name="whois", description="Get info about a user")
     @app_commands.describe(user="User to get info from", ephemeral="Set to ephemeral?")
@@ -193,6 +201,34 @@ class Utils(commands.Cog):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id}!"))
         await interaction.response.send_modal(BotSuggest())
 
+    @app_commands.command(name="help", description="Shows help info and commands")
+    @app_commands.describe(command="Command to get help for")
+    @app_commands.autocomplete(command=command_autocomplete)
+    async def help(self, interaction: discord.Interaction, command: str = None):
+        await interaction.response.defer(ephemeral=True)
+        cmdid = None
+        embed = discord.Embed(color=discord.Color.brand_green())
+        if command == None:
+            if interaction.guild:
+                embed.title = f"Server: {interaction.guild.name}"
+                embed.description = f"Command prefix in this server is: `{await get_prefix(self.bot, interaction)}`"
+            else:
+                embed.title = f"ABotmo help"
+                embed.description = f"The default prefix is: `;;`"
+            await interaction.followup.send(embed=embed)
+            return
+
+        commands = await self.bot.tree.fetch_commands()
+        for cmd in commands:
+            if cmd.name == command:
+                cmdid = cmd.id
+                break
+
+        command = self.bot.tree.get_command(command)
+        embed.title = f"Command: /{command.name}"
+        embed.description = f"**Description**: {command.description or "No Description"}\n**Markdown**: </{command.name}:{cmdid}>\n{cmduae[command.name]}"
+        embed.set_footer(text=f"ID: {cmdid}""| Key: [] = Optional : {} = Required")
+        await interaction.followup.send(embed=embed)
 
 async def setup(bot):
     await bot.add_cog(Utils(bot))

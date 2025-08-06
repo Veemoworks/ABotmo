@@ -28,3 +28,20 @@ botbadges = {
     "verified_bot_developer": "<:dev:1400815766814589080>",
     "active_developer": "<:activedev:1400815784439316573>"
 }
+cmduae = {
+    "playlists":"**Usages**:\n/playlists {user}\n**Examples**:\n/playlists AVeemo",
+    "discography":"**Usages**:\n/discography {artist}\n**Examples**:\n/discography Korn",
+    "silly":"**Usages**:\n/silly {user}\n**Examples**:\n/silly AVeemo",
+    "evil":"**Usages**:\n/evil {user}\n**Examples**:\n/evil AVeemo",
+    "whois":"**Usages**:\n/whois {user} [ephemeral]\n**Examples**:\n/whois AVeemo",
+    "applications":"**Usages**:\n/applications\n**Examples**:\n/applications",
+    "status":"**Usages**:\n/status\n**Examples**:\n/status",
+    "ping":"**Usages**:\n/ping\n**Examples**:\n/ping",
+    "links":"**Usages**:\n/links\n**Examples**:\n/links",
+    "bugreport":"**Usages**:\n/bugreport\n**Examples**:\n/bugreport",
+    "suggestion":"**Usages**:\n/suggestion\n**Examples**:\n/suggestion",
+    "help":"**Usages**:\n/help [command]\n**Examples**:\n/help whois",
+    "warn":"**Usages**:\n/warn {user} {reason} [message]\n**Examples**:\n/warn AVeemo, Breaking Rule 1, Saying very rude words to others",
+    "modlogs":"**Usages**:\n/modlogs {user}\n**Examples**:\n/modlogs AVeemo",
+    "serverconfig":"**Usages**:\n/serverconfig\n**Examples**:\n/serverconfig",
+}

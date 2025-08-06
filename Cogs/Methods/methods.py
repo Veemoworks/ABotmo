@@ -33,7 +33,7 @@ def handle_exception(exc_type, exc_value, exc_traceback, bot):
 # Log to a file
 def log(error, msg):
     with open("output.txt", "a") as f:
-        f.write(msg + "\n")
+        f.write(f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] {"[ERROR   ]" if error else "[INFO    ]"} {msg}\n")
     if error:
         return f"\033[31m[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [ERROR   ] {msg}"
     else:
