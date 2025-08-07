@@ -142,7 +142,7 @@ class Utils(commands.Cog):
         except Exception as ex:
             msg += f"❌ Error: {ex}\n"
 
-        msg += "### Website:\n"
+        msg += f"### Bot Status:\n✅ {round(self.bot.latency * 1000)} ms\n### Website:\n"
         for name, host in hosts.items():
             try:
                 delay = ping(host, timeout=10, unit="ms")
@@ -156,7 +156,7 @@ class Utils(commands.Cog):
             except Exception as ex:
                 msg += f"❌ `{name}` Error: {ex}\n"
 
-        msg += f"### Python Scripts:\n✅ `ABotmo` ({round(self.bot.latency * 1000)}ms)\n"
+        msg += f"### Python Scripts:\n"
 
         for name, url in script_urls.items():
             url = f"http://127.0.0.1:{url}/health"
@@ -170,9 +170,8 @@ class Utils(commands.Cog):
                 amount += 1
             except Exception as ex:
                 msg += f"❌ `{name}` Error: {ex}\n"
-
+                
         msg += "❌ `Channel Topic Updater` Shutdown\n❌ `Minecraft Console Link` Shutdown\n"
-
         embed = discord.Embed(
             title="Server Status",
             description=f"{amount}/{len(hosts) + len(script_urls) + 4} services up and running!\n{msg}",
