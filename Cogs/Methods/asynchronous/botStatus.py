@@ -18,7 +18,7 @@ async def status(bot):
 @tasks.loop(seconds=300)
 async def bot_ping(bot):
     try:
-        with open(r"..\Files\ABotmo_ping.txt", "w") as file:
+        with open(r"Files\ABotmo_ping.txt", "w") as file:
             file.write(str(round(bot.latency * 1000)))
         print(log(False, f"Wrote bot ping to file! Current ping is {round(bot.latency * 1000)}ms."))
     except Exception as e:

@@ -135,6 +135,8 @@ def server_prefix(save, guild, prefix=None):
         cur.execute(f"""
                 SELECT prefix FROM 'Main' WHERE guild_id = '{guild_id}';
                 """)
-        yeah = cur.fetchone()[0]
+        yeah = cur.fetchone()
         con.close()
-        return yeah
+        if yeah == None:
+            return ";;"
+        return yeah[0]
