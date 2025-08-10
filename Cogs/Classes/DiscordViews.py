@@ -44,20 +44,19 @@ class Role(Select):
             max_values=len(options),
             options=options
         )
-        self.configured_roles = set(configured_roles)
 
     async def callback(self, interaction: discord.Interaction):
+        current_roles = set(server_roles(False, interaction))
         selected_roles = set(self.values)
-        current_roles = set(self.configured_roles)
 
         added_roles = selected_roles - current_roles
-        removed_roles = current_roles - selected_roles
+        removed_roles = (set(opt.value for opt in self.options) & current_roles) - selected_roles
 
         changes = []
-
         for role_id in added_roles.union(removed_roles):
             msg = server_roles(True, interaction, role_id)
             changes.append(msg)
+
         new_config = server_roles(False, interaction)
         view = Config(interaction, new_config)
         change_summary = "\n".join(changes) if changes else "No changes made."
