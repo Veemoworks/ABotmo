@@ -168,11 +168,11 @@ def modlogchannel(save, guild, channel=None):
                 """)
         con.commit()
         con.close()
-        return f"Your server configuration for bot prefix has been updated to \"{channel.mention}\"."
+        return f"Your server configuration for bot prefix has been updated to \"<#{channel}>\"."
     else:
-        cur.execute(f"""
-                SELECT channel FROM 'Main' WHERE guild_id = '{guild_id}';
-                """)
+        cur.execute("""
+                    SELECT channel FROM Main WHERE guild_id = ?;
+                    """, (guild_id,))
         yeah = cur.fetchone()
         con.close()
         if yeah == None:

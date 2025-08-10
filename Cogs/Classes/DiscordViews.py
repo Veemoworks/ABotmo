@@ -31,44 +31,38 @@ class Config(View):
 
 # ui.Select here due to a circular import in Cogs.Classes.DiscordSelects.py
 class Logs(Select):
-    def __init__(self, all_channels, configured_channel):
-        options = []
-        for channel in all_channels:
-            if not channel.is_news() and not channel.is_nsfw():
-                options.append(
-                    discord.SelectOption(
-                        label=channel.name,
-                        value=str(channel.id),
-                        default=str(channel.id) in configured_channel
-                    )
-                )
+    def __init__(self, all_channels, configured_channel_id):
+        options = [
+            discord.SelectOption(
+                label=channel.name,
+                value=str(channel.id),
+                default=(channel.id == configured_channel_id)
+            )
+            for channel in all_channels if isinstance(channel, discord.TextChannel)
+        ]
+
         super().__init__(
-            placeholder="Channel",
-            min_values=0,
+            placeholder="Select a Text Channel",
+            min_values=1,
             max_values=1,
             options=options
         )
 
     async def callback(self, interaction: discord.Interaction):
-        current_roles = set(modlogchannel(False, interaction))
-        selected_roles = set(self.value)
+        selected_channel_id = int(self.values[0])
+        old_channel_id = configured_channel_id = modlogchannel(False, interaction)
 
-        added_roles = selected_roles - current_roles
-        removed_roles = (set(opt.value for opt in self.options) & current_roles) - selected_roles
-
-        changes = []
-        for role_id in added_roles.union(removed_roles):
-            msg = modlogchannel(True, interaction, role_id)
-            changes.append(msg)
-
-        new_config = modlogchannel(False, interaction)
-        view = Config(interaction, new_config)
-        change_summary = "\n".join(changes) if changes else "No changes made."
+        if selected_channel_id == old_channel_id:
+            change_summary = "No changes made."
+        else:
+            change_summary = modlogchannel(True, interaction, selected_channel_id)
+        view = Config(interaction, selected_channel_id)
 
         await interaction.response.edit_message(
             content=change_summary,
             view=view
         )
+
 
 class Role(Select):
     def __init__(self, all_roles, configured_roles):
@@ -83,7 +77,7 @@ class Role(Select):
                     )
                 )
         super().__init__(
-            placeholder="Roles",
+            placeholder="Select your Mod Roles",
             min_values=0,
             max_values=len(options),
             options=options
