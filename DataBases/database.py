@@ -2,7 +2,7 @@ import sqlite3, discord
 
 def modlog(save, interaction, data = None, user: discord.Member = None):
     msg = None
-    con = sqlite3.connect("DataBases/modlogs.db")
+    con = sqlite3.connect(r"DataBases\modlogs.db")
     cur = con.cursor()
     guild_id = str(interaction.guild.id)
     cur.execute(f"""
@@ -65,7 +65,7 @@ def modlog(save, interaction, data = None, user: discord.Member = None):
     return msg
 
 def server_roles(save, interaction, role=None):
-    con = sqlite3.connect("DataBases/role.db")
+    con = sqlite3.connect(r"DataBases\role.db")
     cur = con.cursor()
     guild_id = str(interaction.guild.id)
     cur.execute(f"""
@@ -104,7 +104,7 @@ def server_roles(save, interaction, role=None):
     return [row[0] for row in rows]
 
 def server_prefix(save, guild, prefix=None):
-    con = sqlite3.connect("DataBases/prefix.db")
+    con = sqlite3.connect(r"DataBases\prefix.db")
     cur = con.cursor()
     guild_id = str(guild.id)
     if save:
@@ -139,4 +139,42 @@ def server_prefix(save, guild, prefix=None):
         con.close()
         if yeah == None:
             return ";;"
+        return yeah[0]
+
+def modlogchannel(save, guild, channel=None):
+    con = sqlite3.connect(r"DataBases\channel.db")
+    cur = con.cursor()
+    guild_id = str(guild.id)
+    if save:
+        cur.execute(f"""
+                SELECT * FROM 'Main'
+                WHERE guild_id = '{guild_id}';
+            """)
+        if not cur.fetchone():
+            cur.execute(f"""
+                    INSERT INTO 'Main' (guild_id) VALUES ('{guild_id}');
+                    """)
+        else:
+            cur.execute(f"""
+                    UPDATE Main
+                    SET channel = NULL
+                    WHERE guild_id = '{guild_id}'
+                      AND channel IS NOT NULL;
+                    """)
+        cur.execute(f"""
+                UPDATE 'Main'
+                SET channel = '{channel.id}'
+                WHERE guild_id = '{guild_id}';
+                """)
+        con.commit()
+        con.close()
+        return f"Your server configuration for bot prefix has been updated to \"{channel.mention}\"."
+    else:
+        cur.execute(f"""
+                SELECT channel FROM 'Main' WHERE guild_id = '{guild_id}';
+                """)
+        yeah = cur.fetchone()
+        con.close()
+        if yeah == None:
+            return None
         return yeah[0]

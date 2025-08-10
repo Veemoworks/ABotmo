@@ -2,7 +2,7 @@ import discord
 from Cogs.Classes.DiscordModals import PrefixChange
 
 # All of discord.ui.button here
-class PrefixChangeButton(discord.ui.Button):
+class PrefixChange(discord.ui.Button):
     def __init__(self):
         super().__init__(label="Change Prefix", style=discord.ButtonStyle.secondary)
 

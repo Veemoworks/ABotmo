@@ -1,5 +1,6 @@
 import discord
-from Cogs.Classes.DiscordButtons import PrefixChangeButton
+from Cogs.Classes.DiscordButtons import PrefixChange
+from Cogs.Classes.DiscordSelects import Logs
 from DataBases.database import server_roles
 from discord.ui import View, Select
 
@@ -15,10 +16,14 @@ class Config(View):
         self.configured_roles = configured_roles
         guild_roles = interaction.guild.roles
         guild_roles = [r for r in guild_roles if r.name != "@everyone"]
+        guild_channels = interaction.guild.channels
+        guild_channels = [r for r in guild_channels]
 
         for chunk in chunk_list(guild_roles, 25):
             self.add_item(Role(chunk, configured_roles))
-        self.add_item(PrefixChangeButton())
+        for chunk in chunk_list(guild_channels, 25):
+            self.add_item(Logs(chunk, configured_roles))
+        self.add_item(PrefixChange())
 
     async def on_timeout(self):
         for item in self.children:

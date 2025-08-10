@@ -3,7 +3,7 @@ from discord import app_commands
 from discord.ext import commands
 from datetime import datetime, timezone
 from Cogs.Methods.methods import permission_check, log
-from DataBases.database import modlog
+from DataBases.database import modlog, server_roles
 
 class Moderation(commands.Cog):
     def __init__(self, bot):
@@ -18,8 +18,32 @@ class Moderation(commands.Cog):
         if user.bot:
             await interaction.response.send_message(f"You can not warn {user.mention}, they are a bot!", ephemeral=True)
             return
+        allowed_roles = server_roles(False, interaction)
+        for role in user.roles:
+            if str(role.id) in allowed_roles:
+                await interaction.response.send_message(f"You may not warn {user.mention} as they have the role <@&{role.id}> and are a moderator!", ephemeral=True)
+                return
         data = ( user.id, interaction.user.id, reason, message, "WARNING", datetime.now().astimezone(timezone.utc).strftime("[%d|%m|%y] : [%H:%M]"))
         await interaction.response.send_message(modlog(True, interaction, data), ephemeral=True)
+
+    @app_commands.command(name="ban", description="Ban a user")
+    @app_commands.describe(user="Enter a user", reason="Enter a reason", message="Optional Message")
+    @app_commands.guild_only()
+    @permission_check()
+    async def ban(self, interaction: discord.Interaction, user: discord.User, reason: str, message: str = None):
+        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id}!"))
+        if user.bot:
+            await interaction.response.send_message(f"You can not warn {user.mention}, they are a bot!", ephemeral=True)
+            return
+        user = self.bot.get_user(user.id)
+        allowed_roles = server_roles(False, interaction)
+        for role in user.roles:
+            if str(role.id) in allowed_roles:
+                await interaction.response.send_message(f"You may not ban {user.mention} as they have the role <@&{role.id}> and are a moderator!", ephemeral=True)
+                return
+        data = ( user.id, interaction.user.id, reason, message, "BAN", datetime.now().astimezone(timezone.utc).strftime("[%d|%m|%y] : [%H:%M]"))
+        await interaction.response.send_message(modlog(True, interaction, data), ephemeral=True)
+        await user.ban(delete_message_seconds=0, reason=reason)
 
     @app_commands.command(name="modlogs", description="View the moderation log of a member (Timezone: UTC)")
     @app_commands.describe(user="Enter a user")
