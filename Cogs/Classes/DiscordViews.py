@@ -4,12 +4,20 @@ from DataBases.database import server_roles
 from discord.ui import View, Select
 
 # All of discord.ui.view here
+def chunk_list(lst, size=25):
+    for i in range(0, len(lst), size):
+        yield lst[i:i + size]
+
 class Config(View):
     def __init__(self, interaction: discord.Interaction, configured_roles):
         super().__init__(timeout=180)
         self.interaction = interaction
         self.configured_roles = configured_roles
-        self.add_item(Role(interaction.guild.roles, configured_roles))
+        guild_roles = interaction.guild.roles
+        guild_roles = [r for r in guild_roles if r.name != "@everyone"]
+
+        for chunk in chunk_list(guild_roles, 25):
+            self.add_item(Role(chunk, configured_roles))
         self.add_item(PrefixChangeButton())
 
     async def on_timeout(self):
