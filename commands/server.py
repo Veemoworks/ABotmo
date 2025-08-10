@@ -1,7 +1,7 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-from DataBases.database import server_roles
+from DataBases.database import server_roles, modlogchannel
 from Cogs.Methods.methods import log
 from Cogs.Classes.DiscordViews import Config
 
@@ -33,7 +33,8 @@ class Server(commands.Cog):
                               "A text input will pop up and simply enter whatever prefix you awnt for your server.",
                         inline=False)
         current_roles = server_roles(False, interaction)
-        await interaction.response.send_message(embed=embed, view=Config(interaction, current_roles), ephemeral=True)
+        current_channel = modlogchannel(False, interaction)
+        await interaction.response.send_message(embed=embed, view=Config(interaction, current_roles, current_channel), ephemeral=True)
 
 async def setup(bot):
     await bot.add_cog(Server(bot))

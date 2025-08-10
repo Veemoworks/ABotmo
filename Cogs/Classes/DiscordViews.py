@@ -1,5 +1,5 @@
 import discord
-from Cogs.Classes.DiscordButtons import PrefixChange
+from Cogs.Classes.DiscordButtons import PrefixChangeButton
 from DataBases.database import server_roles, modlogchannel
 from discord.ui import View, Select
 
@@ -9,20 +9,18 @@ def chunk_list(lst, size=25):
         yield lst[i:i + size]
 
 class Config(View):
-    def __init__(self, interaction: discord.Interaction, configured_roles):
+    def __init__(self, interaction: discord.Interaction, configured_roles=None, configured_channel=None):
         super().__init__(timeout=180)
         self.interaction = interaction
-        self.configured_roles = configured_roles
-        guild_roles = interaction.guild.roles
-        guild_roles = [r for r in guild_roles if r.name != "@everyone"]
-        guild_channels = interaction.guild.text_channels
-        guild_channels = [r for r in guild_channels]
+        self.configured_roles = configured_roles or []
+        self.configured_channel = configured_channel
+        guild_roles = [r for r in interaction.guild.roles if r.name != "@everyone"]
+        guild_channels = [c for c in interaction.guild.text_channels]
 
         for chunk in chunk_list(guild_roles, 25):
-            self.add_item(Role(chunk, configured_roles))
-        for chunk in chunk_list(guild_channels, 25):
-            self.add_item(Logs(chunk, configured_roles))
-        self.add_item(PrefixChange())
+            self.add_item(Role(chunk, self.configured_roles))
+        self.add_item(Logs(guild_channels, self.configured_channel))
+        self.add_item(PrefixChangeButton())
 
     async def on_timeout(self):
         for item in self.children:
@@ -50,13 +48,13 @@ class Logs(Select):
 
     async def callback(self, interaction: discord.Interaction):
         selected_channel_id = int(self.values[0])
-        old_channel_id = configured_channel_id = modlogchannel(False, interaction)
+        old_channel_id = modlogchannel(False, interaction)
 
         if selected_channel_id == old_channel_id:
             change_summary = "No changes made."
         else:
             change_summary = modlogchannel(True, interaction, selected_channel_id)
-        view = Config(interaction, selected_channel_id)
+        view = Config(interaction, configured_channel=modlogchannel(False, interaction))
 
         await interaction.response.edit_message(
             content=change_summary,

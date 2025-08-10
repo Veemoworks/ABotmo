@@ -2,7 +2,7 @@ import sqlite3, discord
 
 def modlog(save, interaction, data = None, user: discord.Member = None):
     msg = None
-    con = sqlite3.connect(r"DataBases\modlogs.db")
+    con = sqlite3.connect("/home/aveemo/Desktop/Veemoworks/ABotmo/DataBases/modlogs.db")
     cur = con.cursor()
     guild_id = str(interaction.guild.id)
     cur.execute(f"""
@@ -65,7 +65,7 @@ def modlog(save, interaction, data = None, user: discord.Member = None):
     return msg
 
 def server_roles(save, interaction, role=None):
-    con = sqlite3.connect(r"DataBases\role.db")
+    con = sqlite3.connect("/home/aveemo/Desktop/Veemoworks/ABotmo/DataBases/role.db")
     cur = con.cursor()
     guild_id = str(interaction.guild.id)
     cur.execute(f"""
@@ -104,7 +104,7 @@ def server_roles(save, interaction, role=None):
     return [row[0] for row in rows]
 
 def server_prefix(save, guild, prefix=None):
-    con = sqlite3.connect(r"DataBases\prefix.db")
+    con = sqlite3.connect("/home/aveemo/Desktop/Veemoworks/ABotmo/DataBases/prefix.db")
     cur = con.cursor()
     guild_id = str(guild.id)
     if save:
@@ -142,7 +142,7 @@ def server_prefix(save, guild, prefix=None):
         return yeah[0]
 
 def modlogchannel(save, guild, channel=None):
-    con = sqlite3.connect(r"DataBases\channel.db")
+    con = sqlite3.connect("/home/aveemo/Desktop/Veemoworks/ABotmo/DataBases/channel.db")
     cur = con.cursor()
     guild_id = str(guild.id)
     if save:
@@ -163,12 +163,12 @@ def modlogchannel(save, guild, channel=None):
                     """)
         cur.execute(f"""
                 UPDATE 'Main'
-                SET channel = '{channel.id}'
+                SET channel = '{channel}'
                 WHERE guild_id = '{guild_id}';
                 """)
         con.commit()
         con.close()
-        return f"Your server configuration for bot prefix has been updated to \"<#{channel}>\"."
+        return f"Your new modlogs channel is: \"<#{channel}>\"."
     else:
         cur.execute("""
                     SELECT channel FROM Main WHERE guild_id = ?;
