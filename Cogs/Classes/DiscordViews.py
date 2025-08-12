@@ -47,14 +47,8 @@ class Logs(Select):
         )
 
     async def callback(self, interaction: discord.Interaction):
-        selected_channel_id = int(self.values[0])
-        old_channel_id = modlogchannel(False, interaction)
-
-        if selected_channel_id == old_channel_id:
-            change_summary = "No changes made."
-        else:
-            change_summary = modlogchannel(True, interaction, selected_channel_id)
-        view = Config(interaction, configured_channel=modlogchannel(False, interaction))
+        change_summary = modlogchannel(True, interaction.guild, int(self.values[0]))
+        view = Config(interaction, configured_channel=modlogchannel(False, interaction.guild))
 
         await interaction.response.edit_message(
             content=change_summary,

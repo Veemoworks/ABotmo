@@ -25,13 +25,19 @@ class Server(commands.Cog):
                               )
         embed.add_field(name="Mod Roles",
                         value="Select the \"Roles\" dropdown to select roles, select the same role you added to remove it.\n"
-                              "You can add multiple and remove multiple roles.",
+                              "You can add multiple and remove multiple roles, these roles will be your moderator roles.",
                         inline=False
                         )
         embed.add_field(name="Prefix",
                         value="Press the \"Change Prefix\" button to change your server prefix.\n"
                               "A text input will pop up and simply enter whatever prefix you awnt for your server.",
-                        inline=False)
+                        inline=False
+                        )
+        embed.add_field(name="Mod Log Channel",
+                        value="Press the \"Channel\" dropdown to select a channel, select the same chanel to remove it\n"
+                              "The channel you use will be the mod log channel.",
+                        inline=False
+                        )
         current_roles = server_roles(False, interaction)
         current_channel = modlogchannel(False, interaction)
         await interaction.response.send_message(embed=embed, view=Config(interaction, current_roles, current_channel), ephemeral=True)

@@ -2,7 +2,7 @@ import sqlite3, discord
 
 def modlog(save, interaction, data = None, user: discord.Member = None):
     msg = None
-    con = sqlite3.connect("/home/aveemo/Desktop/Veemoworks/ABotmo/DataBases/modlogs.db")
+    con = sqlite3.connect("DataBases/modlogs.db")
     cur = con.cursor()
     guild_id = str(interaction.guild.id)
     cur.execute(f"""
@@ -34,7 +34,7 @@ def modlog(save, interaction, data = None, user: discord.Member = None):
             SELECT * FROM '{guild_id}'
             WHERE user = '{str(data[0])}';
             """)
-        msg = f"Successfully warned <@{data[0]}>, they now have {len(cur.fetchall())} modlogs!"
+        msg = f"Successfully gave <@{data[0]}> a {data[4].lower()}, they now have {len(cur.fetchall())} modlogs!"
     else:
         cur.execute(f"""
             SELECT type, reason, message, timestamp, mod
@@ -65,7 +65,7 @@ def modlog(save, interaction, data = None, user: discord.Member = None):
     return msg
 
 def server_roles(save, interaction, role=None):
-    con = sqlite3.connect("/home/aveemo/Desktop/Veemoworks/ABotmo/DataBases/role.db")
+    con = sqlite3.connect("DataBases/role.db")
     cur = con.cursor()
     guild_id = str(interaction.guild.id)
     cur.execute(f"""
@@ -104,7 +104,7 @@ def server_roles(save, interaction, role=None):
     return [row[0] for row in rows]
 
 def server_prefix(save, guild, prefix=None):
-    con = sqlite3.connect("/home/aveemo/Desktop/Veemoworks/ABotmo/DataBases/prefix.db")
+    con = sqlite3.connect("DataBases/prefix.db")
     cur = con.cursor()
     guild_id = str(guild.id)
     if save:
@@ -142,33 +142,36 @@ def server_prefix(save, guild, prefix=None):
         return yeah[0]
 
 def modlogchannel(save, guild, channel=None):
-    con = sqlite3.connect("/home/aveemo/Desktop/Veemoworks/ABotmo/DataBases/channel.db")
+    con = sqlite3.connect("DataBases/channel.db")
     cur = con.cursor()
+    msg = ""
     guild_id = str(guild.id)
+    channel = str(channel)
     if save:
         cur.execute(f"""
                 SELECT * FROM 'Main'
                 WHERE guild_id = '{guild_id}';
             """)
-        if not cur.fetchone():
+        thing = cur.fetchone()
+        if thing and thing[1] == channel:
             cur.execute(f"""
-                    INSERT INTO 'Main' (guild_id) VALUES ('{guild_id}');
+                    DELETE FROM 'Main' WHERE guild_id = '{guild_id}'
                     """)
+            msg = f"Deleted \"<#{channel}>\" from the server config."
         else:
-            cur.execute(f"""
-                    UPDATE Main
-                    SET channel = NULL
-                    WHERE guild_id = '{guild_id}'
-                      AND channel IS NOT NULL;
+            if thing and not thing[1] == channel:
+                cur.execute(f"""
+                    DELETE FROM 'Main' WHERE guild_id = '{guild_id}'
                     """)
-        cur.execute(f"""
-                UPDATE 'Main'
-                SET channel = '{channel}'
-                WHERE guild_id = '{guild_id}';
-                """)
+                msg = f"Deleted \"<#{thing[1]}>\" from the server config.\n"
+            cur.execute(f"""
+                    INSERT INTO Main (guild_id, channel)
+                    VALUES ({guild_id}, {channel});
+                    """)
+            msg += f"Your new modlogs channel is: \"<#{channel}>\"."
         con.commit()
         con.close()
-        return f"Your new modlogs channel is: \"<#{channel}>\"."
+        return msg
     else:
         cur.execute("""
                     SELECT channel FROM Main WHERE guild_id = ?;

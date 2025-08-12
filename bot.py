@@ -2,7 +2,6 @@ import discord, os, platform, sys
 from discord.ext import commands
 from datetime import datetime
 from dotenv import load_dotenv
-from resources.variables import done
 from Cogs.Methods.methods import crash
 from Cogs.Methods.asynchronous.botEvents import command_error, app_command_error
 from Cogs.Methods.asynchronous.botStatus import status, kuma, bot_ping
@@ -14,10 +13,12 @@ load_dotenv()
 with open("output.txt", "w") as f:
     f.write(f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] Initializing...\n")
 bot = commands.Bot(command_prefix=get_prefix, intents=discord.Intents.all())
+done = False
 
 # Bot event for when bot starts up
 @bot.event
 async def on_ready():
+    global done
     try:
         try:
             if not done:
@@ -46,6 +47,7 @@ async def on_ready():
                 bot_ping.start(bot)
                 # Start uptime kuma pings
                 kuma.start(bot)
+                done = True
         except Exception as e:
             print(log(True, f"Sync Error: {e}"))
     except Exception as e:
@@ -68,4 +70,4 @@ sys.excepthook = handle_exception
 # Run bot
 if __name__ == "__main__":
     bot.run(os.getenv("TOKEN"))
-    close_bot(bot)
+    close_bot()
