@@ -14,10 +14,10 @@ class Moderation(commands.Cog):
     @app_commands.guild_only()
     @permission_check()
     async def warn(self, interaction: discord.Interaction, user: discord.Member, reason: str, message: str = None):
-        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id}!"))
-        #if user.bot:
-         #   await interaction.response.send_message(f"You can not warn {user.mention}, they are a bot!", ephemeral=True)
-          #  return
+        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
+        if user.bot:
+            await interaction.response.send_message(f"You can not warn {user.mention}, they are a bot!", ephemeral=True)
+            return
         allowed_roles = server_roles(False, interaction)
         for role in user.roles:
             if str(role.id) in allowed_roles:
@@ -32,7 +32,7 @@ class Moderation(commands.Cog):
     @app_commands.guild_only()
     @permission_check()
     async def ban(self, interaction: discord.Interaction, user: discord.User, reason: str, message: str = None):
-        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id}!"))
+        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         if user.bot:
             await interaction.response.send_message(f"You can not warn {user.mention}, they are a bot!", ephemeral=True)
             return
@@ -47,12 +47,33 @@ class Moderation(commands.Cog):
         await user.ban(delete_message_seconds=0, reason=reason)
         await logChannel(self.bot, interaction, data, user)
 
+    @app_commands.command(name="unban", description="Unban a user")
+    @app_commands.describe(user="Enter a user", reason="Enter a reason")
+    @app_commands.guild_only()
+    @permission_check()
+    async def unban(self, interaction: discord.Interaction, user: discord.User, reason: str = None):
+        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
+        if user.bot:
+            await interaction.response.send_message(f"{user.mention} is a bot, and are MOST likely not banned!", ephemeral=True)
+            return
+        user = self.bot.fetch_user(user.id)
+        try:
+            await interaction.guild.fetch_ban(user)
+        except discord.NotFound:
+            await interaction.response.send_message(f"{user.mention} is not banned!", ephemeral=True)
+            return
+
+        data = ( user.id, interaction.user.id, reason, None, "UNBAN", datetime.now().astimezone(timezone.utc).strftime("[%d|%m|%y] : [%H:%M]"))
+        await user.unban(reason=reason)
+        await logChannel(self.bot, interaction, data, user)
+        await interaction.response.send_message(f"{user.mention} was successfully unbanned{f" with the reason: {reason}" if not reason == None else ""}!", ephemeral=True)
+
     @app_commands.command(name="modlogs", description="View the moderation log of a member (Timezone: UTC)")
     @app_commands.describe(user="Enter a user")
     @app_commands.guild_only()
     @permission_check()
     async def modlogs(self, interaction: discord.Interaction, user: discord.Member):
-        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id}!"))
+        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         if user.bot:
             await interaction.response.send_message(f"You can not view the warnings of {user.mention}, they are a bot!", ephemeral=True)
             return

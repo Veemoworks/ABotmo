@@ -64,7 +64,7 @@ async def logChannel(bot, interaction, data, user):
     embed.set_author(name=f"CASE {rows} | {data[4]} | {user.name}", icon_url=user.avatar.url)
     embed.add_field(name="User", value=f"{user.mention}")
     embed.add_field(name="Moderator", value=f"{interaction.user.mention}")
-    embed.add_field(name="Info", value=f"{data[4]}: {data[2]}")
+    embed.add_field(name="Info", value=f"{data[4].lower().capitalize()}: {data[2]}")
     embed.set_footer(text=f"ID: {user.id}")
     embed.timestamp = datetime.now()
     if data[4] == "WARNING" or data[4] == "BAN":

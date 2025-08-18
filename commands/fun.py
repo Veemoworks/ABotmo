@@ -21,7 +21,7 @@ class Fun(commands.Cog):
             app_commands.Choice(name="Macchiato", value="6rdMEEWVG8Gi0g25oybVtr")
         ])
     async def playlist(self, interaction: discord.Interaction, user: app_commands.Choice[str], amount: int):
-        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id}!"))
+        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.defer()
         if amount < 1 or amount > 200:
             amount = 1
@@ -30,7 +30,7 @@ class Fun(commands.Cog):
     @app_commands.command(name="discography", description="Get a random song from a band's Spotify discography.")
     @app_commands.describe(artist="Enter any artist's name")
     async def discography(self, interaction: discord.Interaction, artist: str):
-        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id}!"))
+        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.defer()
         results = sp.search(q=artist, type='artist')
 
@@ -63,7 +63,7 @@ class Fun(commands.Cog):
     @app_commands.command(name="silly", description="Get your silliness percentage")
     @app_commands.describe(user="Enter a user")
     async def silly(self, interaction: discord.Interaction, user: discord.Member = None):
-        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id}!"))
+        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         dynevil = ""
         if user == None:
             user = interaction.user
@@ -109,7 +109,7 @@ class Fun(commands.Cog):
     @app_commands.command(name="evil", description="Get your evilness percentage")
     @app_commands.describe(user="Enter a user")
     async def evil(self, interaction: discord.Interaction, user: discord.Member = None):
-        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id}!"))
+        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         dynevil = ""
         if user == None:
             user = interaction.user

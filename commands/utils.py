@@ -26,7 +26,7 @@ class Utils(commands.Cog):
     @app_commands.command(name="whois", description="Get info about a user")
     @app_commands.describe(user="User to get info from", ephemeral="Set to ephemeral?")
     async def whois(self, interaction: discord.Interaction, user: discord.User = None, ephemeral: bool = None):
-        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id if interaction.guild else "DMs"}!"))
+        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         if ephemeral == None:
             ephemeral = True
         if user == None:
@@ -103,7 +103,8 @@ class Utils(commands.Cog):
 
     @app_commands.command(name="applications", description="Provides an application for Veemoworks")
     async def applications(self, interaction: discord.Interaction):
-        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id if interaction.guild else "DMs"}!"))
+        print(log(False,
+                  f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         app_embed = discord.Embed(title="Veemoworks Applications",
                                   description="Hi there!\n"
                                               "We have have an always active application for the Veemoworks project! However sometimes we change the application likely becase we changed to a different provider or our system is full, so make sure to double check with AVeemo if you're unsure.",
@@ -115,7 +116,7 @@ class Utils(commands.Cog):
 
     @app_commands.command(name="status", description="Check the statuses of many services")
     async def status(self, interaction: discord.Interaction):
-        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id if interaction.guild else "DMs"}!"))
+        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.defer()
         msg = ""
         amount = 1
@@ -181,31 +182,31 @@ class Utils(commands.Cog):
 
     @app_commands.command(name="ping", description="Get the bot's current ping")
     async def ping(self, interaction: discord.Interaction):
-        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id if interaction.guild else "DMs"}!"))
+        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         embed = discord.Embed(title="Bot is online!", description=f"Latency is {round(self.bot.latency * 1000)}ms!", color=discord.Color.brand_green())
         embed.set_thumbnail(url=avatar)
         await interaction.response.send_message(embed=embed)
 
     @app_commands.command(name="links", description="Get all links related to the bot")
     async def invite(self, interaction: discord.Interaction):
-        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id if interaction.guild else "DMs"}!"))
+        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.send_message("[**`Install Link`**](<https://bot.veraveemo.uk/invite> \"Install Veemocord™ as an External App\")\n[`Discord Server`](<https://discord.gg/GzWWqHxRap> \"Join the Discord Server and get access to all features and beta access!\") | [`Donate`](<https://ko-fi.com/veraveemo> \"Donate to AVeemo to help support them and their project(s)!\") | [`Bot Info`](<https://bot.veraveemo.uk> \"Get all the info from this bot that you need, or just run /help!\")")
 
     @app_commands.command(name="bugreport", description="Report a ABotmo Bot bug")
     async def bugreport(self, interaction: discord.Interaction):
-        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id if interaction.guild else "DMs"}!"))
+        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.send_modal(BugReport())
 
     @app_commands.command(name="suggestion", description="Give an ABotmo feature to add")
     async def suggestion(self, interaction: discord.Interaction):
-        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id if interaction.guild else "DMs"}!"))
+        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.send_modal(BotSuggest())
 
     @app_commands.command(name="help", description="Shows help info and commands")
     @app_commands.describe(command="Command to get help for")
     @app_commands.autocomplete(command=command_autocomplete)
     async def help(self, interaction: discord.Interaction, command: str = None):
-        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id if interaction.guild else "DMs"}!"))
+        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.defer(ephemeral=True)
         cmdid = None
         embed = discord.Embed(color=discord.Color.brand_green())
