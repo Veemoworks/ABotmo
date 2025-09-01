@@ -141,6 +141,8 @@ class Utils(commands.Cog):
             for name, details in thingy.items():
                 msg += f"{name}: {details}\n"
         except Exception as ex:
+            if len(ex) > 25:
+                ex = ex[:25] + "..."
             msg += f"❌ Error: {ex}\n"
 
         msg += f"### Bot Status:\n✅ {round(self.bot.latency * 1000)} ms\n### Website:\n"
@@ -155,7 +157,9 @@ class Utils(commands.Cog):
             except ping3.errors.Timeout:
                 msg += f"❌ `{name}` Timed Out\n"
             except Exception as ex:
-                msg += f"❌ `{name}` Error: {ex}\n"
+                if len(ex) > 25:
+                    ex = ex[:25] + "..."
+                msg += f"❌ `{name}` Error: {str(ex[:15])}\n"
 
         msg += f"### Python Scripts:\n"
 
@@ -170,6 +174,8 @@ class Utils(commands.Cog):
                 msg += f"✅ `{name}` ({int(elapsed_ms)} ms)\n"
                 amount += 1
             except Exception as ex:
+                if len(ex) > 25:
+                    ex = ex[:25] + "..."
                 msg += f"❌ `{name}` Error: {ex}\n"
                 
         msg += "❌ `Channel Topic Updater` Shutdown\n❌ `Minecraft Console Link` Shutdown\n"

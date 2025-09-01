@@ -1,6 +1,7 @@
-import discord, random, asyncio
+import discord, random
 from discord import app_commands
 from discord.ext import commands
+from Cogs.Methods.asynchronous.methods import calculator
 from Cogs.Methods.methods import log
 from resources.variables import sp
 
@@ -64,91 +65,19 @@ class Fun(commands.Cog):
     @app_commands.describe(user="Enter a user")
     async def silly(self, interaction: discord.Interaction, user: discord.Member = None):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
-        dynevil = ""
         if user == None:
             user = interaction.user
 
-        rand = random.randint(0, 115)
-        if rand > 100:
-            danr = rand - 100
-            rand = rand - danr
-
-        if rand == 100:
-            dynevil = "__**PURE SILLY!!**__"
-        elif rand >= 75:
-            dynevil = "**SILLY!!**"
-        elif rand >= 50:
-            dynevil = "SILLY!"
-        elif rand >= 25:
-            dynevil = "silly!"
-        else:
-            dynevil = "silly."
-
-        evil = discord.Embed(title="Silly Calculator",
-                             description=f"This **SILLY** calculator will determine your silliness, {user.mention}...",
-                             color=discord.Color.yellow())
-        await interaction.response.send_message(embed=evil)
-        await asyncio.sleep(2)
-        evil.add_field(name=".", value="")
-        await interaction.edit_original_response(embed=evil)
-        await asyncio.sleep(1)
-        evil.remove_field(0)
-        evil.add_field(name=". .", value="")
-        await interaction.edit_original_response(embed=evil)
-        await asyncio.sleep(1)
-        evil.remove_field(0)
-        evil.add_field(name=". . .", value="")
-        await interaction.edit_original_response(embed=evil)
-        await asyncio.sleep(1)
-        evil.remove_field(0)
-        await interaction.edit_original_response(embed=evil)
-        await asyncio.sleep(2)
-        evil.add_field(name="", value=f"{user.mention} is {rand}% {dynevil}")
-        await interaction.edit_original_response(embed=evil)
+        await calculator(interaction, "silly", user.mention)
 
     @app_commands.command(name="evil", description="Get your evilness percentage")
     @app_commands.describe(user="Enter a user")
     async def evil(self, interaction: discord.Interaction, user: discord.Member = None):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
-        dynevil = ""
         if user == None:
             user = interaction.user
 
-        rand = random.randint(0, 115)
-
-        if rand >= 100:
-            rand = 100
-            dynevil = "__**PURE EVIL!!**__"
-        elif rand >= 75:
-            dynevil = "**EVIL!!**"
-        elif rand >= 50:
-            dynevil = "EVIL!"
-        elif rand >= 25:
-            dynevil = "evil!"
-        else:
-            dynevil = "evil."
-
-        evil = discord.Embed(title="Evil Calculator",
-                             description=f"This **EVIL** calculator will determine your silliness, {user.mention}...",
-                             color=discord.Color.yellow())
-        await interaction.response.send_message(embed=evil)
-        await asyncio.sleep(2)
-        evil.add_field(name=".", value="")
-        await interaction.edit_original_response(embed=evil)
-        await asyncio.sleep(1)
-        evil.remove_field(0)
-        evil.add_field(name=". .", value="")
-        await interaction.edit_original_response(embed=evil)
-        await asyncio.sleep(1)
-        evil.remove_field(0)
-        evil.add_field(name=". . .", value="")
-        await interaction.edit_original_response(embed=evil)
-        await asyncio.sleep(1)
-        evil.remove_field(0)
-        await interaction.edit_original_response(embed=evil)
-        await asyncio.sleep(2)
-        evil.add_field(name="", value=f"{user.mention} is {rand}% {dynevil}")
-        await interaction.edit_original_response(embed=evil)
+        await calculator(interaction, "evil", user.mention)
 
 async def setup(bot):
     await bot.add_cog(Fun(bot))

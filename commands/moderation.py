@@ -2,7 +2,8 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 from datetime import datetime, timezone
-from Cogs.Methods.methods import permission_check, log, logChannel
+from Cogs.Methods.asynchronous.methods import logChannel
+from Cogs.Methods.methods import permission_check, log
 from DataBases.database import modlog, server_roles
 
 class Moderation(commands.Cog):

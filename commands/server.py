@@ -1,7 +1,6 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-from DataBases.database import server_roles, modlogchannel
 from Cogs.Methods.methods import log
 from Cogs.Classes.DiscordViews import Config
 
