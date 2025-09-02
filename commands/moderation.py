@@ -75,10 +75,11 @@ class Moderation(commands.Cog):
     @permission_check()
     async def modlogs(self, interaction: discord.Interaction, user: discord.Member):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
+        await interaction.response.defer(ephemeral=True)
         if user.bot:
             await interaction.response.send_message(f"You can not view the warnings of {user.mention}, they are a bot!", ephemeral=True)
             return
-        await interaction.response.send_message(embed=modlog(False, interaction, user=user), ephemeral=True)
+        await interaction.followup.send(embed=modlog(False, interaction, user=user))
 
 async def setup(bot):
     await bot.add_cog(Moderation(bot))

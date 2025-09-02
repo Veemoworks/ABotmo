@@ -49,7 +49,8 @@ def modlog(save, interaction, data = None, user: discord.Member = None):
             amount = 0
             for row in rows:
                 amount += 1
-                msg.add_field(name=f"{amount}. {row[3]}", value=f"{row[0]} | \"{row[1]}\" | MSG: \"{row[2]}\" ~ <@{row[4]}>", inline=False)
+                msg.add_field(name=f"{amount}. {row[3]}", value=f"{row[0]} | \"{row[1]}\"{""if row[2] is None else f' | MSG: "{row[2]}"'} ~ <@{row[4]}>", inline=False)
+                msg.set_footer(text=f"{user.id} | Timezone: UTC")
             cur.execute(f"""
                 SELECT type, reason, message, timestamp, mod
                 FROM '{guild_id}'
