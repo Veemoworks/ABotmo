@@ -3,7 +3,7 @@ from discord.ext import commands
 from datetime import datetime
 from dotenv import load_dotenv
 from Cogs.Methods.methods import crash
-from Cogs.Methods.asynchronous.botEvents import command_error, app_command_error
+from Cogs.Methods.asynchronous.botEvents import command_error, app_command_error, message
 from Cogs.Methods.asynchronous.botStatus import status, kuma, bot_ping
 from Cogs.Methods.asynchronous.methods import get_prefix
 from Cogs.Methods.methods import handle_exception, log, close_bot
@@ -60,9 +60,16 @@ async def on_command_error_event(ctx, error):
     await command_error(ctx, error)
 
 # Slash command error
-@bot.tree.error
+"""@bot.tree.error
 async def on_app_command_error_event(interaction, error):
     await app_command_error(interaction, error)
+"""
+# On message events
+@bot.event
+async def on_message(msg):
+    await message(msg)
+
+    await bot.process_commands(msg)
 
 # System exception
 sys.excepthook = handle_exception

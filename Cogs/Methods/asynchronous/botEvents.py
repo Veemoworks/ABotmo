@@ -1,4 +1,5 @@
-import discord
+import discord, time
+from DataBases.database import xp
 from Cogs.Methods.asynchronous.methods import crash
 from resources.links import warm
 
@@ -28,3 +29,12 @@ async def app_command_error(interaction: discord.Interaction, error):
         await interaction.response.send_message(embed=errorembed)
     except discord.errors.InteractionResponded:
         await interaction.followup.send(embed=errorembed)
+
+async def message(msg):
+    if msg.author.bot:
+        return
+
+    guild = msg.guild
+    user = msg.author
+
+    xp(True, guild, int(time.time()), user)

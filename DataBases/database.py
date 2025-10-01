@@ -1,4 +1,4 @@
-import sqlite3, discord
+import sqlite3, discord, random
 
 def modlog(save, interaction, data = None, user: discord.Member = None):
     msg = None
@@ -182,3 +182,65 @@ def modlogchannel(save, guild, channel=None):
         if yeah == None:
             return None
         return yeah[0]
+
+def xp(save, guild, time=None, user=None):
+    con = sqlite3.connect("DataBases/xp.db")
+    cur = con.cursor()
+    guild_id = str(guild.id)
+    cur.execute(f"""
+            SELECT name FROM sqlite_master
+            WHERE type = 'table' AND name = '{guild_id}';
+        """)
+    if not cur.fetchone():
+        cur.execute(f"""
+                CREATE TABLE '{guild_id}' (
+                    user INTEGER,
+                    xp INTEGER,
+                    level INTEGER,
+                    last_msg INTEGER
+                );
+            """)
+        con.commit()
+
+    if save:
+        cur.execute(f"""
+                    SELECT xp, level, last_msg FROM '{guild_id}'
+                    WHERE user = '{user.id}'   
+                """)
+        row = cur.fetchone()
+        if row == None:
+            cur.execute(f"""
+                        INSERT INTO '{guild_id}'
+                        VALUES ({user.id}, {random.randint(5, 25)}, 0, {time})
+                        """)
+            con.commit()
+        else:
+            xp, level, last_msg = row
+            if last_msg is None or time - last_msg >= 5:
+                new_xp = xp + random.randint(5, 25)
+                next_level = 5 * (level ** 2) + 50 * level + 100
+
+                if new_xp >= next_level:
+                    level += 1
+
+                cur.execute(f"""
+                            UPDATE '{guild_id}'
+                            SET xp = '{new_xp}', level = '{level}', last_msg = '{time}'
+                            WHERE user = '{user.id}'
+                        """)
+                con.commit()
+        con.close()
+    else:
+        cur.execute(f"""
+            SELECT xp, level FROM '{guild_id}'
+            WHERE user = '{user.id}'
+        """)
+
+        row = cur.fetchone()
+
+        if row == None:
+            return False, None
+
+        xp, level = row
+        next_level = 5 * (level ** 2) + 50 * level + 100
+        return True, [xp, level, next_level]

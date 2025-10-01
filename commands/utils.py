@@ -37,8 +37,25 @@ class Utils(commands.Cog):
             def __init__(self, user: discord.User):
                 super().__init__(timeout=180)
                 self.user = user
-                self.add_item(discord.ui.Button(label="View Profile (WEB)", url=f"https://discord.com/users/{user.id}", style=discord.ButtonStyle.link, row=1))
-                self.add_item(discord.ui.Button(label="View Profile (CLIENT)", url=f"discord://-/users/{user.id}", style=discord.ButtonStyle.link, row=1))
+                res = requests.get(f"https://api.lanyard.rest/v1/users/{interaction.user.id}")
+                if res.status_code == 200:
+                    if res.json()['success']:
+                        data = res.json()['data']
+                        actives = {
+                            "Web": data['active_on_discord_web'],
+                            "Desktop": data['active_on_discord_desktop'],
+                            "Mobile": data['active_on_discord_mobile'],
+                            "Embedded": data['active_on_discord_embedded']
+                        }
+
+                    for platform, active in actives.items():
+                        if active:
+                            if platform == "Web" or platform == "Embedded":
+                                self.add_item(discord.ui.Button(label="View Profile", url=f"https://discord.com/users/{user.id}", style=discord.ButtonStyle.link, row=1))
+                            else:
+                                self.add_item(discord.ui.Button(label="View Profile", url=f"discord://-/users/{user.id}", style=discord.ButtonStyle.link, row=1))
+                else:
+                    print(log(True, "Error fetching lanyard data for /whois view profile buttons."))
 
                 if user.banner:
                     banner_button = discord.ui.Button(label="View Banner", style=discord.ButtonStyle.primary)
@@ -59,7 +76,7 @@ class Utils(commands.Cog):
                 view = discord.ui.View()
                 view.add_item(
                     discord.ui.Button(label="Image URL", style=discord.ButtonStyle.link, url=self.user.avatar.url))
-                await interaction.response.send_message(embed=embed, view=view, ephemeral=ephemeral)
+                await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
             async def callback(self, interaction: discord.Interaction):
                 embed = discord.Embed(color=discord.Color.brand_green())
@@ -68,7 +85,7 @@ class Utils(commands.Cog):
                 view2 = discord.ui.View()
                 view2.add_item(
                     discord.ui.Button(label="Image URL", style=discord.ButtonStyle.link, url=self.user.banner.url))
-                await interaction.response.send_message(embed=embed, view=view2, ephemeral=ephemeral)
+                await interaction.response.send_message(embed=embed, view=view2, ephemeral=True)
 
         badges = []
         if user.public_flags:
@@ -79,7 +96,7 @@ class Utils(commands.Cog):
         created_at = f"<t:{int(user.created_at.timestamp())}:R>"
 
         if user.id == 333585549837336577:
-            badge_text += " <:VeraVeemo:1400816211620659272> <:VeemoworksDev:1400816284526051369> <:RecNetDB:1401234874848907365> <:Python:1400816361189675038> <:dev:1400815766814589080> <:hypesquad:1400816053675884624> <:partner:1400816107325096016> <:bughunter2:1400815976127135874>"
+            badge_text += " <:VeraVeemo:1400816211620659272> <:VeemoworksDev:1400816284526051369> <:Python:1400816361189675038> <:dev:1400815766814589080> <:hypesquad:1400816053675884624> <:partner:1400816107325096016> <:bughunter2:1400815976127135874>"
         elif user.id == 299914704594403329:
             badge_text += " <:Chomperling:1400816246160756809>"
         elif user.id == 566996607455723522:
