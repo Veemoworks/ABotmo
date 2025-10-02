@@ -43,17 +43,17 @@ class Server(commands.Cog):
             nxt_lvl -= currxp
             if has_perms:
                 embed = discord.Embed(description=f"**Level**: {level}\n**XP**: {currxp}\n**{nxt_lvl} XP** needed.", color=discord.Color.brand_green())
-                embed.set_author(name=f"@{user.name}'s XP for {interaction.guild.name[:12]}" f"{"..." if len(interaction.guild.name) > 12 else "."}", icon_url=user.display_avatar.url)
+                embed.set_author(name=f"@{user.name}'s XP for {interaction.guild.name}.", icon_url=user.display_avatar.url)
                 await interaction.response.send_message(embed=embed)
             else:
                 await interaction.response.send_message(f"**__{user.name}__**\n**Level**: {level}\n**XP**: {currxp}\n**{nxt_lvl} XP** needed.")
         else:
             if has_perms:
                 embed = discord.Embed(color=discord.Color.brand_green())
-                embed.set_author(name=f"@{user.name} has no XP {f"{f"for {interaction.guild.name[:12]}" if not interaction.guild.name == "" else "as an external app"}"}" f"{"..." if len(interaction.guild.name) > 12 else "."}", icon_url=user.display_avatar.url)
+                embed.set_author(name=f"@{user.name} has no XP {f"{f"for {interaction.guild.name}" if not interaction.guild.name == "" else "as an external app"}"}", icon_url=user.display_avatar.url)
                 await interaction.response.send_message(embed=embed)
             else:
-                await interaction.response.send_message(f"**__{user.name}__** has no XP for {interaction.guild.name[:12]}" f"{"..." if len(interaction.guild.name) > 12 else "."}")
+                await interaction.response.send_message(f"**__{user.name}__** has no XP for {interaction.guild.name}.")
 
 async def setup(bot):
     await bot.add_cog(Server(bot))

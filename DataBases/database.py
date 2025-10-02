@@ -184,6 +184,7 @@ def modlogchannel(save, guild, channel=None):
         return yeah[0]
 
 def xp(save, guild, time=None, user=None):
+    returnval = None
     con = sqlite3.connect("DataBases/xp.db")
     cur = con.cursor()
     guild_id = str(guild.id)
@@ -214,6 +215,7 @@ def xp(save, guild, time=None, user=None):
                         VALUES ({user.id}, {random.randint(5, 25)}, 0, {time})
                         """)
             con.commit()
+            level = 0
         else:
             xp, level, last_msg = row
             if last_msg is None or time - last_msg >= 5:
@@ -222,6 +224,7 @@ def xp(save, guild, time=None, user=None):
 
                 if new_xp >= next_level:
                     level += 1
+                    returnval = True
 
                 cur.execute(f"""
                             UPDATE '{guild_id}'
@@ -230,6 +233,7 @@ def xp(save, guild, time=None, user=None):
                         """)
                 con.commit()
         con.close()
+        return returnval, level
     else:
         cur.execute(f"""
             SELECT xp, level FROM '{guild_id}'

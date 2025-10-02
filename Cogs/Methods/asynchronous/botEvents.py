@@ -37,4 +37,7 @@ async def message(msg):
     guild = msg.guild
     user = msg.author
 
-    xp(True, guild, int(time.time()), user)
+    lvl_up, lvl = xp(True, guild, int(time.time()), user)
+
+    if lvl_up:
+        await msg.reply(f"{msg.author.mention}, you have succesfully leveled up to Level {lvl}!", allowed_mentions=discord.AllowedMentions(roles=False, users=False, replied_user=False), delete_after=8)
