@@ -2,6 +2,7 @@ import discord, os, platform, sys
 from discord.ext import commands
 from datetime import datetime
 from dotenv import load_dotenv
+from resources.arrays import guilds
 from Cogs.Methods.methods import crash
 from Cogs.Methods.asynchronous.botEvents import command_error, app_command_error, message
 from Cogs.Methods.asynchronous.botStatus import status, kuma, bot_ping
@@ -23,11 +24,13 @@ async def on_ready():
         try:
             if not done:
                 # Load cogs
-                cogs = ["fun", "utils", "moderation", "server"]
+                cogs = ["fun", "utils", "moderation", "server", "custom"]
                 for cog in cogs:
                     await bot.load_extension(f"commands.{cog}")
                 # Sync bot tree.
                 synced = await bot.tree.sync()
+                for server in guilds:
+                    await bot.tree.sync(guild=discord.Object(id=server))
                 thing = (f"\033[92m[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] ABOTMO ONLINE\n"
                          f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] Logged in as {bot.user}\n"
                          f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] Synced {len(synced)} commands\n"
@@ -60,10 +63,10 @@ async def on_command_error_event(ctx, error):
     await command_error(ctx, error)
 
 # Slash command error
-"""@bot.tree.error
+@bot.tree.error
 async def on_app_command_error_event(interaction, error):
     await app_command_error(interaction, error)
-"""
+
 # On message events
 @bot.event
 async def on_message(msg):
