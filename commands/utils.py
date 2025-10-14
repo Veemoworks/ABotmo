@@ -5,6 +5,7 @@ from discord.ext import commands
 from Cogs.Methods.asynchronous.methods import get_prefix, logChannel
 from Cogs.Methods.methods import permission_check
 from Cogs.Classes.DiscordModals import BugReport, BotSuggest
+from Cogs.Classes.DiscordViews import ServerInfo
 from resources.arrays import veemoworksdevs, recnetdb
 from resources.dictionaries import hosts, script_urls, botbadges, cmduae
 from resources.links import avatar
@@ -294,6 +295,35 @@ class Utils(commands.Cog):
         except Exception as e:
             await interaction.followup.send(f"Could not purge messages: {e}")
             print(log(True, f"Could not purge messages: {e}"))
+
+    @app_commands.command(name="serverinfo", description="Get information about the server!")
+    @app_commands.guild_only()
+    async def serverconfig(self, interaction: discord.Interaction):
+        print(log(False,f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
+        await interaction.response.defer()
+        guild = interaction.guild
+
+        embed = discord.Embed(title=guild.name, description=guild.description, color=discord.Color.brand_green())
+        embed.set_footer(text=f"ID: {guild.id}")
+        if not guild.banner == None:
+            embed.set_image(url=guild.banner.url)
+        if not guild.icon == None:
+            embed.set_thumbnail(url=guild.icon.url)
+        embed.add_field(name="Owner", value=guild.owner.mention)
+        embed.add_field(name="Created At", value=f"<t:{round(guild.created_at.timestamp())}:d> <t:{round(guild.created_at.timestamp())}:t>")
+        embed.add_field(name="Vanity Link", value=guild.vanity_url)
+        embed.add_field(name="Preferred Locale", value=guild.preferred_locale)
+        embed.add_field(name="Verification Level", value=guild.verification_level)
+        embed.add_field(name="Server Boosts", value=f"{guild.premium_subscription_count} (Level {guild.premium_tier})")
+        embed.add_field(name="Channels", value=f"{len(guild.text_channels)} Text | {len(guild.voice_channels)} Voice | {len(guild.stage_channels)} Stages")
+        embed.add_field(name="Categories", value=len(guild.categories))
+        embed.add_field(name="Members", value=guild.member_count)
+        embed.add_field(name="Roles", value=len(guild.roles))
+        embed.add_field(name="Emojis", value=len(guild.emojis))
+        embed.add_field(name="Stickers", value=len(guild.stickers))
+
+        view = ServerInfo(guild)
+        await interaction.followup.send(embed=embed, view=view)
 
 async def setup(bot):
     await bot.add_cog(Utils(bot))

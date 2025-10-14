@@ -8,6 +8,45 @@ def chunk_list(lst, size=25):
     for i in range(0, len(lst), size):
         yield lst[i:i + size]
 
+class ServerInfo(discord.ui.View):
+    def __init__(self, guild: discord.Guild):
+        super().__init__(timeout=180)
+        self.guild = guild
+
+    @discord.ui.button(label="Roles", style=discord.ButtonStyle.blurple)
+    async def roles_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        roles = [r.mention for r in self.guild.roles if not r.is_default()]
+        roles_text = ", ".join(roles) if roles else "No roles found."
+        await interaction.response.send_message(
+            f"**Roles ({len(roles)}):**\n{roles_text[:1900]}",
+            ephemeral=True
+        )
+
+    @discord.ui.button(label="Channels", style=discord.ButtonStyle.blurple)
+    async def channels_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        text_channels = [c.mention for c in self.guild.text_channels]
+        voice_channels = [c.name for c in self.guild.voice_channels]
+        channels_text = (
+            f"**Text Channels ({len(text_channels)}):**\n{', '.join(text_channels)[:900]}"
+            f"\n\n**Voice Channels ({len(voice_channels)}):**\n{', '.join(voice_channels)[:900]}"
+        )
+        await interaction.response.send_message(channels_text, ephemeral=True)
+
+    @discord.ui.button(label="Emojis", style=discord.ButtonStyle.blurple)
+    async def emojis_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        emojis = [str(e) for e in self.guild.emojis]
+        emojis_text = "".join(emojis)[:1900] if emojis else "No emojis found."
+        await interaction.response.send_message(
+            f"**Emojis ({len(emojis)}):**\n{emojis_text}", ephemeral=True
+        )
+
+    @discord.ui.button(label="Stickers", style=discord.ButtonStyle.blurple)
+    async def stickers_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        stickers = [s.name for s in self.guild.stickers]
+        stickers_text = ", ".join(stickers)[:1900] if stickers else "No stickers found."
+        await interaction.response.send_message(
+            f"**Stickers ({len(stickers)}):**\n{stickers_text}", ephemeral=True
+        )
 
 class Config(View):
     def __init__(self, interaction: discord.Interaction):
