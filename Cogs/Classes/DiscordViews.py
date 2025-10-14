@@ -12,41 +12,64 @@ class ServerInfo(discord.ui.View):
     def __init__(self, guild: discord.Guild):
         super().__init__(timeout=180)
         self.guild = guild
+        self.interaction = None
+
+    async def on_timeout(self):
+        for item in self.children:
+            item.disabled = True
+        if self.interaction:
+            await self.interaction.edit_original_response(view=self)
 
     @discord.ui.button(label="Roles", style=discord.ButtonStyle.blurple)
     async def roles_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        self.interaction = interaction
         roles = [r.mention for r in self.guild.roles if not r.is_default()]
-        roles_text = ", ".join(roles) if roles else "No roles found."
-        await interaction.response.send_message(
-            f"**Roles ({len(roles)}):**\n{roles_text[:1900]}",
-            ephemeral=True
+        roles_text = "\n".join(roles) if roles else "No roles found."
+
+        embed = discord.Embed(
+            title=f"Server Roles ({len(roles)})",
+            description=roles_text[:4000],
+            color=discord.Color.brand_green()
         )
+
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @discord.ui.button(label="Channels", style=discord.ButtonStyle.blurple)
     async def channels_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        self.interaction = interaction
         text_channels = [c.mention for c in self.guild.text_channels]
         voice_channels = [c.name for c in self.guild.voice_channels]
-        channels_text = (
-            f"**Text Channels ({len(text_channels)}):**\n{', '.join(text_channels)[:900]}"
-            f"\n\n**Voice Channels ({len(voice_channels)}):**\n{', '.join(voice_channels)[:900]}"
+
+        embed = discord.Embed(
+            title="Server Channels",
+            color=discord.Color.brand_green()
         )
-        await interaction.response.send_message(channels_text, ephemeral=True)
+        embed.add_field(
+            name=f"Text Channels ({len(text_channels)})",
+            value="\n".join(text_channels)[:1024] or "None",
+            inline=False
+        )
+        embed.add_field(
+            name=f"Voice Channels ({len(voice_channels)})",
+            value="\n".join(voice_channels)[:1024] or "None",
+            inline=False
+        )
+
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @discord.ui.button(label="Emojis", style=discord.ButtonStyle.blurple)
     async def emojis_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        self.interaction = interaction
         emojis = [str(e) for e in self.guild.emojis]
-        emojis_text = "".join(emojis)[:1900] if emojis else "No emojis found."
-        await interaction.response.send_message(
-            f"**Emojis ({len(emojis)}):**\n{emojis_text}", ephemeral=True
+        emojis_text = "".join(emojis)[:4000] if emojis else "No emojis found."
+
+        embed = discord.Embed(
+            title=f"Server Emojis ({len(emojis)})",
+            description=emojis_text,
+            color=discord.Color.brand_green()
         )
 
-    @discord.ui.button(label="Stickers", style=discord.ButtonStyle.blurple)
-    async def stickers_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-        stickers = [s.name for s in self.guild.stickers]
-        stickers_text = ", ".join(stickers)[:1900] if stickers else "No stickers found."
-        await interaction.response.send_message(
-            f"**Stickers ({len(stickers)}):**\n{stickers_text}", ephemeral=True
-        )
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
 class Config(View):
     def __init__(self, interaction: discord.Interaction):

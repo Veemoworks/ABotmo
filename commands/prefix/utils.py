@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from discord.ext import commands
 from Cogs.Methods.methods import log
 from Cogs.Methods.asynchronous.methods import logChannel, get_prefix
+from Cogs.Classes.DiscordViews import ServerInfo
 
 class UtilsPREFIX(commands.Cog):
     def __init__(self, bot):
@@ -71,6 +72,46 @@ class UtilsPREFIX(commands.Cog):
             msg = await ctx.send(f"Could not purge messages: {e}")
             await msg.delete(delay=10)
             print(log(True, f"Error in purge command: {e}"))
+
+    @commands.command(name="serverinfo", help="Get information about the current server.")
+    @commands.guild_only()
+    async def serverinfo(self, ctx: commands.Context):
+        guild = ctx.guild
+
+        embed = discord.Embed(
+            title=guild.name,
+            description=guild.description or "No description.",
+            color=discord.Color.brand_green()
+        )
+        embed.set_footer(text=f"ID: {guild.id}")
+
+        if guild.banner:
+            embed.set_image(url=guild.banner.url)
+        if guild.icon:
+            embed.set_thumbnail(url=guild.icon.url)
+
+        embed.add_field(name="Owner", value=guild.owner.mention if guild.owner else "Unknown")
+        embed.add_field(
+            name="Created At",
+            value=f"<t:{round(guild.created_at.timestamp())}:d> <t:{round(guild.created_at.timestamp())}:t>"
+        )
+        embed.add_field(name="Vanity Link", value=guild.vanity_url or "None")
+        embed.add_field(name="Preferred Locale", value=guild.preferred_locale)
+        embed.add_field(name="Verification Level", value=guild.verification_level)
+        embed.add_field(name="Server Boosts", value=f"{guild.premium_subscription_count} (Level {guild.premium_tier})")
+        embed.add_field(
+            name="Channels",
+            value=f"{len(guild.text_channels)} Text | {len(guild.voice_channels)} Voice | {len(guild.stage_channels)} Stage"
+        )
+        embed.add_field(name="Categories", value=len(guild.categories))
+        embed.add_field(name="Members", value=guild.member_count)
+        embed.add_field(name="Roles", value=len(guild.roles))
+        embed.add_field(name="Emojis", value=len(guild.emojis))
+        embed.add_field(name="Stickers", value=len(guild.stickers))
+
+        view = ServerInfo(guild)
+        msg = await ctx.send(embed=embed, view=view)
+        view.message = msg
 
     # errors for commands
     @purge_prefix.error
