@@ -1,3 +1,5 @@
+txfhjkihjiiiiiiiiiii i, /sploggybeanm hiiiiiiiiihiiiiiiiiiiiiiiiiiiiiii i, ,wtriytimg the bot hiii
+
 # ABotmo
 
 ABotmo, also known as "Veemocord™," is a Discord Bot run and managed by "[VeraVeemo](https://discord.com/users/333585549837336577)" for Servers, DMs and as an external app!
