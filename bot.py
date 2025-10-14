@@ -24,7 +24,7 @@ async def on_ready():
         try:
             if not done:
                 # Load cogs
-                cogs = ["fun", "utils", "moderation", "server", "custom"]
+                cogs = ["fun", "utils", "moderation", "server", "custom", "prefix.utils"]
                 for cog in cogs:
                     await bot.load_extension(f"commands.{cog}")
                 # Sync bot tree.

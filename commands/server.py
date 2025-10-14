@@ -29,6 +29,7 @@ class Server(commands.Cog):
         await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
     @app_commands.command(name="rank", description="Check your rank in this server!")
+    @app_commands.describe(user="User to check")
     @app_commands.guild_only()
     async def rank(self, interaction: discord.Interaction, user: discord.Member = None):
         print(log(False,f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id} ({interaction.guild.name})!"))

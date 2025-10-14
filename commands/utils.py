@@ -1,7 +1,9 @@
-import discord, psutil, requests, time, ping3
+import discord, psutil, requests, time, ping3, re
+from datetime import datetime, timezone
 from discord import app_commands
 from discord.ext import commands
-from Cogs.Methods.asynchronous.methods import get_prefix
+from Cogs.Methods.asynchronous.methods import get_prefix, logChannel
+from Cogs.Methods.methods import permission_check
 from Cogs.Classes.DiscordModals import BugReport, BotSuggest
 from resources.arrays import veemoworksdevs, recnetdb
 from resources.dictionaries import hosts, script_urls, botbadges, cmduae
@@ -239,6 +241,59 @@ class Utils(commands.Cog):
                 embed.description = f"**Description**: {cmd.description or "No Description"}\n**Markdown**: </{cmd.name}:{cmdid}>\n{cmduae[cmd.name]}"
                 embed.set_footer(text=f"ID: {cmdid} ""| Key: [] = Optional : {} = Required")
         await interaction.followup.send(embed=embed)
+
+    @app_commands.command(name="purge", description="Purge messages in this channel.")
+    @app_commands.describe(amount="Amount of messages to purge (1–100)", user="Purge messages from a specific user", bots="Delete messages from bots only", embeds="Delete messages with embeds only", files="Delete messages with attachments only", links="Delete messages with links only", mentions="Delete messages with mentions only")
+    @app_commands.guild_only()
+    @permission_check()
+    async def purge_slash(self, interaction: discord.Interaction, amount: int, user: discord.User = None, bots: bool = False, embeds: bool = False, files: bool = False, links: bool = False, mentions: bool = False):
+        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
+        await interaction.response.defer(ephemeral=True)
+
+        if amount < 1 or amount > 100:
+            await interaction.followup.send(f"Please provide a number between 1 and 100.\n-# Your input: {amount}")
+            return
+
+        def check(msg: discord.Message):
+            if user and msg.author != user:
+                return False
+            if bots and not msg.author.bot:
+                return False
+            if embeds and not msg.embeds:
+                return False
+            if files and not msg.attachments:
+                return False
+            if links and not re.search(r"https?://", msg.content):
+                return False
+            if mentions and not (msg.mentions or msg.role_mentions):
+                return False
+            return True
+
+        try:
+            deleted = await interaction.channel.purge(limit=amount, check=check)
+            if not deleted:
+                await interaction.followup.send("No messages matched your filters.")
+                return
+
+            summary = f"Purged **{len(deleted)}** messages."
+            filters_used = []
+            if user: filters_used.append(f"user: {user.display_name}")
+            if bots: filters_used.append("bots")
+            if embeds: filters_used.append("embeds")
+            if files: filters_used.append("files")
+            if links: filters_used.append("links")
+            if mentions: filters_used.append("mentions")
+
+            if filters_used:
+                summary += f" *(filters: {', '.join(filters_used)})*"
+
+            await interaction.followup.send(summary)
+            data = (interaction.user.id, interaction.user.id, amount, interaction.channel.mention, "PURGE",
+                    datetime.now().astimezone(timezone.utc).strftime("[%d|%m|%y] : [%H:%M]"))
+            await logChannel(self.bot, interaction, data, interaction.user)
+        except Exception as e:
+            await interaction.followup.send(f"Could not purge messages: {e}")
+            print(log(True, f"Could not purge messages: {e}"))
 
 async def setup(bot):
     await bot.add_cog(Utils(bot))
