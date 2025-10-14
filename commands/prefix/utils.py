@@ -2,7 +2,7 @@ import discord, re
 from datetime import datetime, timezone
 from discord.ext import commands
 from Cogs.Methods.methods import log
-from Cogs.Methods.asynchronous.methods import logChannel
+from Cogs.Methods.asynchronous.methods import logChannel, get_prefix
 
 class UtilsPREFIX(commands.Cog):
     def __init__(self, bot):
@@ -11,7 +11,8 @@ class UtilsPREFIX(commands.Cog):
     @commands.guild_only()
     @commands.command(name="purge", description="Deletes a number of messages with optional filters.")
     async def purge_prefix(self, ctx, amount: int, *filters):
-        print(log(False,f"{ctx.author} ({ctx.author.id}) used {ctx.command.qualified_name} in {ctx.guild.id} ({ctx.guild.name})!"))
+        prefix = await get_prefix(self.bot, ctx.message)
+        print(log(False,f"{ctx.author} ({ctx.author.id}) used {prefix}{ctx.command.qualified_name} in {ctx.guild.id} ({ctx.guild.name})!"))
 
         if amount < 1 or amount > 100:
             msg = await ctx.send("Please provide a number between 1 and 100.")
@@ -63,29 +64,22 @@ class UtilsPREFIX(commands.Cog):
                 await msg.delete(delay=5)
                 return
 
-            count = len(deleted) - 1
-            summary = f"Purged **{count}** messages."
-            filters_used = []
-            if user: filters_used.append(f"user: {user.display_name}")
-            if bots: filters_used.append("bots")
-            if embeds: filters_used.append("embeds")
-            if files: filters_used.append("files")
-            if links: filters_used.append("links")
-            if mentions: filters_used.append("mentions")
-
-            if filters_used:
-                summary += f" *(filters: {', '.join(filters_used)})*"
-
             data = (ctx.author.id, ctx.author.id, amount, ctx.channel.mention, "PURGE", datetime.now().astimezone(timezone.utc).strftime("[%d|%m|%y] : [%H:%M]"))
             await logChannel(self.bot, ctx, data, ctx.channel)
-
-            msg = await ctx.send(summary)
-            await msg.delete(delay=5)
 
         except Exception as e:
             msg = await ctx.send(f"Could not purge messages: {e}")
             await msg.delete(delay=10)
             print(log(True, f"Error in purge command: {e}"))
+
+    # errors for commands
+    @purge_prefix.error
+    async def purge_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            prefix = await get_prefix(self.bot, ctx.message)
+            print(log(False,f"{ctx.author} ({ctx.author.id}) used {prefix}purge in {ctx.guild.id} ({ctx.guild.name})!"))
+            msg = await ctx.send("Please provide a number between 1 and 100.")
+            await msg.delete(delay=10)
 
 async def setup(bot):
     await bot.add_cog(UtilsPREFIX(bot))

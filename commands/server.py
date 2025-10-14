@@ -35,6 +35,8 @@ class Server(commands.Cog):
         print(log(False,f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id} ({interaction.guild.name})!"))
         has_perms = app_commands.checks.bot_has_permissions(embed_links=True)
 
+        await interaction.response.defer()
+
         if user == None:
             user = interaction.user
         data, xpinfo = xp(False, interaction.guild, user=user)
@@ -45,16 +47,16 @@ class Server(commands.Cog):
             if has_perms:
                 embed = discord.Embed(description=f"**Level**: {level}\n**XP**: {currxp}\n**{nxt_lvl} XP** needed.", color=discord.Color.brand_green())
                 embed.set_author(name=f"@{user.name}'s XP for {interaction.guild.name}.", icon_url=user.display_avatar.url)
-                await interaction.response.send_message(embed=embed)
+                await interaction.followup.send(embed=embed)
             else:
-                await interaction.response.send_message(f"**__{user.name}__**\n**Level**: {level}\n**XP**: {currxp}\n**{nxt_lvl} XP** needed.")
+                await interaction.followup.send(f"**__{user.name}__**\n**Level**: {level}\n**XP**: {currxp}\n**{nxt_lvl} XP** needed.")
         else:
             if has_perms:
                 embed = discord.Embed(color=discord.Color.brand_green())
                 embed.set_author(name=f"@{user.name} has no XP {f"{f"for {interaction.guild.name}" if not interaction.guild.name == "" else "as an external app"}"}", icon_url=user.display_avatar.url)
-                await interaction.response.send_message(embed=embed)
+                await interaction.followup.send(embed=embed)
             else:
-                await interaction.response.send_message(f"**__{user.name}__** has no XP for {interaction.guild.name}.")
+                await interaction.followup.send(f"**__{user.name}__** has no XP for {interaction.guild.name}.")
 
 async def setup(bot):
     await bot.add_cog(Server(bot))

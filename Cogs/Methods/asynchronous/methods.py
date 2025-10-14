@@ -51,11 +51,13 @@ async def logChannel(bot, interaction, data, user):
     """)
     rows = len(cur.fetchall())
     embed = discord.Embed(color=discord.Color.yellow())
-    embed.set_author(name=f"CASE {rows} | {data[4]} | {user.name}", icon_url=user.avatar.url)
-    embed.add_field(name="User", value=f"{user.mention}")
     if interaction == discord.Interaction:
+        embed.set_author(name=f"CASE {rows} | {data[4]} | {user.name}", icon_url=user.avatar.url)
+        embed.add_field(name="User", value=f"{user.mention}")
         embed.add_field(name="Moderator", value=f"{interaction.user.mention}")
     else:
+        embed.set_author(name=f"CASE {rows} | {data[4]} | {user.name}", icon_url=interaction.author.avatar.url)
+        embed.add_field(name="User", value=f"{user.mention}")
         embed.add_field(name="Moderator", value=f"{interaction.author.mention}")
     embed.add_field(name="Info", value=f"{data[4].lower().capitalize()}: {data[2]}")
     embed.set_footer(text=f"ID: {user.id}")

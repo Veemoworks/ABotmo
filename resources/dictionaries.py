@@ -45,4 +45,5 @@ cmduae = {
     "modlogs":"**Usages**:\n/modlogs {user}\n**Examples**:\n/modlogs AVeemo",
     "serverconfig":"**Usages**:\n/serverconfig\n**Examples**:\n/serverconfig",
     "rank":"**Usages**:\n/rank [ user ]\n**Examples**:\n/rank AVeemo",
+    "purge":"**Usages**:\n/purge {amount} [ user ] [ bots ] [ embeds ] [ files ] [ links ] [ mentions ]\n**Examples**:\n/purge 33 @AVeemo False, False, True",
 }

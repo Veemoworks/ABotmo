@@ -1,31 +1,29 @@
-[14-10-2025 15:31:27] [INFO    ] Initializing...
-[14-10-2025 15:31:32] [INFO    ] ABOTMO ONLINE
-[14-10-2025 15:31:32] [INFO    ] Logged in as ABotmo#9330
-[14-10-2025 15:31:32] [INFO    ] Synced 19 commands
-[14-10-2025 15:31:32] [INFO    ] PyCord version: 2.5.2
-[14-10-2025 15:31:32] [INFO    ] Python version: 3.13.5
-[14-10-2025 15:31:32] [INFO    ] Running on: Windows 11 (nt)
-[14-10-2025 15:31:32] [INFO    ] Command silly (</silly:1399764476961624248>) Registered!
-[14-10-2025 15:31:32] [INFO    ] Command status (</status:1399850020668444813>) Registered!
-[14-10-2025 15:31:32] [INFO    ] Command ping (</ping:1400064514686324747>) Registered!
-[14-10-2025 15:31:32] [INFO    ] Command warn (</warn:1400083690586898527>) Registered!
-[14-10-2025 15:31:32] [INFO    ] Command serverconfig (</serverconfig:1400176415638556684>) Registered!
-[14-10-2025 15:31:32] [INFO    ] Command modlogs (</modlogs:1400564269199917087>) Registered!
-[14-10-2025 15:31:32] [INFO    ] Command playlists (</playlists:1400817625608753262>) Registered!
-[14-10-2025 15:31:32] [INFO    ] Command whois (</whois:1400817625608753263>) Registered!
-[14-10-2025 15:31:32] [INFO    ] Command applications (</applications:1400817625608753264>) Registered!
-[14-10-2025 15:31:32] [INFO    ] Command links (</links:1400817625608753265>) Registered!
-[14-10-2025 15:31:32] [INFO    ] Command discography (</discography:1400826613729460234>) Registered!
-[14-10-2025 15:31:32] [INFO    ] Command evil (</evil:1400826613729460235>) Registered!
-[14-10-2025 15:31:32] [INFO    ] Command bugreport (</bugreport:1400826613729460236>) Registered!
-[14-10-2025 15:31:32] [INFO    ] Command suggestion (</suggestion:1400828322237255813>) Registered!
-[14-10-2025 15:31:32] [INFO    ] Command help (</help:1402434849154924665>) Registered!
-[14-10-2025 15:31:32] [INFO    ] Command ban (</ban:1404018231043297310>) Registered!
-[14-10-2025 15:31:32] [INFO    ] Command unban (</unban:1412364950525055007>) Registered!
-[14-10-2025 15:31:32] [INFO    ] Command rank (</rank:1422972213862072451>) Registered!
-[14-10-2025 15:31:32] [INFO    ] Command purge (</purge:1427615388644151449>) Registered!
-[14-10-2025 15:31:32] [INFO    ] Successfully changed status with 7 servers!
-[14-10-2025 15:31:32] [INFO    ] Wrote bot ping to file! Current ping is 228ms.
-[14-10-2025 15:31:33] [ERROR   ] [KUMA] Unexpected response: 530
-[14-10-2025 15:31:39] [INFO    ] veraveemo (333585549837336577) used purge in 1385658782520049704 (man i love bots (I DONTTT!!!!))!
-[14-10-2025 15:32:18] [INFO    ] Bot session was ended.
+[14-10-2025 19:51:32] [INFO    ] Initializing...
+[14-10-2025 19:51:37] [INFO    ] ABOTMO ONLINE
+[14-10-2025 19:51:37] [INFO    ] Logged in as ABotmo#9330
+[14-10-2025 19:51:37] [INFO    ] Synced 19 commands
+[14-10-2025 19:51:37] [INFO    ] PyCord version: 2.6.3
+[14-10-2025 19:51:37] [INFO    ] Python version: 3.13.7
+[14-10-2025 19:51:37] [INFO    ] Running on: Windows 11 (nt)
+[14-10-2025 19:51:37] [INFO    ] Command silly (</silly:1399764476961624248>) Registered!
+[14-10-2025 19:51:37] [INFO    ] Command status (</status:1399850020668444813>) Registered!
+[14-10-2025 19:51:37] [INFO    ] Command ping (</ping:1400064514686324747>) Registered!
+[14-10-2025 19:51:37] [INFO    ] Command warn (</warn:1400083690586898527>) Registered!
+[14-10-2025 19:51:37] [INFO    ] Command serverconfig (</serverconfig:1400176415638556684>) Registered!
+[14-10-2025 19:51:37] [INFO    ] Command modlogs (</modlogs:1400564269199917087>) Registered!
+[14-10-2025 19:51:37] [INFO    ] Command playlists (</playlists:1400817625608753262>) Registered!
+[14-10-2025 19:51:37] [INFO    ] Command whois (</whois:1400817625608753263>) Registered!
+[14-10-2025 19:51:37] [INFO    ] Command applications (</applications:1400817625608753264>) Registered!
+[14-10-2025 19:51:37] [INFO    ] Command links (</links:1400817625608753265>) Registered!
+[14-10-2025 19:51:37] [INFO    ] Command discography (</discography:1400826613729460234>) Registered!
+[14-10-2025 19:51:37] [INFO    ] Command evil (</evil:1400826613729460235>) Registered!
+[14-10-2025 19:51:37] [INFO    ] Command bugreport (</bugreport:1400826613729460236>) Registered!
+[14-10-2025 19:51:37] [INFO    ] Command suggestion (</suggestion:1400828322237255813>) Registered!
+[14-10-2025 19:51:37] [INFO    ] Command help (</help:1402434849154924665>) Registered!
+[14-10-2025 19:51:37] [INFO    ] Command ban (</ban:1404018231043297310>) Registered!
+[14-10-2025 19:51:37] [INFO    ] Command unban (</unban:1412364950525055007>) Registered!
+[14-10-2025 19:51:37] [INFO    ] Command rank (</rank:1422972213862072451>) Registered!
+[14-10-2025 19:51:37] [INFO    ] Command purge (</purge:1427615388644151449>) Registered!
+[14-10-2025 19:51:37] [INFO    ] Successfully changed status with 7 servers!
+[14-10-2025 19:51:37] [INFO    ] Wrote bot ping to file! Current ping is 212ms.
+[14-10-2025 19:51:37] [ERROR   ] [KUMA] Unexpected response: 530
