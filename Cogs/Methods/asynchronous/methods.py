@@ -62,13 +62,15 @@ async def logChannel(bot, interaction, data, user):
     await channel.send(embed=embed)
 
 # for /silly and /evil
-async def calculator(interaction: discord.Interaction, type: str, mention: str):
+async def calculator(interaction: discord.Interaction, type: str, id: int, mention: str):
     rand = random.randint(0, 115)
     if rand > 100:
-        danr = rand - 100
-        rand = rand - danr
+        rand = 100
 
-    if rand == 100:
+    if id == 843643625157034035:
+        rand = 200
+
+    if rand >= 100:
         dynevil = f"__**PURE {type.upper()}!!**__"
     elif rand >= 75:
         dynevil = f"**{type.upper()}!!**"

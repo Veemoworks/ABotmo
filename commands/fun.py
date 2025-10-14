@@ -68,7 +68,7 @@ class Fun(commands.Cog):
         if user == None:
             user = interaction.user
 
-        await calculator(interaction, "silly", user.mention)
+        await calculator(interaction, "silly", user.id, user.mention)
 
     @app_commands.command(name="evil", description="Get your evilness percentage")
     @app_commands.describe(user="Enter a user")
@@ -77,7 +77,7 @@ class Fun(commands.Cog):
         if user == None:
             user = interaction.user
 
-        await calculator(interaction, "evil", user.mention)
+        await calculator(interaction, "evil", user.id, user.mention)
 
 async def setup(bot):
     await bot.add_cog(Fun(bot))

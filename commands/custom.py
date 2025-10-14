@@ -16,22 +16,22 @@ class Custom(commands.Cog):
             await interaction.followup.send("You do not have permission to run this command!")
             return
 
-        torem = 1392367096410669138
-        toapply = 1383601365464387584
+        torem = interaction.guild.get_role(1392367096410669138)
+        toapply = interaction.guild.get_role(1383601365464387584)
         success = False
 
         for role in user.roles:
-            if role.id == torem:
-                await user.remove_roles(discord.Object(torem), reason="Removing old role from /applyperms")
-                await interaction.followup.send(f"Removed role <@&{torem}> . . .")
+            if role.id == torem.id:
+                await user.remove_roles(torem, reason="Removing old role from /applyperms")
+                await interaction.followup.send(f"Removed role <@&{torem.id}> . . .")
                 success = True
                 break
 
         if success:
-            await user.add_roles(discord.Object(toapply), reason="Adding new role from /applyperms")
-            await interaction.edit_original_response(content=f"Removed role <@&{torem}> . . .\nApplied <@&{toapply}>!")
+            await user.add_roles(toapply, reason="Adding new role from /applyperms")
+            await interaction.edit_original_response(content=f"Removed role <@&{torem.id}> . . .\nApplied <@&{toapply.id}>!")
         else:
-            await interaction.followup.send(f"Could not find <@{torem}> in {user.mention}'s roles.")
+            await interaction.followup.send(f"Could not find <@&{torem.id}> in {user.mention}'s roles.")
 
 async def setup(bot):
     await bot.add_cog(Custom(bot))

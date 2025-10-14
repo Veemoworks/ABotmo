@@ -37,25 +37,9 @@ class Utils(commands.Cog):
             def __init__(self, user: discord.User):
                 super().__init__(timeout=180)
                 self.user = user
-                res = requests.get(f"https://api.lanyard.rest/v1/users/{interaction.user.id}")
-                if res.status_code == 200:
-                    if res.json()['success']:
-                        data = res.json()['data']
-                        actives = {
-                            "Web": data['active_on_discord_web'],
-                            "Desktop": data['active_on_discord_desktop'],
-                            "Mobile": data['active_on_discord_mobile'],
-                            "Embedded": data['active_on_discord_embedded']
-                        }
 
-                    for platform, active in actives.items():
-                        if active:
-                            if platform == "Web" or platform == "Embedded":
-                                self.add_item(discord.ui.Button(label="View Profile", url=f"https://discord.com/users/{user.id}", style=discord.ButtonStyle.link, row=1))
-                            else:
-                                self.add_item(discord.ui.Button(label="View Profile", url=f"discord://-/users/{user.id}", style=discord.ButtonStyle.link, row=1))
-                else:
-                    print(log(True, "Error fetching lanyard data for /whois view profile buttons."))
+                self.add_item(discord.ui.Button(label="View Profile (WEB)", url=f"https://discord.com/users/{user.id}", style=discord.ButtonStyle.link, row=1))
+                self.add_item(discord.ui.Button(label="View Profile (APP)", url=f"discord://-/users/{user.id}", style=discord.ButtonStyle.link, row=1))
 
                 if user.banner:
                     banner_button = discord.ui.Button(label="View Banner", style=discord.ButtonStyle.primary)

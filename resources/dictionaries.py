@@ -44,4 +44,5 @@ cmduae = {
     "warn":"**Usages**:\n/warn {user} {reason} [message]\n**Examples**:\n/warn AVeemo, Breaking Rule 1, Saying very rude words to others",
     "modlogs":"**Usages**:\n/modlogs {user}\n**Examples**:\n/modlogs AVeemo",
     "serverconfig":"**Usages**:\n/serverconfig\n**Examples**:\n/serverconfig",
+    "rank":"**Usages**:\n/rank [ user ]\n**Examples**:\n/rank AVeemo",
 }
