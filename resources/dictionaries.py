@@ -29,21 +29,48 @@ botbadges = {
     "active_developer": "<:activedev:1400815784439316573>"
 }
 cmduae = {
-    "playlists":"**Usages**:\n/playlists {user}\n**Examples**:\n/playlists AVeemo",
-    "discography":"**Usages**:\n/discography {artist}\n**Examples**:\n/discography Korn",
-    "silly":"**Usages**:\n/silly [user]\n**Examples**:\n/silly AVeemo",
-    "evil":"**Usages**:\n/evil [user]\n**Examples**:\n/evil AVeemo",
-    "whois":"**Usages**:\n/whois [user] [ephemeral]\n**Examples**:\n/whois AVeemo",
-    "applications":"**Usages**:\n/applications\n**Examples**:\n/applications",
-    "status":"**Usages**:\n/status\n**Examples**:\n/status",
-    "ping":"**Usages**:\n/ping\n**Examples**:\n/ping",
-    "links":"**Usages**:\n/links\n**Examples**:\n/links",
-    "bugreport":"**Usages**:\n/bugreport\n**Examples**:\n/bugreport",
-    "suggestion":"**Usages**:\n/suggestion\n**Examples**:\n/suggestion",
-    "help":"**Usages**:\n/help [command]\n**Examples**:\n/help whois",
-    "warn":"**Usages**:\n/warn {user} {reason} [message]\n**Examples**:\n/warn AVeemo, Breaking Rule 1, Saying very rude words to others",
-    "modlogs":"**Usages**:\n/modlogs {user}\n**Examples**:\n/modlogs AVeemo",
-    "serverconfig":"**Usages**:\n/serverconfig\n**Examples**:\n/serverconfig",
-    "rank":"**Usages**:\n/rank [ user ]\n**Examples**:\n/rank AVeemo",
-    "purge":"**Usages**:\n/purge {amount} [ user ] [ bots ] [ embeds ] [ files ] [ links ] [ mentions ]\n**Examples**:\n/purge 33 @AVeemo False, False, True",
+    "playlists": ["{user}", "AVeemo"],
+    "discography": ["{artist}", "Korn"],
+    "silly": ["[ user ]", "AVeemo"],
+    "evil": ["[ user ]", "AVeemo"],
+    "whois": ["[ user ] [ ephemeral ]", "AVeemo"],
+    "applications": ["", ""],
+    "status": ["", ""],
+    "stats": ["", ""],
+    "links": ["", ""],
+    "bugreport": ["", ""],
+    "suggestion": ["", ""],
+    "help": ["[ command ]", "whois"],
+    "warn": ["{user} {reason} [ message ]", "AVeemo, Breaking Rule 1, Saying very rude words to others"],
+    "modlogs": ["{user} [ page ]", "AVeemo, 3"],
+    "serverconfig": ["", ""],
+    "rank": ["[ user ]", "AVeemo"],
+    "purge": ["{amount} [ user ] [ bots ] [ embeds ] [ files ] [ links ] [ mentions ]", "33 AVeemo False, False, True"],
+    "serverinfo": ["", ""],
+    "softban": ["{user} [ reason ]", "AVeemo, Clearing spam messages."],
+    "kick": ["{user} {reason} [ message ]", "AVeemo, Sending scam links"],
+    "remlog": ["{user} {index} [ reason ]", "AVeemo, 2, False moderation log"],
+    "roleinfo": ["{role}", "Moderator"],
+    "mylogs": ["", ""],
+    "mute": ["{user} {length} {reason}", "AVeemo, 1d", "Innapropriate Language"],
+    "unmute": ["{user} {reason}", "AVeemo, False moderation log"],
+    "message": ["{user} {message}", "AVeemo, Hello! Please don't do that again!"],
+    "togif": ["{image}", "An image attatchment."],
+    "settings": ["[ options ]", "xpmessages"],
+    "checkmod": ["{user} [ page ]", "AVeemo, 2"],
+    "ban": ["{user} {reason} [ message ] [ delete_msgs ]", "AVeemo, Threatened to doxx a user, Permanent ban with no appeal"],
+    "unban": ["{user} {reason}", "AVeemo, Shown proof of them being framed"]
+}
+custom_urls = {
+    1373049145572593784: {
+        "welcome": "https://cdn.discordapp.com/attachments/1423149697987510375/1450662191685439549/OnettWelcome.png?ex=69644f72&is=6962fdf2&hm=9ddb6093d8cfe9df36742786704ecdd61fc5f4726b40e533baf03bc184b125e3&",
+        "goodbye": "https://cdn.discordapp.com/attachments/1423149697987510375/1452089132087246981/ezgif.com-video-to-gif-converter.gif?ex=6962e8e3&is=69619763&hm=7452d9090f0c0f19c9111ca31dcd5da06559d394d0edce095b9f979f6df3a530&"
+    }
+}
+setting_users = {
+    "xpmessages": {
+        0: "Your XP messages have been disabled.",
+        1: "Your XP messages have been enabled only in servers.",
+        2: "Your XP messages have been enabled only in DMs.",
+    }
 }

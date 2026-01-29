@@ -1,28 +1,17 @@
-import discord, asyncio, aiohttp
+import discord, aiohttp, os, psutil, asyncio
 from discord.ext import tasks
 from Cogs.Methods.asynchronous.methods import crash
 from Cogs.Methods.methods import log
 
 # All bot status related things
+@tasks.loop(minutes=3)
 async def status(bot):
-    while True:
-        try:
-            await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f"{len(bot.guilds)} {"servers" if len(bot.guilds) > 1 else "server"}"))
-            print(log(False, f"Successfully changed status with {len(bot.guilds)} {"servers" if len(bot.guilds) > 1 else "server"}!"))
-        except Exception as e:
-            await crash(e)
-            print(log(False, f"Failed to change status: {e}"))
-        await asyncio.sleep(180)
-
-# Log bot ping to a file
-@tasks.loop(seconds=300)
-async def bot_ping(bot):
     try:
-        with open(r"Files\ABotmo_ping.txt", "w") as file:
-            file.write(str(round(bot.latency * 1000)))
-        print(log(False, f"Wrote bot ping to file! Current ping is {round(bot.latency * 1000)}ms."))
+        await bot.change_presence(activity=discord.CustomActivity(name=f"Helping {len(bot.guilds)} {'servers' if len(bot.guilds) > 1 else 'server'}"))
+        print(log(False, f"Successfully changed status with {len(bot.guilds)} {"servers" if len(bot.guilds) > 1 else "server"}!"))
     except Exception as e:
-        print(log(True, f"Failed to write bot ping to file!: {e}"))
+        await crash(e)
+        print(log(False, f"Failed to change status: {e}"))
 
 # Send pings to uptime kuma
 @tasks.loop(seconds=297)
@@ -43,3 +32,15 @@ async def kuma(bot):
                     print(log(False, f"[KUMA] Sent fail status: {resp.status}"))
         except Exception as e2:
             print(log(True, f"[KUMA] Failed to send fail status: {e2}"))
+
+@tasks.loop(hours=1)
+async def ramthing(pid):
+    mem = psutil.Process(pid).memory_full_info()
+    usage = mem.uss / (1024**2)
+    if usage >= 2000:
+        os.system("cls")
+        print(log(False, f"Cleared Console, RAM usage was: {round((usage / 16000) * 100, 2)}% ({round(usage)}MB / 16000MB)"))
+        await asyncio.sleep(15)
+        mem = psutil.Process(pid).memory_full_info()
+        usage = mem.uss / (1024**2)
+        print(log(False, f"Update: RAM usage is now {round((usage / 16000) * 100, 2)}% ({round(usage)}MB / 16000MB)"))

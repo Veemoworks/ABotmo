@@ -21,6 +21,7 @@ class Fun(commands.Cog):
             app_commands.Choice(name="Parish", value="02yzCvHEKF844OuRywdJ07"),
             app_commands.Choice(name="Macchiato", value="6rdMEEWVG8Gi0g25oybVtr")
         ])
+    @app_commands.allowed_contexts(True, True, True)
     async def playlist(self, interaction: discord.Interaction, user: app_commands.Choice[str], amount: int):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.defer()
@@ -30,6 +31,7 @@ class Fun(commands.Cog):
 
     @app_commands.command(name="discography", description="Get a random song from a band's Spotify discography.")
     @app_commands.describe(artist="Enter any artist's name")
+    @app_commands.allowed_contexts(True, True, True)
     async def discography(self, interaction: discord.Interaction, artist: str):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.defer()
@@ -63,21 +65,23 @@ class Fun(commands.Cog):
 
     @app_commands.command(name="silly", description="Get your silliness percentage")
     @app_commands.describe(user="Enter a user")
+    @app_commands.allowed_contexts(True, True, True)
     async def silly(self, interaction: discord.Interaction, user: discord.Member = None):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         if user == None:
             user = interaction.user
 
-        await calculator(interaction, "silly", user.id, user.mention)
+        await calculator(interaction, "silly", user.mention)
 
     @app_commands.command(name="evil", description="Get your evilness percentage")
     @app_commands.describe(user="Enter a user")
+    @app_commands.allowed_contexts(True, True, True)
     async def evil(self, interaction: discord.Interaction, user: discord.Member = None):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         if user == None:
             user = interaction.user
 
-        await calculator(interaction, "evil", user.id, user.mention)
+        await calculator(interaction, "evil", user.mention)
 
 async def setup(bot):
     await bot.add_cog(Fun(bot))

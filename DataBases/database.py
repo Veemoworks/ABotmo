@@ -1,6 +1,6 @@
-import sqlite3, discord, random
+import sqlite3, discord, random, json
 
-def modlog(save, interaction, data = None, user: discord.Member = None):
+def modlog(save, interaction, data = None, user: discord.User = None, rem = False):
     msg = None
     con = sqlite3.connect("DataBases/modlogs.db")
     cur = con.cursor()
@@ -20,14 +20,18 @@ def modlog(save, interaction, data = None, user: discord.Member = None):
                 reason TEXT,
                 message TEXT,
                 type TEXT,
-                timestamp TEXT
+                timestamp TEXT,
+                i INTEGER
             );
         """)
 
-    if save and data:
+    if save and data and not rem:
+        i = len(cur.execute(f"""
+            SELECT * FROM '{guild_id}' WHERE user = '{data[0]}'""").fetchall()) + 1
+        data.append(i)
         cur.execute(f"""
-            INSERT INTO "{guild_id}" (user, mod, reason, message, type, timestamp)
-            VALUES (?, ?, ?, ?, ?, ?);
+            INSERT INTO "{guild_id}" (user, mod, reason, message, type, timestamp, i)
+            VALUES (?, ?, ?, ?, ?, ?, ?);
         """, data)
         con.commit()
         cur.execute(f"""
@@ -35,154 +39,89 @@ def modlog(save, interaction, data = None, user: discord.Member = None):
             WHERE user = '{str(data[0])}';
             """)
         msg = f"Successfully gave <@{data[0]}> a {data[4].lower()}, they now have {len(cur.fetchall())} modlogs!"
-    else:
-        cur.execute(f"""
-            SELECT type, reason, message, timestamp, mod
-            FROM '{guild_id}'
-            WHERE user = '{user.id}'
-            LIMIT 25;
-        """)
-        rows = cur.fetchall()
-        msg = discord.Embed(color=discord.Color.dark_green())
-        msg.set_author(name=user.name, icon_url=user.display_avatar.url)
-        if not rows == []:
-            amount = 0
-            for row in rows:
-                amount += 1
-                msg.add_field(name=f"{amount}. {row[3]}", value=f"{row[0]} | \"{row[1]}\"{""if row[2] is None else f' | MSG: "{row[2]}"'} ~ <@{row[4]}>", inline=False)
-                msg.set_footer(text=f"{user.id} | Timezone: UTC")
+    elif not save and not rem:
+        if data[1]:
             cur.execute(f"""
-                SELECT type, reason, message, timestamp, mod
+                            SELECT type, reason, message, timestamp, user, i
+                            FROM '{guild_id}'
+                            WHERE mod = '{user.id}'
+                        """)
+            rows = cur.fetchall()
+            msg = discord.Embed(color=discord.Color.dark_green())
+            msg.set_author(name=user.name, icon_url=user.display_avatar.url)
+            if not rows == []:
+                tpages = 1
+                target = 26
+                for i in range(len(rows)):
+                    if i == target:
+                        tpages += 1
+                        target += 25
+                if data[0] > tpages:
+                    data[0] = tpages
+                msg.description = f"Page {data[0]} / {tpages}\n-# Each page is 25 modlogs - TOTAL LOGS: {len(rows)}"
+                rows = rows[25 * (data[0] - 1):25 * data[0]]
+                i = 0
+                for row in rows:
+                    i += 1
+                    msg.add_field(name=f"{i}. <t:{row[3]}>",
+                                  value=f"<@{row[4]}>: **{row[0]}** ~ \"{row[1]}\"{"" if row[2] is None else f' | MSG: "{row[2]}"'} - {row[5]}",
+                                  inline=False)
+                    msg.set_footer(text=user.id)
+            else:
+                msg.description = f"No moderation logs from {user.mention} found!"
+        else:
+            cur.execute(f"""
+                SELECT type, reason, message, timestamp, mod, i
                 FROM '{guild_id}'
                 WHERE user = '{user.id}'
+                ORDER BY i;
             """)
             rows = cur.fetchall()
-            if len(rows) > 25:
-                msg.description = (f"{user.mention} has {len(rows)} modlogs, only displaying the top 25.\n"
-                                   f"-# *Why? Read [here](<https://www.pythondiscord.com/pages/guides/python-guides/discord-embed-limits/> \"A redirect to PythonDiscord\").*")
-        else:
-            msg.description = f"No modlogs found for {user.mention}!"
+            msg = discord.Embed(color=discord.Color.dark_green())
+            msg.set_author(name=user.name, icon_url=user.display_avatar.url)
+            if not rows == []:
+                tpages = 1
+                target = 26
+                for i in range(len(rows)):
+                    if i == target:
+                        tpages += 1
+                        target += 25
+                if data[0] > tpages:
+                    data[0] = tpages
+                msg.description = f"Page {data[0]} / {tpages}\n-# Each page is 25 modlogs - TOTAL LOGS: {len(rows)}"
+                rows = rows[25 * (data[0]-1):25 * data[0]]
+                for row in rows:
+                    msg.add_field(name=f"{row[5]}. <t:{row[3]}>", value=f"{row[0]} | \"{row[1]}\"{""if row[2] is None else f' | MSG: "{row[2]}"'} ~ <@{row[4]}>", inline=False)
+                    msg.set_footer(text=user.id)
+            else:
+                msg.description = f"No modlogs found for {user.mention}!"
+    elif save and rem:
+        cur.execute(f"""
+            SELECT * FROM '{guild_id}' WHERE user = '{user.id}'"""
+        )
+        t = cur.fetchall()
+        msg = (f"Could not find index {data} in {user.mention}'s modlogs.", False)
+        if not t == []:
+            if isinstance(data, int):
+                for row in t:
+                    if row == data:
+                        cur.execute(f"""
+                            DELETE FROM '{guild_id}' WHERE i = {data}""")
+                        msg = (f"Successfully deleted index {data} from {user.mention}'s modlogs!", True)
+                        break
+            elif isinstance(data, str):
+                cur.execute(f"""DELETE FROM '{guild_id}' WHERE user = {user.id}""")
+                msg = (f"Successfully deleted all of {user.mention}'s logs!", True)
+
+        con.commit()
+    elif not save and rem:
+        cur.execute(f"""SELECT * FROM '{guild_id}' WHERE user = '{user.id}'""")
+        return len(cur.fetchall())
+
     con.close()
     return msg
 
-def server_roles(save, interaction, role=None):
-    con = sqlite3.connect("DataBases/role.db")
-    cur = con.cursor()
-    guild_id = str(interaction.guild.id)
-    cur.execute(f"""
-        SELECT name FROM sqlite_master
-        WHERE type = 'table' AND name = '{guild_id}';
-    """)
-    if not cur.fetchone():
-        cur.execute(f"""
-            CREATE TABLE '{guild_id}' (
-                roles TEXT
-            );
-        """)
-
-    if save and role:
-        cur.execute(f"""
-            SELECT * FROM '{guild_id}' WHERE roles = ?;
-        """, (str(role),))
-        exists = cur.fetchone()
-
-        if exists:
-            cur.execute(f"""
-                DELETE FROM '{guild_id}' WHERE roles = ?;
-            """, (str(role),))
-            msg = f"Removed <@&{role}> from the server config."
-        else:
-            cur.execute(f"""
-                INSERT INTO '{guild_id}' (roles) VALUES (?);
-            """, (str(role),))
-            msg = f"Added <@&{role}> to the server config."
-        con.commit()
-        con.close()
-        return msg
-    cur.execute(f"SELECT roles FROM '{guild_id}'")
-    rows = cur.fetchall()
-    con.close()
-    return [row[0] for row in rows]
-
-def server_prefix(save, guild, prefix=None):
-    con = sqlite3.connect("DataBases/prefix.db")
-    cur = con.cursor()
-    guild_id = str(guild.id)
-    if save:
-        cur.execute(f"""
-                SELECT * FROM 'Main'
-                WHERE guild_id = '{guild_id}';
-            """)
-        if not cur.fetchone():
-            cur.execute(f"""
-                    INSERT INTO 'Main' (guild_id) VALUES ('{guild_id}');
-                    """)
-        else:
-            cur.execute(f"""
-                    UPDATE Main
-                    SET prefix = NULL
-                    WHERE guild_id = '{guild_id}'
-                      AND prefix IS NOT NULL;
-                    """)
-        cur.execute(f"""
-                UPDATE 'Main'
-                SET prefix = '{prefix}'
-                WHERE guild_id = '{guild_id}';
-                """)
-        con.commit()
-        con.close()
-        return f"Your server configuration for bot prefix has been updated to \"{prefix}\"."
-    else:
-        cur.execute(f"""
-                SELECT prefix FROM 'Main' WHERE guild_id = '{guild_id}';
-                """)
-        yeah = cur.fetchone()
-        con.close()
-        if yeah == None:
-            return ";;"
-        return yeah[0]
-
-def modlogchannel(save, guild, channel=None):
-    con = sqlite3.connect("DataBases/channel.db")
-    cur = con.cursor()
-    msg = ""
-    guild_id = str(guild.id)
-    channel = str(channel)
-    if save:
-        cur.execute(f"""
-                SELECT * FROM 'Main'
-                WHERE guild_id = '{guild_id}';
-            """)
-        thing = cur.fetchone()
-        if thing and thing[1] == channel:
-            cur.execute(f"""
-                    DELETE FROM 'Main' WHERE guild_id = '{guild_id}'
-                    """)
-            msg = f"Deleted \"<#{channel}>\" from the server config."
-        else:
-            if thing and not thing[1] == channel:
-                cur.execute(f"""
-                    DELETE FROM 'Main' WHERE guild_id = '{guild_id}'
-                    """)
-                msg = f"Deleted \"<#{thing[1]}>\" from the server config.\n"
-            cur.execute(f"""
-                    INSERT INTO Main (guild_id, channel)
-                    VALUES ({guild_id}, {channel});
-                    """)
-            msg += f"Your new modlogs channel is: \"<#{channel}>\"."
-        con.commit()
-        con.close()
-        return msg
-    else:
-        cur.execute("""
-                    SELECT channel FROM Main WHERE guild_id = ?;
-                    """, (guild_id,))
-        yeah = cur.fetchone()
-        con.close()
-        if yeah == None:
-            return None
-        return yeah[0]
-
+# <editor-fold desc="xp.db">
 def xp(save, guild, time=None, user=None):
     returnval = None
     con = sqlite3.connect("DataBases/xp.db")
@@ -248,3 +187,328 @@ def xp(save, guild, time=None, user=None):
         xp, level = row
         next_level = 5 * (level ** 2) + 50 * level + 100
         return True, [xp, level, next_level]
+
+def xp_settings(save, guild, data):
+    pass
+# </editor-fold>
+
+# <editor-fold desc="settings.db">
+def server_settings(save, guild, stype=None, value=None):
+    con = sqlite3.connect("DataBases/settings.db")
+    cur = con.cursor()
+    guild_id = str(guild.id)
+
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS server_settings (
+            guild_id TEXT PRIMARY KEY,
+            roles TEXT,
+            prefix TEXT,
+            casenum INTEGER,
+            xpenabled INTEGER
+        );
+    """)
+
+    cur.execute("SELECT * FROM server_settings WHERE guild_id = ?", (guild_id,))
+    row = cur.fetchone()
+
+    if not row:
+        cur.execute("""
+            INSERT INTO server_settings (guild_id, roles, prefix, casenum, xpenabled)
+            VALUES (?, '[]', ';;', 0, 1);
+        """, (guild_id,))
+        con.commit()
+
+    if save:
+
+        if stype == "roles":
+            cur.execute("SELECT roles FROM server_settings WHERE guild_id = ?", (guild_id,))
+            roles = json.loads(cur.fetchone()[0])
+
+            role = str(value)
+
+            if role in roles:
+                roles.remove(role)
+                msg = f"Removed <@&{role}> from the server config."
+            else:
+                roles.append(role)
+                msg = f"Added <@&{role}> to the server config."
+
+            cur.execute("""
+                UPDATE server_settings
+                SET roles = ?
+                WHERE guild_id = ?;
+            """, (json.dumps(roles), guild_id))
+
+            con.commit()
+            con.close()
+            return msg
+
+        elif stype == "prefix":
+            cur.execute("""
+                UPDATE server_settings
+                SET prefix = ?
+                WHERE guild_id = ?;
+            """, (value, guild_id))
+
+            con.commit()
+            con.close()
+            return f"Your server configuration for bot prefix has been updated to \"{value}\"."
+
+        elif stype == "modlog":
+            new_channel = str(value)
+
+            cur.execute("SELECT modlog FROM server_settings WHERE guild_id = ?", (guild_id,))
+            current = cur.fetchone()[0]
+
+            if current == new_channel:
+                cur.execute("""
+                    UPDATE server_settings
+                    SET modlog = NULL
+                    WHERE guild_id = ?;
+                """, (guild_id,))
+                msg = f"Deleted \"<#{new_channel}>\" from the server config."
+            else:
+                cur.execute("""
+                    UPDATE server_settings
+                    SET modlog = ?
+                    WHERE guild_id = ?;
+                """, (new_channel, guild_id))
+                msg = f"Your new modlogs channel is: \"<#{new_channel}>\"."
+
+            con.commit()
+            con.close()
+            return msg
+
+        elif stype == "casenum":
+            cur.execute(f"""
+                SELECT casenum FROM server_settings WHERE guild_id = '{guild_id}'""")
+            num = cur.fetchone()[0]
+            num += 1
+            cur.execute(f"""
+                UPDATE server_settings
+                SET casenum = ?
+                WHERE guild_id = ?;
+            """, (num, guild_id))
+            con.commit()
+            con.close()
+            return num
+
+        elif stype == "xpenabled":
+            cur.execute(f"""SELECT xpenabled FROM server_settings WHERE guild_id = '{guild_id}'""")
+            t = not cur.fetchone()[0]
+            cur.execute(f"""UPDATE server_settings SET xpenabled = {t} WHERE guild_id = '{guild_id}'""")
+            con.commit()
+            con.close()
+
+            return t
+
+        else:
+            con.close()
+            return "Unknown setting type."
+
+    else:
+        cur.execute("""
+            SELECT roles, prefix, casenum, xpenabled
+            FROM server_settings
+            WHERE guild_id = ?;
+        """, (guild_id,))
+        data = cur.fetchone()
+        con.close()
+
+        if stype == "roles":
+            return json.loads(data[0])
+        elif stype == "prefix":
+            return data[1]
+        elif stype == "casenum":
+            return data[2]
+        elif stype == "xpenabled":
+            return data[3]
+        else:
+            return {
+                "roles": json.loads(data[0]),
+                "prefix": data[1],
+                "casenum": data[2],
+                "xpenabled": data[3]
+            }
+
+def user_settings(save, userid: int, setting, data=None):
+    returnval = False
+    con = sqlite3.connect("DataBases/settings.db")
+    cur = con.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS user_settings (
+            user INTEGER PRIMARY KEY,
+            xpmessage INTEGER
+        );
+    """) # temp - 0 = off, 1 = on (server), 2 = on (dms)
+
+    cur.execute(f"SELECT * FROM user_settings WHERE user = {userid}")
+    row = cur.fetchone()
+
+    if not row:
+        cur.execute(f"""
+            INSERT INTO user_settings (user, xpmessage)
+            VALUES ({userid}, 1);
+        """)
+        con.commit()
+
+    if save:
+        if setting == "xpmessage":
+            cur.execute(f"""
+                        SELECT xpmessage
+                        FROM user_settings
+                        WHERE user = {userid}
+            """)
+            if not cur.fetchone()[0] == data:
+                cur.execute(f"""
+                            UPDATE user_settings
+                            SET xpmessage = {data}
+                            WHERE user = {userid}
+                        """)
+                con.commit()
+                returnval = True
+    else:
+        if setting == "xpmessage":
+            cur.execute(f"""
+                        SELECT xpmessage
+                        FROM user_settings
+                        WHERE user = {userid}
+            """)
+            returnval = cur.fetchone()[0]
+    con.close()
+    return returnval
+
+def server_channels(save, guild, channel, data=None):
+    con = sqlite3.connect("DataBases/settings.db")
+    cur = con.cursor()
+    gid = guild.id
+
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS server_channels (
+            guild_id INTEGER PRIMARY KEY,
+            modlog INTEGER,
+            member INTEGER,
+            message INTEGER,
+            channel INTEGER,
+            role INTEGER,
+            voice INTEGER
+        );
+    """)
+
+    cur.execute(f"SELECT * FROM server_channels WHERE guild_id = {gid}")
+    row = cur.fetchone()
+
+    if not row:
+        cur.execute(f"""
+            INSERT INTO server_channels (guild_id, modlog, member, message, channel, role, voice)
+            VALUES ({gid}, 0, 0, 0, 0, 0, 0);
+        """)
+        con.commit()
+
+    if save:
+        if channel == "all event":
+            cur.execute(f"""
+                UPDATE server_channels
+                SET modlog = {data},
+                    member = {data},
+                    message = {data},
+                    channel = {data},
+                    role = {data},
+                    voice = {data}
+                WHERE guild_id = {gid};
+            """)
+            con.commit()
+            con.close()
+            return f"All events have been set to channel \"<#{data}>\""
+
+        cur.execute(f"SELECT {channel} FROM server_channels WHERE guild_id = {gid}")
+        current = cur.fetchone()[0]
+
+        if current == data:
+            cur.execute(f"""
+                        UPDATE server_channels
+                        SET {channel} = NULL
+                        WHERE guild_id = {gid};
+                """)
+            msg = f"Deleted \"<#{data}>\" from the {channel} event server config."
+        else:
+            cur.execute(f"""
+                        UPDATE server_channels
+                        SET {channel} = {data}
+                        WHERE guild_id = {gid};
+                """)
+            msg = f"Your new {channel} event channel is: \"<#{data}>\"."
+        con.commit()
+        con.close()
+        return msg
+    else:
+        cur.execute(f"""
+                    SELECT *
+                    FROM server_channels
+                    WHERE guild_id = {gid};
+                """)
+        data = cur.fetchone()
+        con.close()
+
+        if channel == "modlog":
+            return data[1]
+        elif channel == "member":
+            return data[2]
+        elif channel == "message":
+            return data[3]
+        elif channel == "channel":
+            return data[4]
+        elif channel == "role":
+            return data[5]
+        elif channel == "voice":
+            return data[6]
+        else:
+            return {
+                "modlog": data[1],
+                "member": data[2],
+                "message": data[3],
+                "channel": data[4],
+                "role": data[5],
+                "voice": data[6]
+            }
+# </editor-fold>
+
+def webhooks(save, guild, data):
+    # data format = (id, token, name, channel)
+    con = sqlite3.connect("DataBases/webhooks.db")
+    cur = con.cursor()
+    gid = guild.id
+    cur.execute(f"""
+                SELECT name FROM sqlite_master
+                WHERE type = 'table' AND name = '{gid}';
+            """)
+
+    if not cur.fetchone():
+        cur.execute(f"""
+                    CREATE TABLE '{gid}' (
+                        id INTEGER PRIMARY KEY,
+                        token TEXT,
+                        channel INTEGER
+                    );
+                """)
+        con.commit()
+
+    if save:
+        cur.execute(f"""
+                INSERT INTO '{gid}' (
+                    id, token, channel
+                ) VALUES ({data[0]}, '{data[1]}', {data[2]})
+        """)
+        con.commit()
+        con.close()
+        return True
+    else:
+        cur.execute(f"""
+                SELECT * FROM '{gid}' WHERE channel = {data[0]} AND id = {data[1]}
+        """)
+        data = cur.fetchone()
+        if data:
+            con.close()
+            return data
+        con.close()
+        return False

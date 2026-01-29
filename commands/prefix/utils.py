@@ -1,4 +1,5 @@
-import discord, re
+import discord, re, psutil, sys, os
+from bot import startup
 from datetime import datetime, timezone
 from discord.ext import commands
 from Cogs.Methods.methods import log
@@ -65,9 +66,6 @@ class UtilsPREFIX(commands.Cog):
                 await msg.delete(delay=5)
                 return
 
-            data = (ctx.author.id, ctx.author.id, amount, ctx.channel.mention, "PURGE", datetime.now().astimezone(timezone.utc).strftime("[%d|%m|%y] : [%H:%M]"))
-            await logChannel(self.bot, ctx, data, ctx.channel)
-
         except Exception as e:
             msg = await ctx.send(f"Could not purge messages: {e}")
             await msg.delete(delay=10)
@@ -76,6 +74,8 @@ class UtilsPREFIX(commands.Cog):
     @commands.command(name="serverinfo", help="Get information about the current server.")
     @commands.guild_only()
     async def serverinfo(self, ctx: commands.Context):
+        prefix = await get_prefix(self.bot, ctx.message)
+        print(log(False,f"{ctx.author} ({ctx.author.id}) used {prefix}{ctx.command.qualified_name} in {ctx.guild.id} ({ctx.guild.name})!"))
         guild = ctx.guild
 
         embed = discord.Embed(
@@ -113,7 +113,26 @@ class UtilsPREFIX(commands.Cog):
         msg = await ctx.send(embed=embed, view=view)
         view.message = msg
 
-    # errors for commands
+    @commands.command(name="stats", description="Get the bot's current stats")
+    @commands.guild_only()
+    async def stats(self, ctx: commands.Context):
+        prefix = await get_prefix(self.bot, ctx.message)
+        print(log(False,f"{ctx.author} ({ctx.author.id}) used {prefix}{ctx.command.qualified_name} in {ctx.guild.id} ({ctx.guild.name})!"))
+
+        embed = discord.Embed(color=discord.Color.brand_green())
+        embed.set_author(name="ABotmo", icon_url=self.bot.user.avatar.url)
+        embed.add_field(name="Latency:", value=f"{round(self.bot.latency * 1000)}ms")
+        embed.add_field(name="Startup:", value=f"<t:{int(startup.timestamp())}> (<t:{int(startup.timestamp())}:R>)")
+        embed.add_field(name="Guilds:", value=len(self.bot.guilds))
+        embed.add_field(name="Users:", value=len(self.bot.users))
+        embed.add_field( name="RAM / Memory:", value=f"{round(psutil.virtual_memory().used / (1024**3), 2)}GB / " f"{round(psutil.virtual_memory().total / (1024**3), 2)}GB")
+        embed.add_field(name="CPU:", value=f"{psutil.cpu_percent()}% Util")
+        embed.set_footer(text=f"PID {os.getpid()} | Python {sys.version[:7].strip()} | "f"discord.py V{discord.__version__} | Shard {ctx.guild.shard_id}")
+
+        await ctx.send(embed=embed)
+
+
+# errors for commands
     @purge_prefix.error
     async def purge_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):

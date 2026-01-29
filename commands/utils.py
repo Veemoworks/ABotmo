@@ -1,21 +1,19 @@
-import discord, psutil, requests, time, ping3, re
-from datetime import datetime, timezone
+import discord, psutil, ping3, re, platform
+from bot import startup, version, pid
 from discord import app_commands
 from discord.ext import commands
-from Cogs.Methods.asynchronous.methods import get_prefix, logChannel
-from Cogs.Methods.methods import permission_check
+from Cogs.Methods.asynchronous.methods import get_prefix
+from Cogs.Methods.methods import permission_check, imgcol_gen
 from Cogs.Classes.DiscordModals import BugReport, BotSuggest
 from Cogs.Classes.DiscordViews import ServerInfo
 from resources.arrays import veemoworksdevs, recnetdb
-from resources.dictionaries import hosts, script_urls, botbadges, cmduae
-from resources.links import avatar
+from resources.dictionaries import botbadges, cmduae
 from Cogs.Methods.methods import log
-from ping3 import ping
 
 ping3.EXCEPTIONS = True
 
 class Utils(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: discord.Client):
         self.bot = bot
 
     # Get a list of commands
@@ -24,14 +22,13 @@ class Utils(commands.Cog):
         for cmd in self.bot.tree.walk_commands():
             if cmd.parent is None and current.lower() in cmd.name.lower():
                 choices.append(app_commands.Choice(name=cmd.name, value=cmd.name))
-        return choices
+        return choices[:25]
 
     @app_commands.command(name="whois", description="Get info about a user")
     @app_commands.describe(user="User to get info from", ephemeral="Set to ephemeral?")
-    async def whois(self, interaction: discord.Interaction, user: discord.User = None, ephemeral: bool = None):
+    @app_commands.allowed_contexts(True, True, True)
+    async def whois(self, interaction: discord.Interaction, user: discord.User = None, ephemeral: bool = True):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
-        if ephemeral == None:
-            ephemeral = True
         if user == None:
             user = interaction.user
         user = await self.bot.fetch_user(user.id)
@@ -98,7 +95,7 @@ class Utils(commands.Cog):
         if user.banner:
             embed.set_image(url=user.banner.url)
         embed.add_field(name="Display Name:", value=f"**{user.display_name}**", inline=False)
-        embed.add_field(name="Username:", value=f"`@{user.name}`", inline=False)
+        embed.add_field(name="Username:", value=f"`@{user.name}` ({user.mention})", inline=False)
         embed.add_field(name="Account Created:", value=created_at, inline=False)
         embed.add_field(name="Badges:", value=badge_text, inline=False)
         embed.set_footer(text=f"ID: {user.id}")
@@ -106,6 +103,7 @@ class Utils(commands.Cog):
         await interaction.response.send_message(embed=embed, view=Buttons(user), ephemeral=ephemeral)
 
     @app_commands.command(name="applications", description="Provides an application for Veemoworks")
+    @app_commands.allowed_contexts(True, True, True)
     async def applications(self, interaction: discord.Interaction):
         print(log(False,
                   f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
@@ -118,103 +116,44 @@ class Utils(commands.Cog):
         app_embed.set_footer(text="As of: 19/03/25 (Verified: 01/08/25) | (DD/MM/YY)")
         await interaction.response.send_message(embed=app_embed)
 
-    @app_commands.command(name="status", description="Check the statuses of many services")
-    async def status(self, interaction: discord.Interaction):
+    @app_commands.command(name="stats", description="Get the bot's current stats")
+    @app_commands.allowed_contexts(True, True, True)
+    async def stats(self, interaction: discord.Interaction):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
-        await interaction.response.defer()
-        msg = ""
-        amount = 1
-        thingy = {
-            "CPU": f"{psutil.cpu_percent()}%",
-            "RAM": f"{psutil.virtual_memory().percent}%",
-            "Disk": f"{psutil.disk_usage('/').percent}%",
-            "Battery": f"{int(psutil.sensors_battery().percent)}%" if psutil.sensors_battery() else "N/A",
-            "Uptime": f"{int((time.time() - psutil.boot_time()) // 3600)}h {int(((time.time() - psutil.boot_time()) % 3600) // 60)}m",
-        }
-
-        try:
-            msg += "### Main Server:\n"
-            start = time.perf_counter()
-            r = requests.get("http://127.0.0.0:8000/health")
-            r.raise_for_status()
-            end = time.perf_counter()
-            elapsed_ms = (end - start) * 1000
-            msg += f"✅ {elapsed_ms:.2f}ms\n"
-            amount += 1
-            msg += "\n**__Stats__**:\n"
-            for name, details in thingy.items():
-                msg += f"{name}: {details}\n"
-        except Exception as ex:
-            if len(ex) > 25:
-                ex = ex[:25] + "..."
-            msg += f"❌ Error: {ex}\n"
-
-        msg += f"### Bot Status:\n✅ {round(self.bot.latency * 1000)} ms\n### Website:\n"
-        for name, host in hosts.items():
-            try:
-                delay = ping(host, timeout=10, unit="ms")
-                if delay is None:
-                    msg += f"❌ `{name}` No response\n"
-                else:
-                    msg += f"✅ `{name}` ({int(delay)} ms)\n"
-                    amount += 1
-            except ping3.errors.Timeout:
-                msg += f"❌ `{name}` Timed Out\n"
-            except Exception as ex:
-                if len(ex) > 25:
-                    ex = ex[:25] + "..."
-                msg += f"❌ `{name}` Error: {str(ex[:15])}\n"
-
-        msg += f"### Python Scripts:\n"
-
-        for name, url in script_urls.items():
-            url = f"http://127.0.0.1:{url}/health"
-            try:
-                start = time.perf_counter()
-                r = requests.get(url, timeout=10)
-                r.raise_for_status()
-                end = time.perf_counter()
-                elapsed_ms = (end - start) * 1000
-                msg += f"✅ `{name}` ({int(elapsed_ms)} ms)\n"
-                amount += 1
-            except Exception as ex:
-                if len(ex) > 25:
-                    ex = ex[:25] + "..."
-                msg += f"❌ `{name}` Error: {ex}\n"
-                
-        msg += "❌ `Channel Topic Updater` Shutdown\n❌ `Minecraft Console Link` Shutdown\n"
-        embed = discord.Embed(
-            title="Server Status",
-            description=f"{amount}/{len(hosts) + len(script_urls) + 4} services up and running!\n{msg}",
-            color=discord.Color.brand_green()
-        )
-        await interaction.followup.send(embed=embed)
-
-    @app_commands.command(name="ping", description="Get the bot's current ping")
-    async def ping(self, interaction: discord.Interaction):
-        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
-        embed = discord.Embed(title="Bot is online!", description=f"Latency is {round(self.bot.latency * 1000)}ms!", color=discord.Color.brand_green())
-        embed.set_thumbnail(url=avatar)
+        embed = discord.Embed(color=discord.Color.brand_green())
+        embed.set_author(name="ABotmo", icon_url=self.bot.user.avatar.url)
+        embed.add_field(name="Version", value="v" + version)
+        embed.add_field(name="Latency:", value=f"{round(self.bot.latency * 1000)}ms")
+        embed.add_field(name="Startup:", value=f"<t:{int(startup.timestamp())}> (<t:{int(startup.timestamp())}:R>)")
+        embed.add_field(name="Guilds:", value=len(self.bot.guilds))
+        embed.add_field(name="Users:", value=len(self.bot.users))
+        embed.add_field(name="RAM / Memory:", value=f"{round(psutil.virtual_memory().used / (1024**3), 2)}GB / {round(psutil.virtual_memory().total / (1024**3), 2)}GB")
+        embed.add_field(name="CPU:", value=f"{psutil.cpu_percent()}% Util")
+        embed.set_footer(text=f"PID {pid} | Python {platform.python_version()} | discord.py V{discord.__version__} | Shard {self.bot.shard_id}")
         await interaction.response.send_message(embed=embed)
 
     @app_commands.command(name="links", description="Get all links related to the bot")
+    @app_commands.allowed_contexts(True, True, True)
     async def invite(self, interaction: discord.Interaction):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
-        await interaction.response.send_message("[**`Install Link`**](<https://bot.veraveemo.uk/invite> \"Install Veemocord™ as an External App\")\n[`Discord Server`](<https://discord.gg/GzWWqHxRap> \"Join the Discord Server and get access to all features and beta access!\") | [`Donate`](<https://ko-fi.com/veraveemo> \"Donate to AVeemo to help support them and their project(s)!\") | [`Bot Info`](<https://bot.veraveemo.uk> \"Get all the info from this bot that you need, or just run /help!\")")
+        await interaction.response.send_message("[**`Install Link`**](<https://bot.veraveemo.uk/invite> \"Install ABotmo as an External App\") | [**`Source Code`**](<https://github.com/Veemoworks/ABotmo> \"View the code of the bot!\")\n[`Discord Server`](<https://discord.gg/pwXfWfhH7k> \"Join the Discord Server and get access to all features and beta access!\") | [`Donate`](<https://paypal.me/veraveemo> \"Donate to AVeemo to help support them and their project(s)!\") | [`Bot Info`](<https://bot.veraveemo.uk> \"Get all the info from this bot that you need, or just run /help!\")")
 
-    @app_commands.command(name="bugreport", description="Report a ABotmo Bot bug")
+    @app_commands.command(name="bugreport", description="Report an ABotmo Bot bug")
+    @app_commands.allowed_contexts(True, True, True)
     async def bugreport(self, interaction: discord.Interaction):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.send_modal(BugReport())
 
     @app_commands.command(name="suggestion", description="Give an ABotmo feature to add")
+    @app_commands.allowed_contexts(True, True, True)
     async def suggestion(self, interaction: discord.Interaction):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.send_modal(BotSuggest())
 
     @app_commands.command(name="help", description="Shows help info and commands")
-    @app_commands.describe(command="Command to get help for")
+    @app_commands.describe(command="Command to get help for (* for a list of commands)")
     @app_commands.autocomplete(command=command_autocomplete)
+    @app_commands.allowed_contexts(True, True, True)
     async def help(self, interaction: discord.Interaction, command: str = None):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.defer(ephemeral=True)
@@ -226,6 +165,14 @@ class Utils(commands.Cog):
                 embed.title = f"{f"Server: {interaction.guild.name}" if not interaction.guild.name == "" else "ABotmo Help"}"
             else:
                 embed.title = f"ABotmo help"
+
+        elif command.strip() == "*":
+            commands = await self.bot.tree.fetch_commands()
+            embed.title = f"List of all ABotmo commands ({len(commands)}):"
+            embed.description = ""
+            for cmd in commands:
+                embed.description += f"**/{cmd.name}**: `{cmd.description if cmd.description else "No Description"}`\n"
+
         else:
             commands = await self.bot.tree.fetch_commands()
             for cmd in commands:
@@ -236,15 +183,17 @@ class Utils(commands.Cog):
             cmd = self.bot.tree.get_command(command)
             if not cmd:
                 embed.title = f"Command: /{command}"
-                embed.description = f"Command not found! Try using the suggestions."
+                embed.description = f"Command not found!\nTry using the suggestions or * for a list of all commands."
             else:
+                details = cmduae[cmd.name]
                 embed.title = f"Command: /{cmd.name}"
-                embed.description = f"**Description**: {cmd.description or "No Description"}\n**Markdown**: </{cmd.name}:{cmdid}>\n{cmduae[cmd.name]}"
+                embed.description = f"**Description**: {cmd.description or "No Description"}\n**Markdown**: </{cmd.name}:{cmdid}>\n**Usages**:\n/{cmd.name} {details[0]}\n**Example**:\n/{cmd.name} {details[1]}"
                 embed.set_footer(text=f"ID: {cmdid} ""| Key: [] = Optional : {} = Required")
         await interaction.followup.send(embed=embed)
 
     @app_commands.command(name="purge", description="Purge messages in this channel.")
     @app_commands.describe(amount="Amount of messages to purge (1–100)", user="Purge messages from a specific user", bots="Delete messages from bots only", embeds="Delete messages with embeds only", files="Delete messages with attachments only", links="Delete messages with links only", mentions="Delete messages with mentions only")
+    @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
     @permission_check()
     async def purge_slash(self, interaction: discord.Interaction, amount: int, user: discord.User = None, bots: bool = False, embeds: bool = False, files: bool = False, links: bool = False, mentions: bool = False):
@@ -289,14 +238,12 @@ class Utils(commands.Cog):
                 summary += f" *(filters: {', '.join(filters_used)})*"
 
             await interaction.followup.send(summary)
-            data = (interaction.user.id, interaction.user.id, amount, interaction.channel.mention, "PURGE",
-                    datetime.now().astimezone(timezone.utc).strftime("[%d|%m|%y] : [%H:%M]"))
-            await logChannel(self.bot, interaction, data, interaction.user)
         except Exception as e:
             await interaction.followup.send(f"Could not purge messages: {e}")
             print(log(True, f"Could not purge messages: {e}"))
 
     @app_commands.command(name="serverinfo", description="Get information about the server!")
+    @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
     async def serverinfo(self, interaction: discord.Interaction):
         print(log(False,f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id} ({interaction.guild.name})!"))
@@ -310,7 +257,7 @@ class Utils(commands.Cog):
         if not guild.icon == None:
             embed.set_thumbnail(url=guild.icon.url)
         embed.add_field(name="Owner", value=guild.owner.mention if guild.owner else "Unknown")
-        embed.add_field(name="Created At", value=f"<t:{round(guild.created_at.timestamp())}:d> <t:{round(guild.created_at.timestamp())}:t>")
+        embed.add_field(name="Created At", value=f"<t:{round(guild.created_at.timestamp())}>")
         embed.add_field(name="Vanity Link", value=guild.vanity_url)
         embed.add_field(name="Preferred Locale", value=guild.preferred_locale)
         embed.add_field(name="Verification Level", value=guild.verification_level)
@@ -324,6 +271,34 @@ class Utils(commands.Cog):
 
         view = ServerInfo(guild)
         await interaction.followup.send(embed=embed, view=view)
+
+    @app_commands.command(name="roleinfo", description="View the info of a role!")
+    @app_commands.describe(role="Choose a role to get info from.")
+    @app_commands.allowed_contexts(True, False, False)
+    @app_commands.guild_only()
+    async def roleinfo(self, interaction: discord.Interaction, role: discord.Role):
+        print(log(False,f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id} ({interaction.guild.name})!"))
+        perms = []
+        for name, value in iter(role.permissions):
+            if value:
+                perms.append(name.replace('_', ' ').title())
+
+        embed = discord.Embed(title=role.name, color=role.color)
+        embed.add_field(name="ID:", value=role.id, inline=False)
+        embed.add_field(name="Color:", value=str(role.color).upper(), inline=False)
+        embed.add_field(name="Markdown:", value=f"`{role.mention}`", inline=False)
+        embed.add_field(name="Hoisted:", value=role.hoist, inline=False)
+        embed.add_field(name="Mentionable:", value=role.mentionable, inline=False)
+        embed.add_field(name="Managed:", value=role.managed, inline=False)
+        embed.add_field(name="Position:", value=role.position, inline=False)
+        embed.add_field(name="Permissions:", value=", ".join(perms) if perms else "None", inline=False)
+
+        if role.icon:
+            embed.set_thumbnail(url=role.icon.url)
+        elif str(role.color).upper() != "#000000":
+            embed.set_thumbnail(url="attachment://" + imgcol_gen(str(role.color)))
+
+        await interaction.response.send_message(embed=embed)
 
 async def setup(bot):
     await bot.add_cog(Utils(bot))

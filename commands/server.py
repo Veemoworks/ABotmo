@@ -3,13 +3,15 @@ from discord import app_commands
 from discord.ext import commands
 from Cogs.Methods.methods import log
 from Cogs.Classes.DiscordViews import Config
-from DataBases.database import xp
+from resources.dictionaries import setting_users
+from DataBases.database import xp, server_settings, user_settings
 
 class Server(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     @app_commands.command(name="serverconfig", description="Change the configuration of the server for the bot.")
+    @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
     async def serverconfig(self, interaction: discord.Interaction):
         print(log(False,
@@ -30,12 +32,21 @@ class Server(commands.Cog):
 
     @app_commands.command(name="rank", description="Check your rank in this server!")
     @app_commands.describe(user="User to check")
+    @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
     async def rank(self, interaction: discord.Interaction, user: discord.Member = None):
         print(log(False,f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id} ({interaction.guild.name})!"))
         has_perms = app_commands.checks.bot_has_permissions(embed_links=True)
-
+        embed = discord.Embed(color=discord.Color.brand_green())
         await interaction.response.defer()
+
+        if not server_settings(False, interaction.guild, "xpenabled"):
+            if has_perms:
+                embed.set_author(name="This server has XP disabled!", icon_url=interaction.guild.icon.url)
+                await interaction.followup.send(embed=embed)
+                return
+            await interaction.followup.send("This server has XP disabled!")
+            return
 
         if user == None:
             user = interaction.user
@@ -45,18 +56,42 @@ class Server(commands.Cog):
             currxp, level, nxt_lvl = xpinfo
             nxt_lvl -= currxp
             if has_perms:
-                embed = discord.Embed(description=f"**Level**: {level}\n**XP**: {currxp}\n**{nxt_lvl} XP** needed.", color=discord.Color.brand_green())
+                embed.description = f"**Level**: {level}\n**XP**: {currxp}\n**{nxt_lvl} XP** needed."
                 embed.set_author(name=f"@{user.name}'s XP for {interaction.guild.name}.", icon_url=user.display_avatar.url)
                 await interaction.followup.send(embed=embed)
             else:
                 await interaction.followup.send(f"**__{user.name}__**\n**Level**: {level}\n**XP**: {currxp}\n**{nxt_lvl} XP** needed.")
         else:
             if has_perms:
-                embed = discord.Embed(color=discord.Color.brand_green())
                 embed.set_author(name=f"@{user.name} has no XP {f"{f"for {interaction.guild.name}" if not interaction.guild.name == "" else "as an external app"}"}", icon_url=user.display_avatar.url)
                 await interaction.followup.send(embed=embed)
             else:
                 await interaction.followup.send(f"**__{user.name}__** has no XP for {interaction.guild.name}.")
+
+    @app_commands.command(name="settings", description="Change your settings with the bot!")
+    @app_commands.describe(xpmessages="Toggle where you want the XP messages for leveling up!")
+    @app_commands.choices(xpmessages=[
+        app_commands.Choice(name="Disabled", value="0"),
+        app_commands.Choice(name="Enabled (In Servers)", value="1"),
+        app_commands.Choice(name="Enabled (In DMs)", value="2")
+    ])
+    @app_commands.allowed_contexts(True, True, True)
+    async def settings(self, interaction: discord.Interaction, xpmessages: app_commands.Choice[str] = None):
+        print(log(False,f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
+        await interaction.response.defer(ephemeral=True)
+        embed = discord.Embed(title="User Settings", color=discord.Color.brand_green())
+        embed.set_footer(text=interaction.user.name, icon_url=interaction.user.avatar.url)
+        msg = ""
+
+        if xpmessages:
+            val = user_settings(True, interaction.user.id, "xpmessage", int(xpmessages.value))
+            msg += setting_users["xpmessages"][int(xpmessages.value)] + "\n"
+
+        if msg == "":
+            msg = "No user settings were changed!"
+        embed.description = msg
+        await interaction.followup.send(embed=embed)
+
 
 async def setup(bot):
     await bot.add_cog(Server(bot))

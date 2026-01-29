@@ -1,8 +1,8 @@
 import discord
 from discord.ui import View, Button, Select
-from Cogs.Classes.DiscordButtons import PrefixChangeButton
-from DataBases.database import server_roles, modlogchannel
-
+from Cogs.Classes.DiscordButtons import PrefixChangeButton, XPEnabledButton, BugReportSend
+from DataBases.database import server_settings, server_channels
+from resources.arrays import logchannels
 
 def chunk_list(lst, size=25):
     for i in range(0, len(lst), size):
@@ -38,7 +38,7 @@ class ServerInfo(discord.ui.View):
     async def channels_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.interaction = interaction
         text_channels = [c.mention for c in self.guild.text_channels]
-        voice_channels = [c.name for c in self.guild.voice_channels]
+        voice_channels = [c.mention for c in self.guild.voice_channels]
 
         embed = discord.Embed(
             title="Server Channels",
@@ -79,12 +79,12 @@ class Config(View):
         self.add_item(RolePageButton())
         self.add_item(LogPageButton())
         self.add_item(PrefixChangeButton())
+        self.add_item(XPEnabledButton())
 
     async def on_timeout(self):
         for item in self.children:
             item.disabled = True
         await self.interaction.edit_original_response(view=self)
-
 
 class RolePageButton(Button):
     def __init__(self):
@@ -92,7 +92,7 @@ class RolePageButton(Button):
 
     async def callback(self, interaction: discord.Interaction):
         guild_roles = [r for r in interaction.guild.roles if not r.is_default()]
-        current_roles = server_roles(False, interaction)
+        current_roles = server_settings(False, interaction.guild, "roles")
         view = RoleConfig(interaction, guild_roles, current_roles, page=0)
 
         embed = discord.Embed(
@@ -102,26 +102,19 @@ class RolePageButton(Button):
         )
         await interaction.response.edit_message(embed=embed, view=view)
 
-
 class LogPageButton(Button):
     def __init__(self):
         super().__init__(label="Configure Logs", style=discord.ButtonStyle.primary)
 
     async def callback(self, interaction: discord.Interaction):
-        visible_channels = [
-            c for c in interaction.guild.text_channels
-            if c.permissions_for(interaction.user).view_channel
-        ]
-        current_channel = modlogchannel(False, interaction.guild)
-        view = LogConfig(interaction, visible_channels, current_channel, page=0)
+        view = LogChoice(interaction)
 
         embed = discord.Embed(
             title="Log Channel Configuration",
-            description="Select the channel where moderation logs should be sent:",
+            description="Select the event type of logs:",
             color=discord.Color.green()
         )
         await interaction.response.edit_message(embed=embed, view=view)
-
 
 class RoleConfig(View):
     def __init__(self, interaction: discord.Interaction, all_roles, configured_roles, page=0):
@@ -142,18 +135,25 @@ class RoleConfig(View):
             item.disabled = True
         await self.interaction.edit_original_response(view=self)
 
+class LogChoice(View):
+    def __init__(self, interaction):
+        super().__init__(timeout=180)
+        self.interaction = interaction
+
+        for channel in logchannels:
+            self.add_item(LogChoiceButton(channel))
 
 class LogConfig(View):
-    def __init__(self, interaction: discord.Interaction, all_channels, configured_channel_id, page=0):
+    def __init__(self, interaction: discord.Interaction, all_channels, configured_channel_id, channel=None, page=0):
         super().__init__(timeout=180)
         self.interaction = interaction
 
         chunks = list(chunk_list(all_channels, 25))
-        self.add_item(Logs(chunks[page], configured_channel_id))
+        self.add_item(Logs(chunks[page], configured_channel_id, channel))
 
         if len(chunks) > 1:
-            self.add_item(PageButton("⬅", page - 1, len(chunks), "log", all_channels, configured_channel_id))
-            self.add_item(PageButton("➡", page + 1, len(chunks), "log", all_channels, configured_channel_id))
+            self.add_item(PageButton("⬅", page - 1, len(chunks), "log", all_channels, configured_channel_id, channel))
+            self.add_item(PageButton("➡", page + 1, len(chunks), "log", all_channels, configured_channel_id, channel))
 
         self.add_item(BackButton())
 
@@ -162,14 +162,33 @@ class LogConfig(View):
             item.disabled = True
         await self.interaction.edit_original_response(view=self)
 
+class LogChoiceButton(Button):
+    def __init__(self, buttontype):
+        super().__init__(label=buttontype.capitalize() + "s", style=discord.ButtonStyle.primary)
+        self.buttontype = buttontype
+
+    async def callback(self, interaction):
+        visible_channels = [
+            c for c in interaction.guild.text_channels
+            if c.permissions_for(interaction.user).view_channel
+        ]
+        current_channel = server_channels(False, interaction.guild, self.buttontype)
+        view = LogConfig(interaction, visible_channels, current_channel, self.buttontype, page=0)
+        embed = discord.Embed(
+            title="Log Channel Configuration",
+            description=f"Select the channel you'd like to apply all {"" if self.buttontype == "all event" else self.buttontype} events to:",
+            color=discord.Color.green()
+        )
+        await interaction.response.edit_message(embed=embed, view=view)
 
 class PageButton(Button):
-    def __init__(self, label: str, page: int, max_pages: int, mode: str, items, config):
+    def __init__(self, label: str, page: int, max_pages: int, mode: str, items, config, channel=None):
         super().__init__(label=label, style=discord.ButtonStyle.secondary)
         self.page = page % max_pages
         self.mode = mode
         self.items = items
         self.config = config
+        self.channel = channel
 
     async def callback(self, interaction: discord.Interaction):
         if self.mode == "role":
@@ -180,15 +199,14 @@ class PageButton(Button):
                 color=discord.Color.green()
             )
         else:
-            view = LogConfig(interaction, self.items, self.config, page=self.page)
+            view = LogConfig(interaction, self.items, self.config, self.channel, self.page)
             embed = discord.Embed(
                 title="Log Channel Configuration",
-                description="Select the channel where moderation logs should be sent:",
+                description=f"Select the channel you'd like to apply all {"" if self.channel == "all event" else self.channel} events to:",
                 color=discord.Color.green()
             )
 
         await interaction.response.edit_message(embed=embed, view=view)
-
 
 class BackButton(Button):
     def __init__(self):
@@ -205,9 +223,8 @@ class BackButton(Button):
         view = Config(interaction)
         await interaction.response.edit_message(embed=embed, view=view)
 
-
 class Logs(Select):
-    def __init__(self, channels, configured_channel_id):
+    def __init__(self, channels, configured_channel_id, channel):
         options = [
             discord.SelectOption(
                 label=channel.name,
@@ -222,11 +239,12 @@ class Logs(Select):
             max_values=1,
             options=options
         )
+        self.channel = channel
 
     async def callback(self, interaction: discord.Interaction):
-        change_summary = modlogchannel(True, interaction.guild, int(self.values[0]))
-        current_channel = modlogchannel(False, interaction.guild)
-        view = LogConfig(interaction, interaction.guild.text_channels, current_channel, page=0)
+        change_summary = server_channels(True, interaction.guild, self.channel, int(self.values[0]))
+        current_channel = server_channels(False, interaction.guild, self.channel)
+        view = LogConfig(interaction, interaction.guild.text_channels, current_channel, self.channel, page=0)
 
         embed = discord.Embed(
             title="Log Channel Configuration",
@@ -234,7 +252,6 @@ class Logs(Select):
             color=discord.Color.green()
         )
         await interaction.response.edit_message(embed=embed, view=view)
-
 
 class Role(Select):
     def __init__(self, roles, configured_roles):
@@ -254,16 +271,16 @@ class Role(Select):
         )
 
     async def callback(self, interaction: discord.Interaction):
-        current_roles = set(server_roles(False, interaction))
+        current_roles = set(server_settings(False, interaction.guild, "roles"))
         selected_roles = set(self.values)
 
         added_roles = selected_roles - current_roles
-        removed_roles = (set(opt.value for opt in self.options) & current_roles) - selected_roles
+        removed_roles = (set(opt.value for opt in self.options)& current_roles) - selected_roles
 
-        changes = [server_roles(True, interaction, role_id) for role_id in added_roles.union(removed_roles)]
+        changes = [server_settings(True, interaction.guild, "roles", role_id) for role_id in added_roles.union(removed_roles)]
         change_summary = "\n".join(changes) if changes else "No changes made."
 
-        new_config = server_roles(False, interaction)
+        new_config = server_settings(False, interaction.guild, "roles")
         view = RoleConfig(interaction, interaction.guild.roles, new_config, page=0)
 
         embed = discord.Embed(
@@ -272,3 +289,15 @@ class Role(Select):
             color=discord.Color.blurple()
         )
         await interaction.response.edit_message(embed=embed, view=view)
+
+class AutoBugReport(View):
+    def __init__(self, interaction: discord.Interaction, exception):
+        super().__init__(timeout=180)
+        self.interaction = interaction
+
+        self.add_item(BugReportSend(exception, interaction, self))
+
+    async def on_timeout(self):
+        for item in self.children:
+            item.disabled = True
+        await self.interaction.edit_original_response(view=self)

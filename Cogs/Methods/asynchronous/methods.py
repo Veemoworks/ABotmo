@@ -1,8 +1,9 @@
-import requests, json, discord, sqlite3, asyncio, random
-from DataBases.database import server_prefix, modlogchannel
+import requests, json, discord, asyncio, random, os, dotenv
+from DataBases.database import server_settings, modlog, server_channels, webhooks
 from resources.links import warm
 from resources.dictionaries import headers
 from datetime import datetime
+dotenv.load_dotenv(".env")
 
 # All asynchronous methods
 
@@ -24,7 +25,7 @@ async def crash(error):
             ]
         }
         res = requests.post(
-            "https://discord.com/api/webhooks/1399754937491128420/krs4046qAiczly-uy8XAzJN2o5ADaFnZLjklXig6msVui7_I92sl_fafzelbk2xD9Qkj",
+            os.getenv("LOGWEBHOOK"),
             data=json.dumps(data), headers=headers)
         print(f"\033[92m[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] {res.status_code}: Error message sent successfully.")
     except Exception as e:
@@ -35,59 +36,68 @@ async def get_prefix(bot, message):
     if not message.guild:
         return ";;"
 
-    prefix = server_prefix(False, message.guild)
+    prefix = server_settings(False, message.guild, "prefix")
     return prefix or ";;"
 
 # log things to modlog channel
 async def logChannel(bot, interaction, data, user):
-    temp = modlogchannel(False, interaction.guild)
-    if temp == None:
-        return
-    channel = await bot.fetch_channel(int(temp))
-    con = sqlite3.connect("DataBases/modlogs.db")
-    cur = con.cursor()
-    cur.execute(f"""
-            SELECT * FROM '{interaction.guild.id}';
-    """)
-    rows = len(cur.fetchall())
+    rows = server_settings(False, interaction.guild, "casenum")
+    amt = modlog(False, interaction, user=user, rem=True)
     embed = discord.Embed(color=discord.Color.yellow())
     if interaction == discord.Interaction:
         embed.set_author(name=f"CASE {rows} | {data[4]} | {user.name}", icon_url=user.avatar.url)
         embed.add_field(name="User", value=f"{user.mention}")
         embed.add_field(name="Moderator", value=f"{interaction.user.mention}")
     else:
-        embed.set_author(name=f"CASE {rows} | {data[4]} | {user.name}", icon_url=interaction.author.avatar.url)
+        embed.set_author(name=f"CASE {rows} | {data[4]} | {user.name}", icon_url=interaction.user.avatar.url)
         embed.add_field(name="User", value=f"{user.mention}")
-        embed.add_field(name="Moderator", value=f"{interaction.author.mention}")
+        embed.add_field(name="Moderator", value=f"{interaction.user.mention}")
     embed.add_field(name="Info", value=f"{data[4].lower().capitalize()}: {data[2]}")
     embed.set_footer(text=f"ID: {user.id}")
     embed.timestamp = datetime.now()
-    if data[4] == "WARNING" or data[4] == "BAN":
-        embed.add_field(name="Message", value=f"{f"{data[3]}\n" if not data[3] == None else ""}User now has {rows} modlogs.")
-    await channel.send(embed=embed)
+    if data[4] == "WARNING" or data[4] == "BAN" or data[4] == "MODLOG REMOVAL" or data[4] == "KICK" or data[4] == "MUTE":
+        embed.add_field(name="Message", value=f"{f"{data[3]}\n" if not data[3] == None else ""}User now has {amt} modlogs.")
+
+    await event(bot, interaction.guild, "modlog", user, embed)
+
+async def sendCase(interaction, data, user):
+    try:
+        rows = server_settings(False, interaction.guild, "casenum")
+        amt = modlog(False, interaction, user=user, rem=True)
+        embed = discord.Embed(title=f"You have recieved a **{data[4]}** in __**{interaction.guild.name}**__!", description=f"CASE {rows}", color=discord.Color.brand_red())
+        embed.set_thumbnail(url=interaction.guild.icon.url if interaction.guild.icon else None)
+        embed.set_author(name=f"{interaction.guild.name} | {interaction.guild.id}", icon_url=interaction.guild.icon.url if interaction.guild.icon else None)
+        embed.add_field(name="Reason:", value=data[2], inline=False)
+        if not data[3] == None:
+            embed.add_field(name="Mod Message:", value=data[3], inline=False)
+        embed.add_field(name="Modlogs:", value=amt, inline=False)
+        embed.set_footer(text='Use "/mylogs" to see your log count anytime in any server')
+        embed.timestamp = datetime.now()
+
+        await user.send(embed=embed)
+    except:
+        pass
+
 
 # for /silly and /evil
-async def calculator(interaction: discord.Interaction, type: str, id: int, mention: str):
+async def calculator(interaction: discord.Interaction, ctype: str, mention: str):
     rand = random.randint(0, 115)
     if rand > 100:
         rand = 100
 
-    if id == 843643625157034035:
-        rand = 200
-
     if rand >= 100:
-        dynevil = f"__**PURE {type.upper()}!!**__"
+        dynevil = f"__**PURE {ctype.upper()}!!**__"
     elif rand >= 75:
-        dynevil = f"**{type.upper()}!!**"
+        dynevil = f"**{ctype.upper()}!!**"
     elif rand >= 50:
-        dynevil = f"{type.upper()}!"
+        dynevil = f"{ctype.upper()}!"
     elif rand >= 25:
-        dynevil = f"{type}!"
+        dynevil = f"{ctype}!"
     else:
-        dynevil = f"{type}."
+        dynevil = f"{ctype}."
 
-    evil = discord.Embed(title=f"{type.capitalize()} Calculator",
-                         description=f"This **{type.upper()}** calculator can determine anyone's {type} level...",
+    evil = discord.Embed(title=f"{ctype.capitalize()} Calculator",
+                         description=f"This **{ctype.upper()}** calculator can determine anyone's {ctype} level...",
                          color=discord.Color.yellow())
     await interaction.response.send_message(embed=evil)
     await asyncio.sleep(2)
@@ -105,3 +115,27 @@ async def calculator(interaction: discord.Interaction, type: str, id: int, menti
     await asyncio.sleep(2)
     evil.add_field(name="", value=f"{mention} is {rand}% {dynevil}")
     await interaction.edit_original_response(embed=evil)
+
+async def event(bot, guild, eventtype, ref, embed):
+    channel = server_channels(False, guild, eventtype)
+    if not channel:
+        return
+    channel = bot.get_channel(int(channel))
+    allhooks = await channel.webhooks()
+    webhook = None
+    for webhk in allhooks:
+        temp = webhooks(False, guild, [channel.id, webhk.id])
+        if temp:
+            webhook = temp
+            break
+    if webhook == None:
+        try:
+            newwebhook = await channel.create_webhook(name="ABotmo Logs", reason="Logging for ABotmo")
+        except:
+            return
+        webhooks(True, guild, [newwebhook.id, newwebhook.token, channel.id])
+        webhook = [newwebhook.id, newwebhook.token]
+    embed.timestamp = datetime.now()
+    embed.set_footer(text=f"{eventtype.capitalize()} ID: {ref.id}")
+    requests.post(f"https://discord.com/api/webhooks/{webhook[0]}/{webhook[1]}", json={ "avatar_url": bot.user.avatar.url, "embeds": [embed.to_dict()]}, headers=headers)
+

@@ -1,7 +1,8 @@
-import discord, requests, json
-from DataBases.database import server_prefix
+import discord, requests, json, os, dotenv
+from DataBases.database import server_settings
 from resources.dictionaries import headers
 from discord.ui import Modal, TextInput
+dotenv.load_dotenv(".env")
 
 # All of discord.ui.modal here
 class BugReport(Modal):
@@ -43,13 +44,13 @@ class BugReport(Modal):
         }
 
         try:
-            requests.post("https://discord.com/api/webhooks/1400824872107638914/iHlVfuxnCYA3cLL_yJ4mymv171K8AaBdesGqqKUzQouz_VuncAcKeI53GtmlpUdqiz4c", data=json.dumps(data), headers=headers)
+            requests.post(os.getenv("BUGWEBHOOK"), data=json.dumps(data), headers=headers)
         except requests.RequestException as e:
             print(f"Failed to send bugreport: {e}")
 
 class BotSuggest(Modal):
     def __init__(self):
-        super().__init__(title="Send a bug report")
+        super().__init__(title="Send a bot suggestion")
 
         self.add_item(TextInput(
             label="Feature Type",
@@ -86,7 +87,7 @@ class BotSuggest(Modal):
         }
 
         try:
-            requests.post("https://discord.com/api/webhooks/1400827797391544320/JvOL7xx8DWZ9EswPK9-zHvv-TC881bfoW2N2bueT64MrbPWfaeB_3eB5lu2QCfMNK1Y-", data=json.dumps(data), headers=headers)
+            requests.post(os.getenv("SUGGESTWEBHOOK"), data=json.dumps(data), headers=headers)
         except requests.RequestException as e:
             print(f"Failed to send bugreport: {e}")
 
@@ -101,4 +102,4 @@ class PrefixChange(Modal):
 
     async def on_submit(self, interaction: discord.Interaction):
         for field in self.children:
-            await interaction.response.send_message(server_prefix(True, interaction.guild, field.value), ephemeral=True)
+            await interaction.response.send_message(server_settings(True, interaction.guild, "prefix", field.value), ephemeral=True)

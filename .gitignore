@@ -1,10 +1,11 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
+.todo/
 *.py[cod]
 *$py.class
 Files/
 .txt
-.db
+*.db
 # C extensions
 *.so
 
