@@ -52,9 +52,7 @@ async def logChannel(bot, interaction, data, user):
         embed.set_author(name=f"CASE {rows} | {data[4]} | {user.name}", icon_url=interaction.user.avatar.url)
         embed.add_field(name="User", value=f"{user.mention}")
         embed.add_field(name="Moderator", value=f"{interaction.user.mention}")
-    embed.add_field(name="Info", value=f"{data[4].lower().capitalize()}: {data[2]}")
-    embed.set_footer(text=f"ID: {user.id}")
-    embed.timestamp = datetime.now()
+    embed.add_field(name="Info", value=f"{data[4].lower().capitalize()if data[4].lower() == "message" else "Reason"}: {data[2]}")
     if data[4] == "WARNING" or data[4] == "BAN" or data[4] == "MODLOG REMOVAL" or data[4] == "KICK" or data[4] == "MUTE":
         embed.add_field(name="Message", value=f"{f"{data[3]}\n" if not data[3] == None else ""}User now has {amt} modlogs.")
 

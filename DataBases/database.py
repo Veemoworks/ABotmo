@@ -186,6 +186,7 @@ def xp(save, guild, time=None, user=None):
 
         xp, level = row
         next_level = 5 * (level ** 2) + 50 * level + 100
+        con.close()
         return True, [xp, level, next_level]
 
 def xp_settings(save, guild, data):

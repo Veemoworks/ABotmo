@@ -1,11 +1,6 @@
 # Byte-compiled / optimized / DLL files
-__pycache__/
-.todo/
 *.py[cod]
 *$py.class
-Files/
-.txt
-*.db
 # C extensions
 *.so
 
@@ -175,3 +170,12 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# idk
+__pycache__/
+.todo/
+Files/
+*.txt
+# stuff to stop sending the db in commits from happening again
+*.db
+*.sqlite

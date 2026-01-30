@@ -10,7 +10,7 @@ from Cogs.Methods.methods import handle_exception, log, close_bot
 from resources.dictionaries import custom_urls
 
 # Variables
-version = "0.6.10"
+version = "0.6.11"
 pid = os.getpid()
 debugging = False
 done = False
@@ -128,7 +128,7 @@ async def on_member_remove(member):
             embed.set_image(url=custom_urls[guild.id]["goodbye"])
     if guild.id == 1373049145572593784:
         channel = bot.get_channel(1373060852558598276)
-        emoji = bot.get_emoji(1415121249822179419)
+        emoji = bot.get_emoji(1386741952040407112)
         msg = await channel.send(f"aw geez {member.mention} has left us... We are now {guild.member_count} friends :,<", embed=embed)
         await msg.add_reaction(emoji)
     elif guild.id == 1418384480061624444:
@@ -411,8 +411,6 @@ async def on_message(msg):
 
 # System exception
 sys.excepthook = handle_exception
-
-bot.on_error
 
 # Run bot
 if __name__ == "__main__":

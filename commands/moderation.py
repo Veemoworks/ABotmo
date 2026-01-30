@@ -18,19 +18,20 @@ class Moderation(commands.Cog):
     @permission_check()
     async def warn(self, interaction: discord.Interaction, user: discord.Member, reason: str, message: str = None):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
+        await interaction.response.defer(ephemeral=True)
         if user.bot:
-            await interaction.response.send_message(f"You can not warn {user.mention}, they are a bot!", ephemeral=True)
+            await interaction.followup.send(f"You can not warn {user.mention}, they are a bot!")
             return
         allowed_roles = server_settings(False, interaction.guild, "roles")
         for role in user.roles:
             if str(role.id) in allowed_roles:
-                await interaction.response.send_message(f"You may not warn {user.mention} as they have the role <@&{role.id}> and are a moderator!", ephemeral=True)
+                await interaction.followup.send(f"You may not warn {user.mention} as they have the role <@&{role.id}> and are a moderator!")
                 return
         data = [ user.id, interaction.user.id, reason, message, "WARNING", int(datetime.now().timestamp())]
-        await interaction.response.send_message(modlog(True, interaction, data), ephemeral=True)
         server_settings(True, interaction.guild, "casenum")
         await logChannel(self.bot, interaction, data, user)
         await sendCase(interaction, data, user)
+        await interaction.followup.send(modlog(True, interaction, data))
 
     @app_commands.command(name="mute", description="Timeout a user for a specific duration")
     @app_commands.describe(user="Enter a user", length="Enter a time (60s, 1m, 1h, 1d, 2w)", reason="Enter a reason")
@@ -39,14 +40,15 @@ class Moderation(commands.Cog):
     @permission_check()
     async def mute(self, interaction: discord.Interaction, user: discord.Member, length: str, reason: str):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f'{interaction.guild.id} ({interaction.guild.name})' if interaction.guild else 'DMs'}!"))
+        await interaction.response.defer(ephemeral=True)
         if user.bot:
-            await interaction.response.send_message(f"You can not mute {user.mention}, they are a bot!", ephemeral=True)
+            await interaction.followup.send(f"You can not mute {user.mention}, they are a bot!")
             return
 
         allowed_roles = server_settings(False, interaction.guild, "roles")
         for role in user.roles:
             if str(role.id) in allowed_roles:
-                await interaction.response.send_message(f"You may not mute {user.mention} as they have the role <@&{role.id}> and are a moderator!", ephemeral=True)
+                await interaction.followup.send(f"You may not mute {user.mention} as they have the role <@&{role.id}> and are a moderator!")
                 return
 
         unit = length[-1]
@@ -63,7 +65,7 @@ class Moderation(commands.Cog):
         elif unit == "w":
             delta = timedelta(weeks=amount)
         else:
-            await interaction.response.send_message("Invalid time format! Use s/m/h/d/w.", ephemeral=True)
+            await interaction.followup.send("Invalid time format! Use s/m/h/d/w.")
             return
 
         now = discord.utils.utcnow()
@@ -76,12 +78,12 @@ class Moderation(commands.Cog):
         try:
             await user.timeout(until, reason=reason)
             data = [ user.id, interaction.user.id, reason, f"Muted for {length}", "MUTE", int(datetime.now().timestamp())]
-            await interaction.response.send_message(modlog(True, interaction, data), ephemeral=True)
             server_settings(True, interaction.guild, "casenum")
             await logChannel(self.bot, interaction, data, user)
             await sendCase(interaction, data, user)
+            await interaction.followup.send(modlog(True, interaction, data))
         except Exception as e:
-            await interaction.response.send_message(f"An error occurred while running this command!\nError: {e}", view=AutoBugReport(interaction, e), ephemeral=True)
+            await interaction.followup.send(f"An error occurred while running this command!\nError: {e}", view=AutoBugReport(interaction, e))
 
     @app_commands.command(name="unmute", description="Remove a timeout from a user")
     @app_commands.describe(user="Enter a user", reason="Enter a reason")
@@ -90,22 +92,23 @@ class Moderation(commands.Cog):
     @permission_check()
     async def unmute(self, interaction: discord.Interaction, user: discord.Member, reason: str = None):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f'{interaction.guild.id} ({interaction.guild.name})' if interaction.guild else 'DMs'}!"))
+        await interaction.response.defer(ephemeral=True)
         if user.bot:
-            await interaction.response.send_message(f"{user.mention} is a bot, they are most likely not muted!", ephemeral=True)
+            await interaction.followup.send(f"{user.mention} is a bot, they are most likely not muted!")
             return
 
         try:
             if user.is_timed_out():
                 await user.timeout(discord.utils.utcnow(), reason=reason)
                 data = [ user.id, interaction.user.id, reason, None, "UNMUTE", int(datetime.now().timestamp())]
-                await interaction.response.send_message(f"Successfully unmuted {user.mention}!", ephemeral=True)
                 server_settings(True, interaction.guild, "casenum")
                 await logChannel(self.bot, interaction, data, user)
                 await sendCase(interaction, data, user)
+                await interaction.followup.send(f"Successfully unmuted {user.mention}!")
             else:
-                await interaction.response.send_message(f"{user.mention} is not muted!", ephemeral=True)
+                await interaction.followup.send(f"{user.mention} is not muted!")
         except Exception as e:
-            await interaction.response.send_message(f"An error occurred while running this command!\nError: {e}", view=AutoBugReport(interaction, e), ephemeral=True)
+            await interaction.followup.send(f"An error occurred while running this command!\nError: {e}", view=AutoBugReport(interaction, e))
 
     @app_commands.command(name="ban", description="Ban a user")
     @app_commands.describe(user="Enter a user", reason="Enter a reason", message="Optional Message", delete_msgs="Delete messages from the user within a certain amount of days.")
@@ -114,8 +117,9 @@ class Moderation(commands.Cog):
     @permission_check()
     async def ban(self, interaction: discord.Interaction, user: discord.User, reason: str, message: str = None, delete_msgs: int = 0):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
+        await interaction.response.defer(ephemeral=True)
         if user.bot:
-            await interaction.response.send_message(f"You can not ban {user.mention}, they are a bot!", ephemeral=True)
+            await interaction.followup.send(f"You can not ban {user.mention}, they are a bot!")
             return
         t = interaction.guild.get_member(user.id)
         allowed_roles = server_settings(False, interaction.guild, "roles")
@@ -124,21 +128,21 @@ class Moderation(commands.Cog):
             if not t == None:
                 for role in t.roles:
                     if str(role.id) in allowed_roles:
-                        await interaction.response.send_message(f"You may not ban {user.mention} as they have the role <@&{role.id}> and are a moderator!", ephemeral=True)
+                        await interaction.followup.send(f"You may not ban {user.mention} as they have the role <@&{role.id}> and are a moderator!")
                         return
                 server_settings(True, interaction.guild, "casenum")
                 await sendCase(interaction, data, user)
                 await t.ban(delete_message_days=delete_msgs, reason=reason)
             else:
-                user = await self.bot.fetch_user(user.id)
+                user = self.bot.get_user(user.id)
                 server_settings(True, interaction.guild, "casenum")
                 await sendCase(interaction, data, user)
                 await interaction.guild.ban(user, reason=reason, delete_message_days=delete_msgs)
 
-            await interaction.response.send_message(modlog(True, interaction, data), ephemeral=True)
             await logChannel(self.bot, interaction, data, user)
+            await interaction.followup.send(modlog(True, interaction, data))
         except Exception as e:
-            await interaction.response.send_message(f"An error occurred while running this command!\nError: {e}", view=AutoBugReport(interaction, e), ephemeral=True)
+            await interaction.followup.send(f"An error occurred while running this command!\nError: {e}", view=AutoBugReport(interaction, e))
 
     @app_commands.command(name="softban", description="Ban and instantly unban someone to clear their messages.")
     @app_commands.describe(user="Enter a user", reason="Enter a reason")
@@ -147,8 +151,9 @@ class Moderation(commands.Cog):
     @permission_check()
     async def softban(self, interaction: discord.Interaction, user: discord.User, reason: str = None):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
+        await interaction.response.defer(ephemeral=True)
         if user.bot:
-            await interaction.response.send_message(f"You can not softban {user.mention}, they are a bot!", ephemeral=True)
+            await interaction.followup.send(f"You can not softban {user.mention}, they are a bot!")
             return
         t = interaction.guild.get_member(user.id)
         allowed_roles = server_settings(False, interaction.guild, "roles")
@@ -157,7 +162,7 @@ class Moderation(commands.Cog):
             if not t == None:
                 for role in t.roles:
                     if str(role.id) in allowed_roles:
-                        await interaction.response.send_message(f"You may not softban {user.mention} as they have the role <@&{role.id}> and are a moderator!", ephemeral=True)
+                        await interaction.followup.send(f"You may not softban {user.mention} as they have the role <@&{role.id}> and are a moderator!")
                         return
                 server_settings(True, interaction.guild, "casenum")
                 await sendCase(interaction, data, user)
@@ -166,16 +171,15 @@ class Moderation(commands.Cog):
                 await t.unban(reason="Unbanning from softban")
             else:
                 server_settings(True, interaction.guild, "casenum")
-                await sendCase(interaction, data, user)
-                user = await self.bot.fetch_user(user.id)
+                user = self.bot.get_user(user.id)
                 await interaction.guild.ban(user, delete_message_days=7, reason="Softban")
                 await asyncio.sleep(1)
                 await interaction.guild.unban(user, reason="Unbanning from softban")
         except Exception as e:
-            await interaction.response.send_message(f"An error occurred while running this command!\nError: {e}", view=AutoBugReport(interaction, e), ephemeral=True)
+            await interaction.followup.send(f"An error occurred while running this command!\nError: {e}", view=AutoBugReport(interaction, e))
 
-        await interaction.response.send_message(modlog(True, interaction, data), ephemeral=True)
         await logChannel(self.bot, interaction, data, user)
+        await interaction.followup.send(modlog(True, interaction, data))
 
     @app_commands.command(name="kick", description="Kick a user")
     @app_commands.describe(user="Enter a user", reason="Enter a reason", message="Optional Message")
@@ -184,23 +188,24 @@ class Moderation(commands.Cog):
     @permission_check()
     async def kick(self, interaction: discord.Interaction, user: discord.Member, reason: str, message: str = None):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
+        await interaction.response.defer(ephemeral=True)
         if user.bot:
-            await interaction.response.send_message(f"You can not kick {user.mention}, they are a bot!", ephemeral=True)
+            await interaction.followup.send(f"You can not kick {user.mention}, they are a bot!")
             return
         allowed_roles = server_settings(False, interaction.guild, "roles")
         for role in user.roles:
             if str(role.id) in allowed_roles:
-                await interaction.response.send_message(f"You may not kick {user.mention} as they have the role <@&{role.id}> and are a moderator!", ephemeral=True)
+                await interaction.followup.send(f"You may not kick {user.mention} as they have the role <@&{role.id}> and are a moderator!")
                 return
         try:
             data = [ user.id, interaction.user.id, reason, message, "KICK", int(datetime.now().timestamp())]
             server_settings(True, interaction.guild, "casenum")
             await sendCase(interaction, data, user)
-            await interaction.response.send_message(modlog(True, interaction, data), ephemeral=True)
             await user.kick(reason=reason)
             await logChannel(self.bot, interaction, data, user)
+            await interaction.followup.send(modlog(True, interaction, data))
         except Exception as e:
-            await interaction.response.send_message(f"An error occurred while running this command!\nError: {e}", view=AutoBugReport(interaction, e), ephemeral=True)
+            await interaction.followup.send(f"An error occurred while running this command!\nError: {e}", view=AutoBugReport(interaction, e))
 
     @app_commands.command(name="unban", description="Unban a user")
     @app_commands.describe(user="Enter a user", reason="Enter a reason")
@@ -209,15 +214,16 @@ class Moderation(commands.Cog):
     @permission_check()
     async def unban(self, interaction: discord.Interaction, user: discord.User, reason: str = None):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
+        await interaction.response.defer(ephemeral=True)
         if user.bot:
-            await interaction.response.send_message(f"{user.mention} is a bot, and are MOST likely not banned!", ephemeral=True)
+            await interaction.followup.send(f"{user.mention} is a bot, and are MOST likely not banned!")
             return
 
-        user = await self.bot.fetch_user(user.id)
+        user = self.bot.get_user(user.id)
         try:
             await interaction.guild.fetch_ban(user)
         except discord.NotFound:
-            await interaction.response.send_message(f"{user.mention} is not banned!", ephemeral=True)
+            await interaction.followup.send(f"{user.mention} is not banned!")
             return
 
         try:
@@ -225,9 +231,9 @@ class Moderation(commands.Cog):
             await interaction.guild.unban(user, reason=reason)
             server_settings(True, interaction.guild, "casenum")
             await logChannel(self.bot, interaction, data, user)
-            await interaction.response.send_message(f"{user.mention} was successfully unbanned{f" with the reason: {reason}" if not reason == None else ""}!", ephemeral=True)
+            await interaction.followup.send(f"{user.mention} was successfully unbanned{f" with the reason: {reason}" if not reason == None else ""}!")
         except Exception as e:
-            await interaction.response.send_message(f"An error occurred while running this command!\nError: {e}", view=AutoBugReport(interaction, e), ephemeral=True)
+            await interaction.followup.send(f"An error occurred while running this command!\nError: {e}", view=AutoBugReport(interaction, e))
 
     @app_commands.command(name="message", description="Message a user")
     @app_commands.describe(user="Enter a user", message=r"Enter the message you'd like to send (\ for a new line)")
@@ -269,7 +275,7 @@ class Moderation(commands.Cog):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.defer(ephemeral=True)
         if user.bot:
-            await interaction.response.send_message(f"You can not view the warnings of {user.mention}, they are a bot!", ephemeral=True)
+            await interaction.followup.send(f"You can not view the warnings of {user.mention}, they are a bot!")
             return
         if page < 1:
             await interaction.followup.send("Please enter a page number thats bigger than 0!")
@@ -285,7 +291,7 @@ class Moderation(commands.Cog):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.defer(ephemeral=True)
         if user.bot:
-            await interaction.followup.send(f"You can not view the warnings of {user.mention}, they are a bot!", ephemeral=True)
+            await interaction.followup.send(f"You can not view the warnings of {user.mention}, they are a bot!")
             return
         if page < 1:
             await interaction.followup.send("Please enter a page number thats bigger than 0!")
@@ -300,22 +306,23 @@ class Moderation(commands.Cog):
     @permission_check()
     async def remlog(self, interaction: discord.Interaction, user: discord.User, index: str, reason: str = None):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
+        await interaction.response.defer(ephemeral=True)
         if user.bot:
-            await interaction.response.send_message(f"You can not remove a mod log from {user.mention}, they are a bot!", ephemeral=True)
+            await interaction.followup.send(f"You can not remove a mod log from {user.mention}, they are a bot!")
             return
         if not index.isnumeric():
             if not index == "*":
-                await interaction.response.send_message(f"Please input a number or \"*\" and not {index}", ephemeral=True)
+                await interaction.followup.send(f"Please input a number or \"*\" and not {index}")
                 return
         else:
             index = int(index)
 
         thing = modlog(True, interaction, index, user, True)
 
-        await interaction.response.send_message(thing[0], ephemeral=True)
         if thing[1]:
             server_settings(True, interaction.guild, "casenum")
             await logChannel(self.bot, interaction, [ user.id, interaction.user.id, index, reason, "MODLOG REMOVAL", int(datetime.now().timestamp())], user)
+        await interaction.followup.send(thing[0])
 
     @app_commands.command(name="mylogs", description="See your log count for this server!")
     @app_commands.guild_only()
