@@ -95,7 +95,7 @@ class Utils(commands.Cog):
         if user.banner:
             embed.set_image(url=user.banner.url)
         embed.add_field(name="Display Name:", value=f"**{user.display_name}**", inline=False)
-        embed.add_field(name="Username:", value=f"`@{user.name}` ({user.mention})", inline=False)
+        embed.add_field(name="Username:", value=f"{user.mention} (`@{user.name}`)", inline=False)
         embed.add_field(name="Account Created:", value=created_at, inline=False)
         embed.add_field(name="Badges:", value=badge_text, inline=False)
         embed.set_footer(text=f"ID: {user.id}")
@@ -136,7 +136,7 @@ class Utils(commands.Cog):
     @app_commands.allowed_contexts(True, True, True)
     async def invite(self, interaction: discord.Interaction):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
-        await interaction.response.send_message("[**`Install Link`**](<https://bot.veraveemo.uk/invite> \"Install ABotmo as an External App\") | [**`Source Code`**](<https://github.com/Veemoworks/ABotmo> \"View the code of the bot!\")\n[`Discord Server`](<https://discord.gg/pwXfWfhH7k> \"Join the Discord Server and get access to all features and beta access!\") | [`Donate`](<https://paypal.me/veraveemo> \"Donate to AVeemo to help support them and their project(s)!\") | [`Bot Info`](<https://bot.veraveemo.uk> \"Get all the info from this bot that you need, or just run /help!\")")
+        await interaction.response.send_message(f"[**`Install Link`**](<https://discord.com/oauth2/authorize?client_id=1399735099452424314> \"Install ABotmo as an External App\") | [**`Source Code`**](<https://github.com/Veemoworks/ABotmo> \"View the code of the bot!\")\n[`Discord Server`](<https://discord.gg/pwXfWfhH7k> \"Join the Discord Server and get access to all features and beta access!\") | [`Donate`](<https://paypal.me/veraveemo> \"Donate to AVeemo to help support them and their project(s)!\") | [`Bot Info`](<https://bot.veraveemo.uk> \"Get all the info from this bot that you need, or just run /help!\")")
 
     @app_commands.command(name="bugreport", description="Report an ABotmo Bot bug")
     @app_commands.allowed_contexts(True, True, True)

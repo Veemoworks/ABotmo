@@ -275,7 +275,7 @@ class Moderation(commands.Cog):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.defer(ephemeral=True)
         if user.bot:
-            await interaction.followup.send(f"You can not view the warnings of {user.mention}, they are a bot!")
+            await interaction.followup.send(f"You can not view the modlogs of {user.mention}, they are a bot!")
             return
         if page < 1:
             await interaction.followup.send("Please enter a page number thats bigger than 0!")
@@ -291,7 +291,7 @@ class Moderation(commands.Cog):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.defer(ephemeral=True)
         if user.bot:
-            await interaction.followup.send(f"You can not view the warnings of {user.mention}, they are a bot!")
+            await interaction.followup.send(f"You can not view the modlogs of {user.mention}, they are a bot!")
             return
         if page < 1:
             await interaction.followup.send("Please enter a page number thats bigger than 0!")
