@@ -1,5 +1,5 @@
 import discord, time
-from DataBases.database import xp, server_settings, user_settings
+from DataBases.database import xp, user_settings, xp_settings
 from resources.links import warm
 from Cogs.Methods.asynchronous.methods import crash
 
@@ -34,16 +34,25 @@ async def message(msg: discord.Message):
     guild = msg.guild
     user = msg.author
     if guild:
-        if server_settings(False, guild, "xpenabled"):
+        data = xp_settings(False, guild, None)
+        if data["xpenabled"]:
             lvl_up, lvl = xp(True, guild, int(time.time()), user)
 
             if lvl_up:
                 try:
-                    enabled = user_settings(False, user.id, "xpmessage")
-                    if enabled:
-                        if enabled == 2:
-                            await user.send(f"{msg.author.mention}, you have succesfully leveled up to Level {lvl} in {guild.name} ({guild.id})!{"\n-# *You can toggle this message with /settings!*" if lvl % 5 == 0 else ""}")
+                    if data["messagetoggle"]:
+                        if data["channel"] == 1:
+                            await msg.reply(
+                                f"{msg.author.mention}, you have succesfully leveled up to Level {lvl}!", allowed_mentions=discord.AllowedMentions(roles=False, users=False, replied_user=False))
                         else:
-                           await msg.reply(f"{msg.author.mention}, you have succesfully leveled up to Level {lvl}!{"\n-# *You can toggle this message with /settings!*" if lvl % 5 == 0 else ""}    ", allowed_mentions=discord.AllowedMentions(roles=False, users=False, replied_user=False))
-                except:
+                            await msg.guild.get_channel(data["channel"]).send(f"{msg.author.mention} has successfully leveled up to Level {lvl}")
+                    else:
+                        enabled = user_settings(False, user.id, "xpmessage")
+                        if enabled:
+                            if enabled == 2:
+                                await user.send(f"{msg.author.mention}, you have succesfully leveled up to Level {lvl} in {guild.name} ({guild.id})!{"\n-# *You can toggle this message with /settings!*" if lvl % 5 == 0 else ""}")
+                            else:
+                               await msg.reply(f"{msg.author.mention}, you have succesfully leveled up to Level {lvl}!{"\n-# *You can toggle this message with /settings!*" if lvl % 5 == 0 else ""}", allowed_mentions=discord.AllowedMentions(roles=False, users=False, replied_user=False))
+                except Exception as e:
+                    print(e)
                     pass

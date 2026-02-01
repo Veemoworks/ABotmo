@@ -149,16 +149,18 @@ def xp(save, guild, time=None, user=None):
                 """)
         row = cur.fetchone()
         if row == None:
+            t = xp_settings(False, guild, None)
             cur.execute(f"""
                         INSERT INTO '{guild_id}'
-                        VALUES ({user.id}, {random.randint(5, 25)}, 0, {time})
+                        VALUES ({user.id}, {random.randint(t["range"][0], t["range"][1])}, 0, {time})
                         """)
             con.commit()
             level = 0
         else:
-            xp, level, last_msg = row
-            if last_msg is None or time - last_msg >= 5:
-                new_xp = xp + random.randint(5, 25)
+            g = xp_settings(False, guild, None)
+            xph, level, last_msg = row
+            if last_msg is None or time - last_msg >= g["cd"]:
+                new_xp = xph + random.randint(g["range"][0], g["range"][1])
                 next_level = 5 * (level ** 2) + 100 * level + 100
 
                 if new_xp >= next_level:
@@ -185,7 +187,7 @@ def xp(save, guild, time=None, user=None):
             return False, None
 
         xp, level = row
-        next_level = 5 * (level ** 2) + 50 * level + 100
+        next_level = 5 * (level ** 2) + 100 * level + 100
         con.close()
         return True, [xp, level, next_level]
 
@@ -199,7 +201,8 @@ def xp_settings(save, guild: discord.Guild, data):
             messagetoggle INTEGER,
             channel INTEGER,
             cd INTEGER,
-            range TEXT
+            range TEXT,
+            xpenabled INTEGER
         );
     """)
 
@@ -217,6 +220,8 @@ def xp_settings(save, guild: discord.Guild, data):
     # channel conifg (where lvl up is sent) - channel
     # cd for xp - cd
     # range of xp - range
+    # xpenabled thing
+
     if save:
         changes = {}
         for datatype, vals in data.items():
@@ -228,17 +233,18 @@ def xp_settings(save, guild: discord.Guild, data):
                     SET {datatype} = {val}
                     WHERE guild_id = {gid}
             """)
+            con.commit()
             changes[datatype] = val
-
+        con.close()
         kirk = {
             "messagetoggle": "Level Up message",
             "channel": "Level Up channel",
             "cd": "XP cooldown",
             "range": "XP range",
+            "xpenabled": "XP Toggle",
             "channelnums": {
-                0: "be turned off",
                 1: "current channel",
-                2: guild.get_channel(data["channel"][1]).mention
+                2: guild.get_channel(data["channel"][1])
             }
         }
 
@@ -248,9 +254,9 @@ def xp_settings(save, guild: discord.Guild, data):
         for key, val in changes.items():
             if key == "channel":
                 if val > 1:
-                    val = kirk["channelnums"][2]
+                    val = kirk["channelnums"][2].mention
                 else:
-                    val = kirk["channelnums"][val]
+                    val = kirk["channelnums"][1]
 
             text.append(f"{kirk[key]} was set to {val}")
 
@@ -272,12 +278,15 @@ def xp_settings(save, guild: discord.Guild, data):
             return data[3]
         elif data == "range":
             return json.loads(data[4])
+        elif data == "xpenabled":
+            return data[5]
         else:
             return {
                 "messagetoggle": data[1],
                 "channel": data[2],
                 "cd": data[3],
-                "range": json.loads(data[4])
+                "range": json.loads(data[4]),
+                "xpenabled": data[5]
             }
 
 # </editor-fold>
@@ -293,8 +302,7 @@ def server_settings(save, guild, stype=None, value=None):
             guild_id TEXT PRIMARY KEY,
             roles TEXT,
             prefix TEXT,
-            casenum INTEGER,
-            xpenabled INTEGER
+            casenum INTEGER
         );
     """)
 
@@ -303,8 +311,8 @@ def server_settings(save, guild, stype=None, value=None):
 
     if not row:
         cur.execute("""
-            INSERT INTO server_settings (guild_id, roles, prefix, casenum, xpenabled)
-            VALUES (?, '[]', ';;', 0, 1);
+            INSERT INTO server_settings (guild_id, roles, prefix, casenum)
+            VALUES (?, '[]', ';;', 0);
         """, (guild_id,))
         con.commit()
 
@@ -382,23 +390,9 @@ def server_settings(save, guild, stype=None, value=None):
             con.commit()
             con.close()
             return num
-
-        elif stype == "xpenabled":
-            cur.execute(f"""SELECT xpenabled FROM server_settings WHERE guild_id = '{guild_id}'""")
-            t = not cur.fetchone()[0]
-            cur.execute(f"""UPDATE server_settings SET xpenabled = {t} WHERE guild_id = '{guild_id}'""")
-            con.commit()
-            con.close()
-
-            return t
-
-        else:
-            con.close()
-            return "Unknown setting type."
-
     else:
         cur.execute("""
-            SELECT roles, prefix, casenum, xpenabled
+            SELECT roles, prefix, casenum
             FROM server_settings
             WHERE guild_id = ?;
         """, (guild_id,))
@@ -411,14 +405,11 @@ def server_settings(save, guild, stype=None, value=None):
             return data[1]
         elif stype == "casenum":
             return data[2]
-        elif stype == "xpenabled":
-            return data[3]
         else:
             return {
                 "roles": json.loads(data[0]),
                 "prefix": data[1],
                 "casenum": data[2],
-                "xpenabled": data[3]
             }
 
 def user_settings(save, userid: int, setting, data=None):

@@ -1,6 +1,6 @@
 import discord
 from discord.ui import View, Button, Select
-from Cogs.Classes.DiscordButtons import PrefixChangeButton, XPEnabledButton, BugReportSend
+from Cogs.Classes.DiscordButtons import PrefixChangeButton, BugReportSend
 from DataBases.database import server_settings, server_channels
 from resources.arrays import logchannels
 
@@ -79,7 +79,6 @@ class Config(View):
         self.add_item(RolePageButton())
         self.add_item(LogPageButton())
         self.add_item(PrefixChangeButton())
-        self.add_item(XPEnabledButton())
 
     async def on_timeout(self):
         for item in self.children:

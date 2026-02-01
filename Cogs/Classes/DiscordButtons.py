@@ -1,7 +1,8 @@
 import discord, requests, os, json
 from Cogs.Classes.DiscordModals import PrefixChange
 from resources.dictionaries import headers
-from DataBases.database import server_settings
+from DataBases.database import server_settings, xp_settings
+
 
 # All of discord.ui.button here
 class PrefixChangeButton(discord.ui.Button):
@@ -10,15 +11,6 @@ class PrefixChangeButton(discord.ui.Button):
 
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.send_modal(PrefixChange())
-
-class XPEnabledButton(discord.ui.Button):
-    def __init__(self):
-        super().__init__(label="Toggle XP", style=discord.ButtonStyle.grey)
-
-    async def callback(self, interaction: discord.Interaction):
-        t = server_settings(True, interaction.guild, "xpenabled")
-        await interaction.response.edit_message(content=f"XP is now {"enabled" if t else "disabled"}!")
-
 
 class BugReportSend(discord.ui.Button):
     def __init__(self, exception, interaction, view):

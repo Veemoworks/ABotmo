@@ -1,10 +1,11 @@
-import discord
+import discord, json
 from discord import app_commands
 from discord.ext import commands
 from Cogs.Methods.methods import log
 from Cogs.Classes.DiscordViews import Config
 from resources.dictionaries import setting_users
-from DataBases.database import xp, server_settings, user_settings
+from DataBases.database import xp, server_settings, user_settings, xp_settings
+
 
 class Server(commands.Cog):
     def __init__(self, bot):
@@ -16,8 +17,9 @@ class Server(commands.Cog):
     async def serverconfig(self, interaction: discord.Interaction):
         print(log(False,
                   f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id} ({interaction.guild.name})!"))
+        await interaction.response.defer(ephemeral=True)
         if not interaction.user.guild_permissions.administrator:
-            await interaction.response.send_message("You do not have permission to run this command!", ephemeral=True)
+            await interaction.followup.send("You do not have permission to run this command!")
             return
 
         embed = discord.Embed(
@@ -28,7 +30,59 @@ class Server(commands.Cog):
             color=discord.Color.brand_green()
         )
         view = Config(interaction)
-        await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+        await interaction.followup.send(embed=embed, view=view)
+
+    @app_commands.command(name="xpconfig", description="Change the XP configuration of the server for the bot.")
+    @app_commands.describe(message="Toggle if level up messages are sent", channel="Configure where level up messages are sent (select current one for Current Channel config)", cd="Configure the cooldown between each message before giving XP", xprange="Configure the range of random XP given", xpenabled="Toggle if XP should be enabled")
+    @app_commands.allowed_contexts(True, False, False)
+    @app_commands.guild_only()
+    async def xpconfig(self, interaction: discord.Interaction, message: bool = None, channel: discord.TextChannel = None, cd: int = None, xprange: str = None, xpenabled: bool = None):
+        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id} ({interaction.guild.name})!"))
+        await interaction.response.defer(ephemeral=True)
+        if not interaction.user.guild_permissions.administrator:
+            await interaction.followup.send("You do not have permission to run this command!")
+            return
+
+        embed = discord.Embed(title="XP Configuration", description=f"Welcome to the XP Configuration Panel, {interaction.user.mention}\nOnly Administrators can access this command.\n\nYour changes will soon be adjusted, please wait...", color=discord.Color.brand_green())
+        msg = await interaction.followup.send(embed=embed)
+        embed.description = embed.description.removesuffix("Your changes will soon be adjusted, please wait...")
+        if not xprange is None:
+            success = False
+            try:
+                xprange = json.loads(f"[{xprange}]")
+                if len(xprange) > 2 or len(xprange) < 2:
+                    success = False
+                    embed.description += "Please enter **2** numbers with a comma seperating them for xp range. (Example: '1, 25')"
+                else:
+                    xprange = f"'{xprange}'"
+                    success = True
+            except json.decoder.JSONDecodeError:
+                success = False
+                embed.description += "Please enter **2 NUMBERS** with a comma seperating them for xp range. (Example: '1, 25')"
+
+            if not success:
+                await msg.edit(embed=embed)
+                return
+        if not channel is None:
+            if channel.id == interaction.channel.id:
+                channel = 1
+            else:
+                channel = channel.id
+        temp = {
+            "messagetoggle": message,
+            "channel": channel,
+            "cd": cd,
+            "range": xprange,
+            "xpenabled": xpenabled
+        }
+        data = {}
+        for datatype, val in temp.items():
+            if val is None:
+                data[datatype] = [False, None]
+            else:
+                data[datatype] = [True, val]
+        embed.description += xp_settings(True, interaction.guild, data)
+        await msg.edit(embed=embed)
 
     @app_commands.command(name="rank", description="Check your rank in this server!")
     @app_commands.describe(user="User to check")
