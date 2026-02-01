@@ -39,12 +39,14 @@ async def on_ready():
                     await bot.load_extension(f"commands.{cog}")
                 # Sync bot tree.
                 synced = await bot.tree.sync()
-                thing = (f"\033[92m[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] Logged in as {bot.user}\n"
-                         f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] discord.py V{discord.__version__}\n"
-                         f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] Python {platform.python_version()}\n"
-                         f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] Running on: {platform.system()} {platform.release()} ({os.name})\n"
-                         f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] Synced {len(synced)} commands\n"
-                         f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] Registering new commands from: {", ".join(cogs)}.\n"
+                now = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+                thing = (f"\033[92m[{now}] [INFO    ] ABotmo v{version}"
+                         f"[{now}] [INFO    ] Logged in as {bot.user}\n"
+                         f"[{now}] [INFO    ] discord.py V{discord.__version__}\n"
+                         f"[{now}] [INFO    ] Python {platform.python_version()}\n"
+                         f"[{now}] [INFO    ] Running on: {platform.system()} {platform.release()} ({os.name})\n"
+                         f"[{now}] [INFO    ] Synced {len(synced)} commands\n"
+                         f"[{now}] [INFO    ] Registering new commands from: {", ".join(cogs)}.\n"
                 )
                 print(thing, end="")
                 with open("output.txt", "a") as r:

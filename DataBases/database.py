@@ -159,7 +159,7 @@ def xp(save, guild, time=None, user=None):
             xp, level, last_msg = row
             if last_msg is None or time - last_msg >= 5:
                 new_xp = xp + random.randint(5, 25)
-                next_level = 5 * (level ** 2) + 50 * level + 100
+                next_level = 5 * (level ** 2) + 100 * level + 100
 
                 if new_xp >= next_level:
                     level += 1
@@ -189,8 +189,97 @@ def xp(save, guild, time=None, user=None):
         con.close()
         return True, [xp, level, next_level]
 
-def xp_settings(save, guild, data):
-    pass
+def xp_settings(save, guild: discord.Guild, data):
+    con = sqlite3.connect("DataBases/xp.db")
+    cur = con.cursor()
+    gid = guild.id
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS xp_settings (
+            guild_id INTEGER PRIMARY KEY,
+            messagetoggle INTEGER,
+            channel INTEGER,
+            cd INTEGER,
+            range TEXT
+        );
+    """)
+
+    cur.execute("SELECT * FROM xp_settings WHERE guild_id = ?", (gid,))
+    row = cur.fetchone()
+
+    if not row:
+        cur.execute(f"""
+            INSERT INTO xp_settings (guild_id)
+            VALUES ({gid});
+        """)
+        con.commit()
+
+    # togglable messages - messagetoggle
+    # channel conifg (where lvl up is sent) - channel
+    # cd for xp - cd
+    # range of xp - range
+    if save:
+        changes = {}
+        for datatype, vals in data.items():
+            changed, val = vals
+            if not changed:
+                continue
+            cur.execute(f"""
+                    UPDATE xp_settings
+                    SET {datatype} = {val}
+                    WHERE guild_id = {gid}
+            """)
+            changes[datatype] = val
+
+        kirk = {
+            "messagetoggle": "Level Up message",
+            "channel": "Level Up channel",
+            "cd": "XP cooldown",
+            "range": "XP range",
+            "channelnums": {
+                0: "be turned off",
+                1: "current channel",
+                2: guild.get_channel(data["channel"][1]).mention
+            }
+        }
+
+        if not changes:
+            return "No XP setting changes were made!"
+        text = []
+        for key, val in changes.items():
+            if key == "channel":
+                if val > 1:
+                    val = kirk["channelnums"][2]
+                else:
+                    val = kirk["channelnums"][val]
+
+            text.append(f"{kirk[key]} was set to {val}")
+
+        return "\n".join(text)
+    else:
+        cur.execute(f"""
+            SELECT *
+            FROM xp_settings
+            WHERE guild_id = {gid};
+        """)
+        data = cur.fetchone()
+        con.close()
+
+        if data == "messagetoggle":
+            return data[1]
+        elif data == "channel":
+            return data[2]
+        elif data == "cd":
+            return data[3]
+        elif data == "range":
+            return json.loads(data[4])
+        else:
+            return {
+                "messagetoggle": data[1],
+                "channel": data[2],
+                "cd": data[3],
+                "range": json.loads(data[4])
+            }
+
 # </editor-fold>
 
 # <editor-fold desc="settings.db">
