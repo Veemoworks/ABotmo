@@ -34,13 +34,13 @@ async def kuma(bot):
             print(log(True, f"[KUMA] Failed to send fail status: {e2}"))
 
 @tasks.loop(hours=1)
-async def ramthing(pid):
-    mem = psutil.Process(pid).memory_full_info()
+async def ramthing():
+    p = None
+    for process in psutil.process_iter():
+        if process.name() == "WindowsTerminal.exe":
+            p = process
+    mem = psutil.Process(p.pid).memory_full_info()
     usage = mem.uss / (1024**2)
     if usage >= 2000:
         os.system("cls")
         print(log(False, f"Cleared Console, RAM usage was: {round((usage / 16000) * 100, 2)}% ({round(usage)}MB / 16000MB)"))
-        await asyncio.sleep(15)
-        mem = psutil.Process(pid).memory_full_info()
-        usage = mem.uss / (1024**2)
-        print(log(False, f"Update: RAM usage is now {round((usage / 16000) * 100, 2)}% ({round(usage)}MB / 16000MB)"))

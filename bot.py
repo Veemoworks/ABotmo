@@ -10,7 +10,7 @@ from Cogs.Methods.methods import handle_exception, log, close_bot
 from resources.dictionaries import custom_urls
 
 # Variables
-version = "0.6.12"
+version = "0.6.14"
 pid = os.getpid()
 debugging = False
 done = False
@@ -40,7 +40,7 @@ async def on_ready():
                 # Sync bot tree.
                 synced = await bot.tree.sync()
                 now = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
-                thing = (f"\033[92m[{now}] [INFO    ] ABotmo v{version}"
+                thing = (f"\033[92m[{now}] [INFO    ] ABotmo v{version}\n"
                          f"[{now}] [INFO    ] Logged in as {bot.user}\n"
                          f"[{now}] [INFO    ] discord.py V{discord.__version__}\n"
                          f"[{now}] [INFO    ] Python {platform.python_version()}\n"
@@ -55,7 +55,7 @@ async def on_ready():
                 for command in cmds:
                     print(log(False, f"Command {command.name} (</{command.name}:{command.id}>) Registered!"))
                 # Bot Loops
-                ramthing.start(pid)
+                ramthing.start()
                 status.start(bot)
                 kuma.start(bot)
                 t = bot.get_channel(1403041372751265912)
@@ -81,7 +81,7 @@ async def on_app_command_error_event(interaction, error):
 @bot.event
 async def on_guild_join(guild: discord.Guild):
     channels = await guild.fetch_channels()
-    embed = discord.Embed(title=f"Thanks for inviting {bot.user.display_name}!", description=f"To get started, run </serverconfig:1400176415638556684> to get your configuration for the server setup!\nYou may also use </help:1402434849154924665> to get help for commands! (* in the command parameter to get a list of all commands)\n-# **Guild Count: {len(bot.guilds)}**", color=discord.Color.brand_green())
+    embed = discord.Embed(title=f"Thanks for inviting {bot.user.display_name}!", description=f"To get started, run </serverconfig:1400176415638556684> for your server configuration and </xpconfig:1467585730837479436> for the XP configuration both setup!\nYou may also use </help:1402434849154924665> to get help for commands! (* in the command parameter to get a list of all commands)\n-# **Guild Count: {len(bot.guilds)}**", color=discord.Color.brand_green())
     embed.set_footer(text=guild.name + " | " + str(guild.id), icon_url=guild.icon.url if guild.icon else None)
     embed.set_thumbnail(url=guild.icon.url if guild.icon else None)
     embed.set_author(name=bot.user.display_name, icon_url=bot.user.avatar.url)

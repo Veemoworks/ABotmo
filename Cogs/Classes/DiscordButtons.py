@@ -1,8 +1,6 @@
 import discord, requests, os, json
 from Cogs.Classes.DiscordModals import PrefixChange
-from resources.dictionaries import headers
-from DataBases.database import server_settings, xp_settings
-
+from resources.dictionaries import headers, devs
 
 # All of discord.ui.button here
 class PrefixChangeButton(discord.ui.Button):
@@ -42,3 +40,23 @@ class BugReportSend(discord.ui.Button):
         for item in self.oldview:
             item.disabled = True
         await self.interaction.edit_original_response(view=self.oldview)
+
+class CreditsButton(discord.ui.Button):
+    def __init__(self, bot):
+        super().__init__(style=discord.ButtonStyle.primary, label="Credits")
+        self.bot = bot
+
+    async def callback(self, interaction):
+        await interaction.response.defer()
+        embed = discord.Embed(title="ABotmo Credits", description="", color=discord.Colour.brand_green())
+        embed.set_author(name=self.bot.user.name, icon_url=self.bot.user.avatar.url)
+
+        for role, ppl in devs.items():
+            embed.description += f"\n## __{role}__:\n"
+            for dev in ppl:
+                dev = self.bot.get_user(dev)
+                embed.description += f"- {dev.mention} {dev.name}"
+
+        await interaction.followup.send(embed=embed)
+        self.disabled = True
+        await interaction.edit_original_response(view=self.view)

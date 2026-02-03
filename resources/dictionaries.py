@@ -74,3 +74,11 @@ setting_users = {
         2: "Your XP messages have been enabled only in DMs.",
     }
 }
+devs = {
+    "Owner": [
+        333585549837336577,
+    ],
+    "Programming": [
+        1120115279544995870,
+    ],
+}

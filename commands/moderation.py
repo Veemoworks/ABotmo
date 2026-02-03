@@ -219,7 +219,6 @@ class Moderation(commands.Cog):
             await interaction.followup.send(f"{user.mention} is a bot, and are MOST likely not banned!")
             return
 
-        user = self.bot.get_user(user.id)
         try:
             await interaction.guild.fetch_ban(user)
         except discord.NotFound:

@@ -6,6 +6,7 @@ from Cogs.Methods.asynchronous.methods import get_prefix
 from Cogs.Methods.methods import permission_check, imgcol_gen
 from Cogs.Classes.DiscordModals import BugReport, BotSuggest
 from Cogs.Classes.DiscordViews import ServerInfo
+from Cogs.Classes.DiscordButtons import CreditsButton
 from resources.arrays import veemoworksdevs, recnetdb
 from resources.dictionaries import botbadges, cmduae
 from Cogs.Methods.methods import log
@@ -121,8 +122,7 @@ class Utils(commands.Cog):
     async def stats(self, interaction: discord.Interaction):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         embed = discord.Embed(color=discord.Color.brand_green())
-        embed.set_author(name="ABotmo", icon_url=self.bot.user.avatar.url)
-        embed.add_field(name="Version", value="v" + version)
+        embed.set_author(name="ABotmo v" + version, icon_url=self.bot.user.avatar.url)
         embed.add_field(name="Latency:", value=f"{round(self.bot.latency * 1000)}ms")
         embed.add_field(name="Startup:", value=f"<t:{int(startup.timestamp())}> (<t:{int(startup.timestamp())}:R>)")
         embed.add_field(name="Guilds:", value=len(self.bot.guilds))
@@ -130,7 +130,19 @@ class Utils(commands.Cog):
         embed.add_field(name="RAM / Memory:", value=f"{round(psutil.virtual_memory().used / (1024**3), 2)}GB / {round(psutil.virtual_memory().total / (1024**3), 2)}GB")
         embed.add_field(name="CPU:", value=f"{psutil.cpu_percent()}% Util")
         embed.set_footer(text=f"PID {pid} | Python {platform.python_version()} | discord.py V{discord.__version__} | Shard {self.bot.shard_id}")
-        await interaction.response.send_message(embed=embed)
+        class button(discord.ui.View):
+            def __init__(self, bot):
+                super().__init__(timeout=180)
+                self.bot = bot
+                self.interaction = interaction
+                self.add_item(item=CreditsButton(self.bot))
+
+            async def on_timeout(self):
+                for item in self.children:
+                    item.disabled = True
+                await self.interaction.edit_original_response(view=self)
+
+        await interaction.response.send_message(embed=embed, view=button(self.bot))
 
     @app_commands.command(name="links", description="Get all links related to the bot")
     @app_commands.allowed_contexts(True, True, True)
