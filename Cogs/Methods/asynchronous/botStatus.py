@@ -35,7 +35,7 @@ async def kuma(bot):
 
 @tasks.loop(hours=1)
 async def ramthing():
-    p = None
+    p = psutil.Process()
     for process in psutil.process_iter():
         if process.name() == "WindowsTerminal.exe":
             p = process

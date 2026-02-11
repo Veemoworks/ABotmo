@@ -149,7 +149,7 @@ def xp(save, guild, time=None, user=None):
                 """)
         row = cur.fetchone()
         if row == None:
-            t = xp_settings(False, guild, None)
+            t: dict = xp_settings(False, guild, None)
             cur.execute(f"""
                         INSERT INTO '{guild_id}'
                         VALUES ({user.id}, {random.randint(t["range"][0], t["range"][1])}, 0, {time})
@@ -157,7 +157,7 @@ def xp(save, guild, time=None, user=None):
             con.commit()
             level = 0
         else:
-            g = xp_settings(False, guild, None)
+            g: dict = xp_settings(False, guild, None)
             xph, level, last_msg = row
             if last_msg is None or time - last_msg >= g["cd"]:
                 new_xp = xph + random.randint(g["range"][0], g["range"][1])

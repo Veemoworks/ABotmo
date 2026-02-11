@@ -54,8 +54,12 @@ class Server(commands.Cog):
                     success = False
                     embed.description += "Please enter **2** numbers with a comma seperating them for xp range. (Example: '1, 25')"
                 else:
-                    xprange = f"'{xprange}'"
-                    success = True
+                    if xprange[0] < 1 or xprange[1] < 1:
+                        success = False
+                        embed.description += "Input a number that is bigger than 0. (Example: `3, 60')"
+                    else:
+                        xprange = f"'{xprange}'"
+                        success = True
             except json.decoder.JSONDecodeError:
                 success = False
                 embed.description += "Please enter **2 NUMBERS** with a comma seperating them for xp range. (Example: '1, 25')"
