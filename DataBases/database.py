@@ -186,10 +186,10 @@ def xp(save, guild, time=None, user=None):
         if row == None:
             return False, None
 
-        xp, level = row
+        dxp, level = row
         next_level = 5 * (level ** 2) + 100 * level + 100
         con.close()
-        return True, [xp, level, next_level]
+        return True, [dxp, level, next_level]
 
 def xp_settings(save, guild: discord.Guild, data):
     con = sqlite3.connect("DataBases/xp.db")
@@ -288,6 +288,55 @@ def xp_settings(save, guild: discord.Guild, data):
                 "range": json.loads(data[4]),
                 "xpenabled": data[5]
             }
+
+def xp_roles(save, guild: discord.Guild, level=None, role=None):
+    con = sqlite3.connect("DataBases/xp.db")
+    cur = con.cursor()
+    gid = guild.id
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS xp_roles (
+            guild_id INTEGER PRIMARY KEY,
+            data TEXT
+        );
+    """)
+
+    cur.execute(f"SELECT * FROM xp_roles WHERE guild_id = {gid}")
+    row = cur.fetchone()
+    level = str(level)
+    role = str(role)
+    if not row:
+        cur.execute(f"""
+            INSERT INTO xp_roles (guild_id)
+            VALUES ({gid});
+        """)
+        con.commit()
+    if save:
+        val = False
+        cur.execute(f"SELECT data FROM xp_roles WHERE guild_id = {gid}")
+        data: dict = json.loads(cur.fetchone()[0].replace("'", '"'))
+        if role in data.values():
+            key = None
+            for k, v in data.items():
+                if role == v:
+                    key = k
+            data.pop(key)
+            data[level] = role
+            val = False
+        else:
+            data[level] = role
+            val = True
+        cur.execute(f"UPDATE xp_roles SET data = \"{str(data)}\" WHERE guild_id = {gid}")
+        con.commit()
+        con.close()
+        return val
+    else:
+        cur.execute(f"SELECT data FROM xp_roles WHERE guild_id = {gid}")
+        data = json.loads(cur.fetchone()[0].replace("'", '"'))
+        if not level is None:
+            data = data.get(level)
+        con.close()
+        return data
+
 
 # </editor-fold>
 
@@ -390,6 +439,8 @@ def server_settings(save, guild, stype=None, value=None):
             con.commit()
             con.close()
             return num
+        else:
+            return "fella..."
     else:
         cur.execute("""
             SELECT roles, prefix, casenum

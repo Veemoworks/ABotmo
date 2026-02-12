@@ -4,8 +4,7 @@ from discord.ext import commands
 from Cogs.Methods.methods import log
 from Cogs.Classes.DiscordViews import Config
 from resources.dictionaries import setting_users
-from DataBases.database import xp, server_settings, user_settings, xp_settings
-
+from DataBases.database import xp, server_settings, user_settings, xp_settings, xp_roles
 
 class Server(commands.Cog):
     def __init__(self, bot):
@@ -38,6 +37,8 @@ class Server(commands.Cog):
     @app_commands.guild_only()
     async def xpconfig(self, interaction: discord.Interaction, message: bool = None, channel: discord.TextChannel = None, cd: int = None, xprange: str = None, xpenabled: bool = None):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id} ({interaction.guild.name})!"))
+        # soon a module like serverconfig
+        # xproles is a seperate page for the page buttons and when u selecta role it gives u a pop up saying what level
         await interaction.response.defer(ephemeral=True)
         if not interaction.user.guild_permissions.administrator:
             await interaction.followup.send("You do not have permission to run this command!")
@@ -87,6 +88,20 @@ class Server(commands.Cog):
                 data[datatype] = [True, val]
         embed.description += xp_settings(True, interaction.guild, data)
         await msg.edit(embed=embed)
+
+    @app_commands.command(name="test")
+    async def test(self, interaction: discord.Interaction, role: discord.Role, level: int):
+        await interaction.response.defer(ephemeral=True)
+        if not interaction.user.id == 333585549837336577:
+            await interaction.followup.send("yo gurt u cant use ts man")
+            return
+        if role.is_bot_managed():
+            await interaction.followup.send("nope, thats a bot role loser")
+            return
+        elif role.is_assignable():
+            await interaction.followup.send("i cant interact with that role bum...")
+            return
+        await interaction.followup.send(xp_roles(True, interaction.guild, level, role.id))
 
     @app_commands.command(name="rank", description="Check your rank in this server!")
     @app_commands.describe(user="User to check")

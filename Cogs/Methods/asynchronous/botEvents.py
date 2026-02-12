@@ -1,7 +1,8 @@
 import discord, time
-from DataBases.database import xp, user_settings, xp_settings
+from DataBases.database import xp, user_settings, xp_settings, xp_roles
 from resources.links import warm
-from Cogs.Methods.asynchronous.methods import crash
+from Cogs.Methods.asynchronous.methods import crash, get_prefix
+from Cogs.Methods.methods import log
 
 # All bot related events
 
@@ -34,12 +35,19 @@ async def message(msg: discord.Message):
     guild = msg.guild
     user = msg.author
     if guild:
+        if msg.content.startswith(await get_prefix(None, msg)):
+            return
         data = xp_settings(False, guild, None)
         if data["xpenabled"]:
             lvl_up, lvl = xp(True, guild, int(time.time()), user)
 
             if lvl_up:
+                role = xp_roles(False, guild, lvl)
                 try:
+                    if not role is None:
+                        role = guild.get_role(int(role))
+                        if not role is None:
+                            await user.add_roles(role, reason=f"Level up to {lvl}")
                     if data["messagetoggle"]:
                         if data["channel"] == 1:
                             await msg.reply(
@@ -54,5 +62,5 @@ async def message(msg: discord.Message):
                             else:
                                await msg.reply(f"{msg.author.mention}, you have succesfully leveled up to Level {lvl}!{"\n-# *You can toggle this message with /settings!*" if lvl % 5 == 0 else ""}", allowed_mentions=discord.AllowedMentions(roles=False, users=False, replied_user=False))
                 except Exception as e:
-                    print(e)
+                    print(log(True, f"on_message raised an error: "+ str(e)))
                     pass
