@@ -1,12 +1,21 @@
 import discord
 from discord.ui import View, Button, Select
 from Cogs.Classes.DiscordButtons import PrefixChangeButton, BugReportSend
+from Cogs.Classes.DiscordModals import XPLevel
 from DataBases.database import server_settings, server_channels
 from resources.arrays import logchannels
 
-def chunk_list(lst, size=25):
-    for i in range(0, len(lst), size):
-        yield lst[i:i + size]
+class AutoBugReport(View):
+    def __init__(self, interaction: discord.Interaction, exception):
+        super().__init__(timeout=180)
+        self.interaction = interaction
+
+        self.add_item(BugReportSend(exception, interaction, self))
+
+    async def on_timeout(self):
+        for item in self.children:
+            item.disabled = True
+        await self.interaction.edit_original_response(view=self)
 
 class ServerInfo(discord.ui.View):
     def __init__(self, guild: discord.Guild):
@@ -71,6 +80,11 @@ class ServerInfo(discord.ui.View):
 
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
+# <editor-fold desc="serverconfig">
+def chunk_list(lst, size=25):
+    for i in range(0, len(lst), size):
+        yield lst[i:i + size]
+
 class Config(View):
     def __init__(self, interaction: discord.Interaction):
         super().__init__(timeout=180)
@@ -92,7 +106,7 @@ class RolePageButton(Button):
     async def callback(self, interaction: discord.Interaction):
         guild_roles = [r for r in interaction.guild.roles if not r.is_default()]
         current_roles = server_settings(False, interaction.guild, "roles")
-        view = RoleConfig(interaction, guild_roles, current_roles, page=0)
+        view = ServerConfigRole(interaction, guild_roles, current_roles, page=0)
 
         embed = discord.Embed(
             title="Role Configuration",
@@ -115,25 +129,6 @@ class LogPageButton(Button):
         )
         await interaction.response.edit_message(embed=embed, view=view)
 
-class RoleConfig(View):
-    def __init__(self, interaction: discord.Interaction, all_roles, configured_roles, page=0):
-        super().__init__(timeout=180)
-        self.interaction = interaction
-
-        chunks = list(chunk_list(all_roles, 25))
-        self.add_item(Role(chunks[page], configured_roles))
-
-        if len(chunks) > 1:
-            self.add_item(PageButton("⬅", page - 1, len(chunks), "role", all_roles, configured_roles))
-            self.add_item(PageButton("➡", page + 1, len(chunks), "role", all_roles, configured_roles))
-
-        self.add_item(BackButton())
-
-    async def on_timeout(self):
-        for item in self.children:
-            item.disabled = True
-        await self.interaction.edit_original_response(view=self)
-
 class LogChoice(View):
     def __init__(self, interaction):
         super().__init__(timeout=180)
@@ -154,7 +149,7 @@ class LogConfig(View):
             self.add_item(PageButton("⬅", page - 1, len(chunks), "log", all_channels, configured_channel_id, channel))
             self.add_item(PageButton("➡", page + 1, len(chunks), "log", all_channels, configured_channel_id, channel))
 
-        self.add_item(BackButton())
+        self.add_item(ServerConfigBack())
 
     async def on_timeout(self):
         for item in self.children:
@@ -191,7 +186,7 @@ class PageButton(Button):
 
     async def callback(self, interaction: discord.Interaction):
         if self.mode == "role":
-            view = RoleConfig(interaction, self.items, self.config, page=self.page)
+            view = ServerConfigRole(interaction, self.items, self.config, page=self.page)
             embed = discord.Embed(
                 title="Role Configuration",
                 description="Select the moderator roles below:",
@@ -207,20 +202,7 @@ class PageButton(Button):
 
         await interaction.response.edit_message(embed=embed, view=view)
 
-class BackButton(Button):
-    def __init__(self):
-        super().__init__(label="Go Back", style=discord.ButtonStyle.secondary, row=2)
 
-    async def callback(self, interaction: discord.Interaction):
-        embed = discord.Embed(
-            title="Server Configuration",
-            description=f"Welcome to the Server Configuration Panel, {interaction.user.mention}!\n"
-                        "Only Administrators can access this menu.\n\n"
-                        "Choose what you’d like to configure below:",
-            color=discord.Color.brand_green()
-        )
-        view = Config(interaction)
-        await interaction.response.edit_message(embed=embed, view=view)
 
 class Logs(Select):
     def __init__(self, channels, configured_channel_id, channel):
@@ -280,7 +262,7 @@ class Role(Select):
         change_summary = "\n".join(changes) if changes else "No changes made."
 
         new_config = server_settings(False, interaction.guild, "roles")
-        view = RoleConfig(interaction, interaction.guild.roles, new_config, page=0)
+        view = ServerConfigRole(interaction, interaction.guild.roles, new_config, page=0)
 
         embed = discord.Embed(
             title="Role Configuration",
@@ -289,14 +271,149 @@ class Role(Select):
         )
         await interaction.response.edit_message(embed=embed, view=view)
 
-class AutoBugReport(View):
-    def __init__(self, interaction: discord.Interaction, exception):
+class ServerConfigRole(View):
+    def __init__(self, interaction: discord.Interaction, all_roles, configured_roles, page=0):
         super().__init__(timeout=180)
         self.interaction = interaction
 
-        self.add_item(BugReportSend(exception, interaction, self))
+        chunks = list(chunk_list(all_roles, 25))
+        self.add_item(Role(chunks[page], configured_roles))
+
+        if len(chunks) > 1:
+            self.add_item(PageButton("⬅", page - 1, len(chunks), "role", all_roles, configured_roles))
+            self.add_item(PageButton("➡", page + 1, len(chunks), "role", all_roles, configured_roles))
+
+        self.add_item(ServerConfigBack())
 
     async def on_timeout(self):
         for item in self.children:
             item.disabled = True
         await self.interaction.edit_original_response(view=self)
+
+class ServerConfigBack(Button):
+    def __init__(self):
+        super().__init__(label="Go Back", style=discord.ButtonStyle.secondary, row=2)
+
+    async def callback(self, interaction: discord.Interaction):
+        embed = discord.Embed(
+            title="Server Configuration",
+            description=f"Welcome to the Server Configuration Panel, {interaction.user.mention}!\n"
+                        "Only Administrators can access this menu.\n\n"
+                        "Choose what you’d like to configure below:",
+            color=discord.Color.brand_green()
+        )
+        view = Config(interaction)
+        await interaction.response.edit_message(embed=embed, view=view)
+# </editor-fold>
+
+# <editor-fold desc="xpconfig">
+class XPConfig(View):
+    def __init__(self, interaction: discord.Interaction):
+        super().__init__(timeout=180)
+        self.interaction = interaction
+
+        self.add_item(XPRoles())
+
+    async def on_timeout(self):
+        for item in self.children:
+            item.disabled = True
+        await self.interaction.edit_original_response(view=self)
+
+class XPRoles(Button):
+    def __init__(self):
+        super().__init__(label="Level Roles", style=discord.ButtonStyle.primary)
+
+    async def callback(self, interaction: discord.Interaction):
+        try:
+            guild_roles = [r for r in interaction.guild.roles if not r.is_default()]
+            view = XPRolePage(interaction, guild_roles, page=0)
+
+            embed = discord.Embed(
+                title="Level Role Configuration",
+                description="Select 1 role from the list of roles below:",
+                color=discord.Color.green()
+            )
+            await interaction.response.edit_message(embed=embed, view=view)
+        except Exception as e:
+            print(e)
+
+class XPPageButton(Button):
+    def __init__(self, label: str, page: int, max_pages: int, mode: str, items):
+        super().__init__(label=label, style=discord.ButtonStyle.secondary)
+        self.page = page % max_pages
+        self.mode = mode
+        self.items = items
+
+    async def callback(self, interaction: discord.Interaction):
+        if self.mode == "role":
+            view = XPRolePage(interaction, self.items, page=self.page)
+            embed = discord.Embed(
+                title="Level Role Configuration",
+                description="Select 1 role from the list of roles below:",
+                color=discord.Color.green()
+            )
+        # else:
+        #     view = LogConfig(interaction, self.items, self.channel, self.page)
+        #     embed = discord.Embed(
+        #         title="Level Up Message Channel Configuration",
+        #         description=f"Select 1 channel to send the level up messages to:",
+        #         color=discord.Color.green()
+        #     )
+
+        await interaction.response.edit_message(embed=embed, view=view)
+
+class XPRole(Select):
+    def __init__(self, roles):
+        options = [
+            discord.SelectOption(
+                label=role.name,
+                value=str(role.id)
+            )
+            for role in roles
+        ]
+        super().__init__(
+            placeholder="Select your level up role",
+            min_values=0,
+            max_values=len(options),
+            options=options
+        )
+
+    async def callback(self, interaction: discord.Interaction):
+        print(self.values)
+        role = interaction.guild.get_role(int(self.values[0]))
+        await interaction.response.send_modal(XPLevel(role))
+
+class XPRolePage(View):
+    def __init__(self, interaction: discord.Interaction, all_roles, page=0):
+        super().__init__(timeout=180)
+        self.interaction = interaction
+
+        chunks = list(chunk_list(all_roles, 25))
+        self.add_item(XPRole(chunks[page]))
+
+        if len(chunks) > 1:
+            self.add_item(XPPageButton("⬅", page - 1, len(chunks), "role", all_roles))
+            self.add_item(XPPageButton("➡", page + 1, len(chunks), "role", all_roles))
+
+        self.add_item(XPConfigBack())
+
+    async def on_timeout(self):
+        for item in self.children:
+            item.disabled = True
+        await self.interaction.edit_original_response(view=self)
+
+class XPConfigBack(Button):
+    def __init__(self):
+        super().__init__(label="Go Back", style=discord.ButtonStyle.secondary, row=2)
+
+    async def callback(self, interaction: discord.Interaction):
+        embed = discord.Embed(
+            title="XP Configuration",
+            description=f"Welcome to the XP Configuration Panel, {interaction.user.mention}!\n"
+                        "Only Administrators can access this menu.\n\n"
+                        "Choose what you’d like to configure below:",
+            color=discord.Color.brand_green()
+        )
+        view = XPConfig(interaction)
+        await interaction.response.edit_message(embed=embed, view=view)
+# </editor-fold>

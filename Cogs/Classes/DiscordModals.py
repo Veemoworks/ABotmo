@@ -1,5 +1,5 @@
 import discord, requests, json, os, dotenv
-from DataBases.database import server_settings
+from DataBases.database import server_settings, xp_roles
 from resources.dictionaries import headers
 from discord.ui import Modal, TextInput
 dotenv.load_dotenv(".env")
@@ -103,3 +103,23 @@ class PrefixChange(Modal):
     async def on_submit(self, interaction: discord.Interaction):
         for field in self.children:
             await interaction.response.send_message(server_settings(True, interaction.guild, "prefix", field.value), ephemeral=True)
+
+class XPLevel(Modal):
+    def __init__(self, role):
+        super().__init__(title="Enter a number")
+        self.role = role
+        self.add_item(TextInput(
+            label=f"Level Required for role: {role.name}",
+            placeholder="Enter a number, if you enter anything else it'll be ignored.",
+            style=discord.TextStyle.short
+        ))
+
+    async def on_submit(self, interaction: discord.Interaction):
+        for field in self.children:
+            if field.value.isnumeric():
+                response = xp_roles(True, interaction.guild, field.value, self.role.id)
+                if response:
+                    response = f"Successfully added {self.role.mention} as a level up reward for level {field.value}!"
+                else:
+                    response= f"Succesfully replaced the old role for level {field.value} to {self.role.mention}!"
+                await interaction.response.send_message(response, ephemeral=True)
