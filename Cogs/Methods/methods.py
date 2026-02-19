@@ -1,10 +1,10 @@
-import os.path
-import sys, asyncio, traceback, discord, numpy as np, requests, json
+import sys, asyncio, traceback, discord, numpy as np, requests, json, os
 from PIL import Image
 from datetime import datetime
 from dotenv import load_dotenv
 from discord import app_commands
 from Cogs.Methods.asynchronous.methods import crash
+from resources.dictionaries import kirk
 from DataBases.database import server_settings
 load_dotenv(".env")
 
@@ -63,6 +63,30 @@ def log(error, msg):
         return f"\033[31m[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [ERROR   ] {msg}"
     else:
         return f"\033[92m[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] {msg}"
+
+# lowkirk forgot about this file
+# uhh thing that wait what was i gonn add
+# type checker for a specfiic command (/xpconfig)
+def to_text(data: dict):
+    msg = []
+    for key, value in data.items():
+        _type = type(value)
+        skib = ""
+        if _type == int:
+            if not key == "channel":
+                if value:
+                    skib = "On"
+                else:
+                    skib = "Off"
+            else:
+                if value == 1:
+                    skib = "Current Channel"
+                else:
+                    skib = f"<#{value}>"
+        elif _type == list:
+            skib = f"{value[0]} to {value[1]}"
+        msg.append(f"{kirk[key]} is {skib}")
+    return "\n".join(msg)
 
 # Log to a file and close the bot
 def close_bot():

@@ -252,12 +252,20 @@ def xp_settings(save, guild: discord.Guild, data):
             return "No XP setting changes were made!"
         text = []
         for key, val in changes.items():
+            _type = type(val)
             if key == "channel":
                 if val > 1:
                     val = kirk["channelnums"][2].mention
                 else:
                     val = kirk["channelnums"][1]
-
+            elif _type == bool:
+                if val:
+                    val = "On"
+                else:
+                    val = "Off"
+            elif _type == str:
+                temp = json.loads(val.strip("'"))
+                val = f"{temp[0]} to {temp[1]}"
             text.append(f"{kirk[key]} was set to {val}")
 
         return "\n".join(text)

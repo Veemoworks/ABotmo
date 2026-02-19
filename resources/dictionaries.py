@@ -82,3 +82,10 @@ devs = {
         1120115279544995870,
     ],
 }
+kirk = {
+    "messagetoggle": "Level Up message",
+    "channel": "Level Up channel",
+    "cd": "XP cooldown",
+    "range": "XP range",
+    "xpenabled": "XP Toggle"
+}

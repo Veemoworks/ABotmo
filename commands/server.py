@@ -1,10 +1,10 @@
 import discord, json
 from discord import app_commands
 from discord.ext import commands
-from Cogs.Methods.methods import log, type_to_text
+from Cogs.Methods.methods import log, to_text
 from Cogs.Classes.DiscordViews import Config, XPConfig
 from resources.dictionaries import setting_users
-from DataBases.database import xp, server_settings, user_settings, xp_roles, xp_settings
+from DataBases.database import xp, server_settings, user_settings, xp_settings
 
 class Server(commands.Cog):
     def __init__(self, bot):
@@ -43,12 +43,12 @@ class Server(commands.Cog):
             await interaction.followup.send("You do not have permission to run this command!")
             return
 
-        currentconfig = xp_settings(False, interaction.guild, None)
-        embed = discord.Embed(title="XP Configuration", description=f"Welcome to the XP Configuration Panel, {interaction.user.mention}\nOnly Administrators can access this command.\nCurrent Config: XP Message Toggle: {type_to_text("messagetoggle")}\n\nYour changes will soon be adjusted, please wait...", color=discord.Color.brand_green())
+        currconfig = xp_settings(False, interaction.guild, None)
+        embed = discord.Embed(title="XP Configuration", description=f"Welcome to the XP Configuration Panel, {interaction.user.mention}\nOnly Administrators can access this command.\n\n**__Current Config:__**\n{to_text(currconfig)}\n\nYour changes will soon be adjusted, please wait...", color=discord.Color.brand_green())
         msg = await interaction.followup.send(embed=embed)
         embed.description = embed.description.removesuffix("Your changes will soon be adjusted, please wait...")
-        success = False
         if not xprange is None:
+            success = False
             try:
                 xprange = json.loads(f"[{xprange}]")
                 if len(xprange) > 2 or len(xprange) < 2:
@@ -65,15 +65,20 @@ class Server(commands.Cog):
             except json.decoder.JSONDecodeError:
                 success = False
                 embed.description += "Please enter **2 NUMBERS** with a comma seperating them for xp range. (Example: '1, 25')\n"
-        elif not cd is None:
+
+            if not success:
+                await msg.edit(embed=embed)
+                return
+        if not cd is None:
+            success = False
             if cd > 60:
                 success = False
                 embed.description += "Pleae enter a cool down of less than 60 seconds!\n"
             else:
                 success = True
-        if not success:
-            await msg.edit(embed=embed)
-            return
+            if not success:
+                await msg.edit(embed=embed)
+                return
         if not channel is None:
             if channel.id == interaction.channel.id:
                 channel = 1
