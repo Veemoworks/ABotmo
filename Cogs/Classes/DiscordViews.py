@@ -374,12 +374,11 @@ class XPRole(Select):
         super().__init__(
             placeholder="Select your level up role",
             min_values=0,
-            max_values=len(options),
+            max_values=1,
             options=options
         )
 
     async def callback(self, interaction: discord.Interaction):
-        print(self.values)
         role = interaction.guild.get_role(int(self.values[0]))
         await interaction.response.send_modal(XPLevel(role))
 
