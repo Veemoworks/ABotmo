@@ -408,32 +408,6 @@ def server_settings(save, guild, stype=None, value=None):
             con.commit()
             con.close()
             return f"Your server configuration for bot prefix has been updated to \"{value}\"."
-
-        elif stype == "modlog":
-            new_channel = str(value)
-
-            cur.execute("SELECT modlog FROM server_settings WHERE guild_id = ?", (guild_id,))
-            current = cur.fetchone()[0]
-
-            if current == new_channel:
-                cur.execute("""
-                    UPDATE server_settings
-                    SET modlog = NULL
-                    WHERE guild_id = ?;
-                """, (guild_id,))
-                msg = f"Deleted \"<#{new_channel}>\" from the server config."
-            else:
-                cur.execute("""
-                    UPDATE server_settings
-                    SET modlog = ?
-                    WHERE guild_id = ?;
-                """, (new_channel, guild_id))
-                msg = f"Your new modlogs channel is: \"<#{new_channel}>\"."
-
-            con.commit()
-            con.close()
-            return msg
-
         elif stype == "casenum":
             cur.execute(f"""
                 SELECT casenum FROM server_settings WHERE guild_id = '{guild_id}'""")

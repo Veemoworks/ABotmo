@@ -87,5 +87,13 @@ kirk = {
     "channel": "Level Up channel",
     "cd": "XP cooldown",
     "range": "XP range",
-    "xpenabled": "XP Toggle"
+    "xpenabled": "XP Toggle",
+    "roles": "Moderator Roles",
+    "prefix": "Bot Prefix",
+    "modlog": "Mod Logs Channel",
+    "member": "Member Logs Channel",
+    "message": "Message Logs Channel",
+    "mchannel": "Channel Logs Channel",
+    "role": "Role Logs Channel",
+    "voice": "Voice Logs Channel",
 }

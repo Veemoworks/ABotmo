@@ -67,24 +67,34 @@ def log(error, msg):
 # lowkirk forgot about this file
 # uhh thing that wait what was i gonn add
 # type checker for a specfiic command (/xpconfig)
-def to_text(data: dict):
+def to_text(data: dict, xpconfig=False):
     msg = []
     for key, value in data.items():
         _type = type(value)
-        skib = ""
+        skib = value
         if _type == int:
-            if not key == "channel":
-                if value:
-                    skib = "On"
+            if xpconfig:
+                if not key == "channel":
+                    if value:
+                        skib = "On"
+                    else:
+                        skib = "Off"
                 else:
-                    skib = "Off"
+                    if value == 1:
+                        skib = "Current Channel"
+                    else:
+                        skib = f"<#{value}>"
             else:
-                if value == 1:
-                    skib = "Current Channel"
-                else:
-                    skib = f"<#{value}>"
+                skib = f"<#{value}>"
         elif _type == list:
-            skib = f"{value[0]} to {value[1]}"
+            if xpconfig:
+                skib = f"{value[0]} to {value[1]}"
+            else:
+                skib = ""
+                for val in value:
+                    skib += f"<@&{val}>"
+                msg.append(f"{kirk[key]} are {skib}")
+                continue
         msg.append(f"{kirk[key]} is {skib}")
     return "\n".join(msg)
 
