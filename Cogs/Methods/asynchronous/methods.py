@@ -135,5 +135,7 @@ async def event(bot, guild, eventtype, ref, embed):
         webhook = [newwebhook.id, newwebhook.token]
     embed.timestamp = datetime.now()
     embed.set_footer(text=f"{eventtype.capitalize()} ID: {ref.id}")
-    requests.post(f"https://discord.com/api/webhooks/{webhook[0]}/{webhook[1]}", json={ "avatar_url": bot.user.avatar.url, "embeds": [embed.to_dict()]}, headers=headers)
+    resp = requests.post(f"https://discord.com/api/webhooks/{webhook[0]}/{webhook[1]}", json={ "avatar_url": bot.user.avatar.url, "embeds": [embed.to_dict()]}, headers=headers)
+    if not resp.ok:
+        print(f"\033[31m[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [ERROR   ] An error occured in sending an event!: {resp.status_code}: {resp.content}")
 
