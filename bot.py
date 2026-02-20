@@ -10,7 +10,7 @@ from Cogs.Methods.methods import handle_exception, log, close_bot
 from resources.dictionaries import custom_urls
 
 # Variables
-version = "0.7.2"
+version = "0.7.3"
 pid = os.getpid()
 debugging = False
 done = False
