@@ -198,9 +198,8 @@ async def on_message_edit(old, new):
         return
     embed = discord.Embed(description=f"Message edited in {old.channel.mention}\n[Jump to Message]({old.jump_url})", colour=discord.Colour.brand_green())
     embed.set_author(name=old.author.name, icon_url=old.author.avatar.url)
-    embed.add_field(name="Before:", value=old.content[:1024])
-    embed.add_field(name="After:", value=new.content[:1024])
-
+    embed.add_field(name="Before:", value=f"{old.content[:1021]}{"..." if len(old.content) >= 1024 else old.content[1022:1024]}")
+    embed.add_field(name="After:", value=f"{new.content[:1021]}{"..." if len(new.content) >= 1024 else old.content[1022:1024]}")
     await event(bot, old.guild, "message", old, embed)
 
 @bot.event
