@@ -28,9 +28,9 @@ class Moderation(commands.Cog):
                 await interaction.followup.send(f"You may not warn {user.mention} as they have the role <@&{role.id}> and are a moderator!")
                 return
         data = [ user.id, interaction.user.id, reason, message, "WARNING", int(datetime.now().timestamp())]
-        server_settings(True, interaction.guild, "casenum")
-        await logChannel(self.bot, interaction, data, user)
-        await sendCase(interaction, data, user)
+        amt = server_settings(True, interaction.guild, "casenum")
+        await logChannel(self.bot, interaction, data, user, amt)
+        await sendCase(interaction, data, user, amt)
         await interaction.followup.send(modlog(True, interaction, data))
 
     @app_commands.command(name="mute", description="Timeout a user for a specific duration")
@@ -78,9 +78,9 @@ class Moderation(commands.Cog):
         try:
             await user.timeout(until, reason=reason)
             data = [ user.id, interaction.user.id, reason, f"Muted for {length}", "MUTE", int(datetime.now().timestamp())]
-            server_settings(True, interaction.guild, "casenum")
-            await logChannel(self.bot, interaction, data, user)
-            await sendCase(interaction, data, user)
+            amt = server_settings(True, interaction.guild, "casenum")
+            await logChannel(self.bot, interaction, data, user, amt)
+            await sendCase(interaction, data, user, amt)
             await interaction.followup.send(modlog(True, interaction, data))
         except Exception as e:
             await interaction.followup.send(f"An error occurred while running this command!\nError: {e}", view=AutoBugReport(interaction, e))
@@ -101,9 +101,9 @@ class Moderation(commands.Cog):
             if user.is_timed_out():
                 await user.timeout(discord.utils.utcnow(), reason=reason)
                 data = [ user.id, interaction.user.id, reason, None, "UNMUTE", int(datetime.now().timestamp())]
-                server_settings(True, interaction.guild, "casenum")
-                await logChannel(self.bot, interaction, data, user)
-                await sendCase(interaction, data, user)
+                amt = server_settings(True, interaction.guild, "casenum")
+                await logChannel(self.bot, interaction, data, user, amt)
+                await sendCase(interaction, data, user, amt)
                 await interaction.followup.send(f"Successfully unmuted {user.mention}!")
             else:
                 await interaction.followup.send(f"{user.mention} is not muted!")
@@ -130,16 +130,16 @@ class Moderation(commands.Cog):
                     if str(role.id) in allowed_roles:
                         await interaction.followup.send(f"You may not ban {user.mention} as they have the role <@&{role.id}> and are a moderator!")
                         return
-                server_settings(True, interaction.guild, "casenum")
-                await sendCase(interaction, data, user)
+                amt = server_settings(True, interaction.guild, "casenum")
+                await sendCase(interaction, data, user, amt)
                 await t.ban(delete_message_days=delete_msgs, reason=reason)
             else:
                 user = self.bot.get_user(user.id)
-                server_settings(True, interaction.guild, "casenum")
-                await sendCase(interaction, data, user)
+                amt = server_settings(True, interaction.guild, "casenum")
+                await sendCase(interaction, data, user, amt)
                 await interaction.guild.ban(user, reason=reason, delete_message_days=delete_msgs)
 
-            await logChannel(self.bot, interaction, data, user)
+            await logChannel(self.bot, interaction, data, user, amt)
             await interaction.followup.send(modlog(True, interaction, data))
         except Exception as e:
             await interaction.followup.send(f"An error occurred while running this command!\nError: {e}", view=AutoBugReport(interaction, e))
@@ -158,19 +158,20 @@ class Moderation(commands.Cog):
         t = interaction.guild.get_member(user.id)
         allowed_roles = server_settings(False, interaction.guild, "roles")
         data = [ user.id, interaction.user.id, reason, None, "SOFTBAN", int(datetime.now().timestamp())]
+        amt = 0
         try:
             if not t == None:
                 for role in t.roles:
                     if str(role.id) in allowed_roles:
                         await interaction.followup.send(f"You may not softban {user.mention} as they have the role <@&{role.id}> and are a moderator!")
                         return
-                server_settings(True, interaction.guild, "casenum")
-                await sendCase(interaction, data, user)
+                amt = server_settings(True, interaction.guild, "casenum")
+                await sendCase(interaction, data, user, amt)
                 await t.ban(delete_message_days=7, reason="Softban")
                 await asyncio.sleep(1)
                 await t.unban(reason="Unbanning from softban")
             else:
-                server_settings(True, interaction.guild, "casenum")
+                amt = server_settings(True, interaction.guild, "casenum")
                 user = self.bot.get_user(user.id)
                 await interaction.guild.ban(user, delete_message_days=7, reason="Softban")
                 await asyncio.sleep(1)
@@ -178,7 +179,7 @@ class Moderation(commands.Cog):
         except Exception as e:
             await interaction.followup.send(f"An error occurred while running this command!\nError: {e}", view=AutoBugReport(interaction, e))
 
-        await logChannel(self.bot, interaction, data, user)
+        await logChannel(self.bot, interaction, data, user, amt)
         await interaction.followup.send(modlog(True, interaction, data))
 
     @app_commands.command(name="kick", description="Kick a user")
@@ -199,10 +200,10 @@ class Moderation(commands.Cog):
                 return
         try:
             data = [ user.id, interaction.user.id, reason, message, "KICK", int(datetime.now().timestamp())]
-            server_settings(True, interaction.guild, "casenum")
-            await sendCase(interaction, data, user)
+            amt = server_settings(True, interaction.guild, "casenum")
+            await sendCase(interaction, data, user, amt)
             await user.kick(reason=reason)
-            await logChannel(self.bot, interaction, data, user)
+            await logChannel(self.bot, interaction, data, user, amt)
             await interaction.followup.send(modlog(True, interaction, data))
         except Exception as e:
             await interaction.followup.send(f"An error occurred while running this command!\nError: {e}", view=AutoBugReport(interaction, e))
@@ -228,8 +229,8 @@ class Moderation(commands.Cog):
         try:
             data = [ user.id, interaction.user.id, reason, None, "UNBAN", int(datetime.now().timestamp())]
             await interaction.guild.unban(user, reason=reason)
-            server_settings(True, interaction.guild, "casenum")
-            await logChannel(self.bot, interaction, data, user)
+            amt = server_settings(True, interaction.guild, "casenum")
+            await logChannel(self.bot, interaction, data, user, amt)
             await interaction.followup.send(f"{user.mention} was successfully unbanned{f" with the reason: {reason}" if not reason == None else ""}!")
         except Exception as e:
             await interaction.followup.send(f"An error occurred while running this command!\nError: {e}", view=AutoBugReport(interaction, e))
@@ -260,7 +261,7 @@ class Moderation(commands.Cog):
 
         try:
             await user.send(embed=embed)
-            await logChannel(self.bot, interaction, data, user)
+            await logChannel(self.bot, interaction, data, user, case)
             await interaction.followup.send(f'{user.mention} was successfully messaged:\n"{message}"!')
         except Exception as e:
             await interaction.followup.send(f"An error occurred while running this command!\nError: {e}", view=AutoBugReport(interaction, e))
@@ -319,8 +320,7 @@ class Moderation(commands.Cog):
         thing = modlog(True, interaction, index, user, True)
 
         if thing[1]:
-            server_settings(True, interaction.guild, "casenum")
-            await logChannel(self.bot, interaction, [ user.id, interaction.user.id, index, reason, "MODLOG REMOVAL", int(datetime.now().timestamp())], user)
+            await logChannel(self.bot, interaction, [ user.id, interaction.user.id, index, reason, "MODLOG REMOVAL", int(datetime.now().timestamp())], user, server_settings(True, interaction.guild, "casenum"))
         await interaction.followup.send(thing[0])
 
     @app_commands.command(name="mylogs", description="See your log count for this server!")

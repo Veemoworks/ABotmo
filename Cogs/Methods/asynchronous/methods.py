@@ -40,9 +40,8 @@ async def get_prefix(bot, message):
     return prefix or ";;"
 
 # log things to modlog channel
-async def logChannel(bot, interaction, data, user):
+async def logChannel(bot, interaction, data, user, amt):
     rows = server_settings(False, interaction.guild, "casenum")
-    amt = modlog(False, interaction, user=user, rem=True)
     embed = discord.Embed(color=discord.Color.yellow())
     if interaction == discord.Interaction:
         embed.set_author(name=f"CASE {rows} | {data[4]} | {user.name}", icon_url=user.avatar.url)
@@ -58,10 +57,9 @@ async def logChannel(bot, interaction, data, user):
 
     await event(bot, interaction.guild, "modlog", user, embed)
 
-async def sendCase(interaction, data, user):
+async def sendCase(interaction, data, user, amt):
     try:
         rows = server_settings(False, interaction.guild, "casenum")
-        amt = modlog(False, interaction, user=user, rem=True)
         embed = discord.Embed(title=f"You have recieved a **{data[4]}** in __**{interaction.guild.name}**__!", description=f"CASE {rows}", color=discord.Color.brand_red())
         embed.set_thumbnail(url=interaction.guild.icon.url if interaction.guild.icon else None)
         embed.set_author(name=f"{interaction.guild.name} | {interaction.guild.id}", icon_url=interaction.guild.icon.url if interaction.guild.icon else None)

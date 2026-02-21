@@ -114,10 +114,6 @@ def modlog(save, interaction, data = None, user: discord.User = None, rem = Fals
                 msg = (f"Successfully deleted all of {user.mention}'s logs!", True)
 
         con.commit()
-    elif not save and rem:
-        cur.execute(f"""SELECT * FROM '{guild_id}' WHERE user = '{user.id}'""")
-        return len(cur.fetchall())
-
     con.close()
     return msg
 
