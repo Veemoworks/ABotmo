@@ -10,7 +10,7 @@ from Cogs.Methods.methods import handle_exception, log, close_bot
 from resources.dictionaries import custom_urls
 
 # Variables
-version = "0.7.3"
+version = "0.7.4"
 pid = os.getpid()
 debugging = False
 done = False
@@ -137,7 +137,7 @@ async def on_member_remove(member):
         await bot.get_channel(1418384488098037771).send(f"Oh...goodbye, {member.mention}...you have stopped and gone....", allowed_mentions=discord.AllowedMentions(users=False))
 
 @bot.event
-async def on_member_update(old, new):
+async def on_member_update(old: discord.Member, new):
     embed = discord.Embed(colour=discord.Colour.yellow())
     embed.set_author(name=new.name, icon_url=new.avatar.url)
     summary = new.mention + " has been updated:\n"
@@ -164,6 +164,11 @@ async def on_member_update(old, new):
     if not old.timed_out_until == new.timed_out_until:
         summary += "- Timeout Updated\n"
         embed.add_field(name="Timeout Updated", value=f"Before: {f"<t:{int(old.timed_out_until.timestamp())}:f>" if old.timed_out_until else None} | After: {f"<t:{int(new.timed_out_until.timestamp())}:f>" if new.timed_out_until else None}")
+    if not old.premium_since == new.premium_since:
+        if old.premium_since is None:
+            summary += "- Started server boosting\n"
+        else:
+            summary += f"- Stopped server boosting (Started boosting at <t:{int(new.premium_since.timestamp())}:d>)\n"
     embed.description = summary
 
     if summary == new.mention + " has been updated:\n":
