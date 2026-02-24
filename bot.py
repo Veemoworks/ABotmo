@@ -59,7 +59,7 @@ async def on_ready():
                 status.start(bot)
                 kuma.start(bot)
                 t = bot.get_channel(1403041372751265912)
-                await t.edit(name="Bot Status: ✅")
+                await t.edit(name="[ 🟢 ] | Bot Status: Online")
                 print(log(False, f"READY TO KILL ALL FELLAS..."))
                 done = True
         except Exception as e:

@@ -103,4 +103,4 @@ def to_text(data: dict, xpconfig=False):
 def close_bot():
     with open("output.txt", "a") as f:
         f.write(f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] Bot session was ended.\n")
-    requests.patch("https://discord.com/api/v10/channels/1403041372751265912", headers={"Authorization":"Bot " + os.getenv("TOKEN"), "Content-Type": "application/json"}, data=json.dumps({"name": "Bot Status: ❌"}))
+    requests.patch("https://discord.com/api/v10/channels/1403041372751265912", headers={"Authorization":"Bot " + os.getenv("TOKEN"), "Content-Type": "application/json"}, data=json.dumps({"name": "[ 🔴 ] | Bot Status: Offline"}))
