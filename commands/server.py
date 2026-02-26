@@ -1,7 +1,7 @@
 import discord, json
 from discord import app_commands
 from discord.ext import commands
-from Cogs.Methods.methods import log, to_text
+from Cogs.Methods.methods import log, to_text, permission_check
 from Cogs.Classes.DiscordViews import Config, XPConfig
 from resources.dictionaries import setting_users
 from DataBases.database import xp, server_settings, user_settings, xp_settings, server_channels
@@ -147,6 +147,30 @@ class Server(commands.Cog):
                 await interaction.followup.send(embed=embed)
             else:
                 await interaction.followup.send(f"**__{user.name}__** has no XP for {interaction.guild.name}.")
+
+    @app_commands.command(name="set_rank", description="Modify a user's rank!")
+    @app_commands.describe(user="User to modify", newlevel="Change the user's level", newxp="Change the user's XP")
+    @app_commands.allowed_contexts(True, False, False)
+    @app_commands.guild_only()
+    @permission_check()
+    async def set_rank(self, interaction: discord.Interaction, user: discord.Member, newlevel: int = None, newxp: int = None):
+        print(log(False,
+                  f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id} ({interaction.guild.name})!"))
+        if not newlevel and not newxp:
+            await interaction.response.send_message("Please enter either a Level or XP to modify!")
+            return
+        if user.bot:
+            await interaction.response.send_message("You cannot modify a bot's rank!")
+            return
+        hasdata, olddata = xp(False, interaction.guild, user=user)
+        text = ""
+        if newlevel:
+            text += f"Changed Level{f" from {olddata[1]}" if hasdata else ""} to {newlevel}\n"
+        if newxp:
+            text += f"Changed XP{f" from {olddata[0]}" if hasdata else ""} to {newxp}"
+        data = [newxp, newlevel]
+        xp(True, interaction.guild, data, user, False)
+        await interaction.response.send_message(f"Successfully changed {user.mention}'s rank\n{text}", allowed_mentions=discord.AllowedMentions(users=False))
 
     @app_commands.command(name="settings", description="Change your settings with the bot!")
     @app_commands.describe(xpmessages="Toggle where you want the XP messages for leveling up!")

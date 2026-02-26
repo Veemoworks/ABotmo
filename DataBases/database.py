@@ -118,7 +118,7 @@ def modlog(save, interaction, data = None, user: discord.User = None, rem = Fals
     return msg
 
 # <editor-fold desc="xp.db">
-def xp(save, guild, time=None, user=None):
+def xp(save, guild, data=None, user=None, lvlup=True):
     returnval = None
     con = sqlite3.connect("DataBases/xp.db")
     cur = con.cursor()
@@ -139,38 +139,49 @@ def xp(save, guild, time=None, user=None):
         con.commit()
 
     if save:
-        cur.execute(f"""
-                    SELECT xp, level, last_msg FROM '{guild_id}'
-                    WHERE user = '{user.id}'   
-                """)
-        row = cur.fetchone()
-        if row == None:
-            t: dict = xp_settings(False, guild, None)
+        if lvlup:
             cur.execute(f"""
-                        INSERT INTO '{guild_id}'
-                        VALUES ({user.id}, {random.randint(t["range"][0], t["range"][1])}, 0, {time})
-                        """)
-            con.commit()
-            level = 0
-        else:
-            g: dict = xp_settings(False, guild, None)
-            xph, level, last_msg = row
-            if last_msg is None or time - last_msg >= g["cd"]:
-                new_xp = xph + random.randint(g["range"][0], g["range"][1])
-                next_level = 5 * (level ** 2) + 100 * level + 100
-
-                if new_xp >= next_level:
-                    level += 1
-                    returnval = True
-
+                        SELECT xp, level, last_msg FROM '{guild_id}'
+                        WHERE user = '{user.id}'   
+                    """)
+            row = cur.fetchone()
+            if row == None:
+                t: dict = xp_settings(False, guild, None)
                 cur.execute(f"""
-                            UPDATE '{guild_id}'
-                            SET xp = '{new_xp}', level = '{level}', last_msg = '{time}'
-                            WHERE user = '{user.id}'
-                        """)
+                            INSERT INTO '{guild_id}'
+                            VALUES ({user.id}, {random.randint(t["range"][0], t["range"][1])}, 0, {data})
+                            """)
                 con.commit()
-        con.close()
-        return returnval, level
+                level = 0
+            else:
+                g: dict = xp_settings(False, guild, None)
+                xph, level, last_msg = row
+                if last_msg is None or data - last_msg >= g["cd"]:
+                    new_xp = xph + random.randint(g["range"][0], g["range"][1])
+                    next_level = 5 * (level ** 2) + 100 * level + 100
+
+                    if new_xp >= next_level:
+                        level += 1
+                        returnval = True
+
+                    cur.execute(f"""
+                                UPDATE '{guild_id}'
+                                SET xp = '{new_xp}', level = '{level}', last_msg = '{data}'
+                                WHERE user = '{user.id}'
+                            """)
+                    con.commit()
+            con.close()
+            return returnval, level
+        else:
+            newxp, newlevel = data
+            cur.execute(f"""
+                        UPDATE '{guild_id}'
+                        SET {f"xp = '{newxp}'" if newxp else ""}{", " if newlevel and newxp else ""}{f"level = '{newlevel}'" if newlevel else ""}
+                        WHERE user = '{user.id}' 
+                    """)
+            con.commit()
+            con.close()
+            return [newxp, newlevel]
     else:
         cur.execute(f"""
             SELECT xp, level FROM '{guild_id}'
