@@ -1,11 +1,12 @@
 import discord, psutil, ping3, re, platform
 from bot import startup, version, pid
+from datetime import datetime
 from discord import app_commands
 from discord.ext import commands
 from Cogs.Methods.asynchronous.methods import get_prefix
 from Cogs.Methods.methods import permission_check, imgcol_gen
 from Cogs.Classes.DiscordModals import BugReport, BotSuggest
-from Cogs.Classes.DiscordViews import ServerInfo
+from Cogs.Classes.DiscordViews import ServerInfo, ProfileButtons
 from Cogs.Classes.DiscordButtons import CreditsButton
 from resources.arrays import veemoworksdevs, recnetdb
 from resources.dictionaries import botbadges, cmduae
@@ -28,80 +29,38 @@ class Utils(commands.Cog):
     @app_commands.command(name="whois", description="Get info about a user")
     @app_commands.describe(user="User to get info from", ephemeral="Set to ephemeral?")
     @app_commands.allowed_contexts(True, True, True)
-    async def whois(self, interaction: discord.Interaction, user: discord.User = None, ephemeral: bool = True):
+    async def whois(self, interaction: discord.Interaction, user: discord.User = None):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         if user == None:
             user = interaction.user
-        user = await self.bot.fetch_user(user.id)
-
-        class Buttons(discord.ui.View):
-            def __init__(self, user: discord.User):
-                super().__init__(timeout=180)
-                self.user = user
-
-                self.add_item(discord.ui.Button(label="View Profile (WEB)", url=f"https://discord.com/users/{user.id}", style=discord.ButtonStyle.link, row=1))
-                self.add_item(discord.ui.Button(label="View Profile (APP)", url=f"discord://-/users/{user.id}", style=discord.ButtonStyle.link, row=1))
-
-                if user.banner:
-                    banner_button = discord.ui.Button(label="View Banner", style=discord.ButtonStyle.primary)
-                    banner_button.callback = self.callback
-                    self.add_item(banner_button)
-
-            async def on_timeout(self):
-                for item in self.children:
-                    item.disabled = True
-                await interaction.edit_original_response(view=self)
-
-            @discord.ui.button(label="View Avatar", style=discord.ButtonStyle.primary)
-            async def avatar_callback(self, interaction: discord.Interaction, button: discord.ui.Button):
-                embed = discord.Embed(color=discord.Color.brand_green())
-                embed.set_image(url=self.user.avatar.url)
-                embed.set_author(name=f"@{self.user}", icon_url=self.user.avatar.url)
-
-                view = discord.ui.View()
-                view.add_item(
-                    discord.ui.Button(label="Image URL", style=discord.ButtonStyle.link, url=self.user.avatar.url))
-                await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
-
-            async def callback(self, interaction: discord.Interaction):
-                embed = discord.Embed(color=discord.Color.brand_green())
-                embed.set_image(url=self.user.banner.url)
-                embed.set_author(name=f"@{self.user}", icon_url=self.user.avatar.url)
-                view2 = discord.ui.View()
-                view2.add_item(
-                    discord.ui.Button(label="Image URL", style=discord.ButtonStyle.link, url=self.user.banner.url))
-                await interaction.response.send_message(embed=embed, view=view2, ephemeral=True)
+        try:
+            user = await self.bot.fetch_user(user.id)
+        except:
+            pass
 
         badges = []
         if user.public_flags:
             for flag, emoji in botbadges.items():
                 if getattr(user.public_flags, flag, False):
                     badges.append(emoji)
-        badge_text = " ".join(badges) if badges else " "
-        created_at = f"<t:{int(user.created_at.timestamp())}:R>"
+        badges = " ".join(badges) if badges else " "
 
         if user.id == 333585549837336577:
-            badge_text += " <:VeraVeemo:1400816211620659272> <:VeemoworksDev:1400816284526051369> <:Python:1400816361189675038> <:dev:1400815766814589080> <:hypesquad:1400816053675884624> <:partner:1400816107325096016> <:bughunter2:1400815976127135874>"
-        elif user.id == 299914704594403329:
-            badge_text += " <:Chomperling:1400816246160756809>"
-        elif user.id == 566996607455723522:
-            badge_text += " <:PedroStudios:1400816325311336478>"
+            badges += " <:VeraVeemo:1400816211620659272> <:VeemoworksDev:1400816284526051369> <:Python:1400816361189675038> <:dev:1400815766814589080> <:hypesquad:1400816053675884624> <:partner:1400816107325096016> <:bughunter2:1400815976127135874>"
         if user.id in veemoworksdevs:
-            badge_text += " <:VeemoworksDev:1400816284526051369>"
+            badges += " <:VeemoworksDev:1400816284526051369>"
             if user.id in recnetdb:
-                badge_text += " <:RecNetDB:1401234874848907365>"
+                badges += " <:RecNetDB:1401234874848907365>"
 
-        embed = discord.Embed(title=f"{user.name}'s Profile", color=discord.Color.brand_green())
+        embed = discord.Embed( description=badges, color=discord.Color.brand_green())
+        embed.set_author(name=f"{user.name} ({user.id})")
+        embed.add_field(name="Display Name:", value=f"{user.display_name}{f" (G: {user.global_name})" if not user.display_name == user.global_name else ""}")
+        created = int(user.created_at.timestamp())
+        embed.add_field(name="Creation Date:", value=f"<t:{created}:f> (<t:{created}:R>)")
         embed.set_thumbnail(url=user.avatar.url)
-        if user.banner:
-            embed.set_image(url=user.banner.url)
-        embed.add_field(name="Display Name:", value=f"**{user.display_name}**", inline=False)
-        embed.add_field(name="Username:", value=f"{user.mention} (`@{user.name}`)", inline=False)
-        embed.add_field(name="Account Created:", value=created_at, inline=False)
-        embed.add_field(name="Badges:", value=badge_text, inline=False)
-        embed.set_footer(text=f"ID: {user.id}")
+        embed.timestamp = datetime.now()
 
-        await interaction.response.send_message(embed=embed, view=Buttons(user), ephemeral=ephemeral)
+        await interaction.response.send_message(embed=embed, view=ProfileButtons(user, interaction))
 
     @app_commands.command(name="applications", description="Provides an application for Veemoworks")
     @app_commands.allowed_contexts(True, True, True)

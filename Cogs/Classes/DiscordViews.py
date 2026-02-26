@@ -17,7 +17,7 @@ class AutoBugReport(View):
             item.disabled = True
         await self.interaction.edit_original_response(view=self)
 
-class ServerInfo(discord.ui.View):
+class ServerInfo(View):
     def __init__(self, guild: discord.Guild):
         super().__init__(timeout=180)
         self.guild = guild
@@ -30,7 +30,7 @@ class ServerInfo(discord.ui.View):
             await self.interaction.edit_original_response(view=self)
 
     @discord.ui.button(label="Roles", style=discord.ButtonStyle.blurple)
-    async def roles_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+    async def roles_button(self, interaction: discord.Interaction, button: Button):
         self.interaction = interaction
         roles = [r.mention for r in self.guild.roles if not r.is_default()]
         roles_text = "\n".join(roles) if roles else "No roles found."
@@ -44,7 +44,7 @@ class ServerInfo(discord.ui.View):
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @discord.ui.button(label="Channels", style=discord.ButtonStyle.blurple)
-    async def channels_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+    async def channels_button(self, interaction: discord.Interaction, button: Button):
         self.interaction = interaction
         text_channels = [c.mention for c in self.guild.text_channels]
         voice_channels = [c.mention for c in self.guild.voice_channels]
@@ -67,8 +67,7 @@ class ServerInfo(discord.ui.View):
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @discord.ui.button(label="Emojis", style=discord.ButtonStyle.blurple)
-    async def emojis_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-        self.interaction = interaction
+    async def emojis_button(self, interaction: discord.Interaction, button: Button):
         emojis = [str(e) for e in self.guild.emojis]
         emojis_text = "".join(emojis)[:4000] if emojis else "No emojis found."
 
@@ -416,3 +415,35 @@ class XPConfigBack(Button):
         view = XPConfig(interaction)
         await interaction.response.edit_message(embed=embed, view=view)
 # </editor-fold>
+
+class ProfileButtons(View):
+    def __init__(self, user: discord.User, interaction):
+        super().__init__(timeout=180)
+        self.user = user
+        self.interaction = interaction
+        self.add_item(Button(label="View Profile (WEB)", url=f"https://discord.com/users/{user.id}",style=discord.ButtonStyle.link, row=1))
+        self.add_item(Button(label="View Profile (APP)", url=f"discord://-/users/{user.id}",style=discord.ButtonStyle.link, row=1))
+
+        if user.banner:
+            banner = Button(label="View Banner", style=discord.ButtonStyle.primary)
+            banner.callback = self.bannerCallback
+
+            self.add_item(banner)
+
+    async def on_timeout(self):
+        for item in self.children:
+            item.disabled = True
+        await self.interaction.edit_original_response(view=self)
+
+    async def bannerCallback(self, interactionc):
+        embed = discord.Embed(color=discord.Color.brand_green())
+        embed.set_image(url=self.user.banner.url)
+        embed.set_author(name=f"@{self.user}", icon_url=self.user.avatar.url)
+        await interactionc.response.send_message(embed=embed, view=View().add_item(Button(label="Image URL", style=discord.ButtonStyle.link, url=self.user.banner.url)), ephemeral=True)
+
+    @discord.ui.button(label="View Avatar", style=discord.ButtonStyle.primary)
+    async def callback(self, interaction: discord.Interaction,_):
+        embed = discord.Embed(color=discord.Color.brand_green())
+        embed.set_image(url=self.user.avatar.url)
+        embed.set_author(name=f"@{self.user}", icon_url=self.user.avatar.url)
+        await interaction.response.send_message(embed=embed, view=View().add_item(Button(label="Image URL", style=discord.ButtonStyle.link, url=self.user.avatar.url)), ephemeral=True)
