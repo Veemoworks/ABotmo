@@ -48,7 +48,10 @@ class Server(commands.Cog):
             await interaction.followup.send("You do not have permission to run this command!")
             return
 
-        currconfig = xp_settings(False, interaction.guild, None)
+        currconfig: dict = xp_settings(False, interaction.guild, None)
+        if not currconfig["xpenabled"]:
+            currconfig.clear()
+            currconfig["xpenabled"] = 0
         embed = discord.Embed(title="XP Configuration", description=f"Welcome to the XP Configuration Panel, {interaction.user.mention}\nOnly Administrators can access this command.\n\n**__Current Config:__**\n{to_text(currconfig, True)}\n\nYour changes will soon be adjusted, please wait...", color=discord.Color.brand_green())
         msg = await interaction.followup.send(embed=embed)
         embed.description = embed.description.removesuffix("Your changes will soon be adjusted, please wait...")
