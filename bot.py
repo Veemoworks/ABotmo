@@ -18,12 +18,6 @@ startup = datetime.now()
 
 # Load .env, clear old output.txt, and initalize the bot
 load_dotenv()
-with open("output.txt", "w") as f:
-    f.write("")
-    print(log(False, "Initilizaing..."))
-if debugging:
-    with open("debug.txt", "w") as f:
-        f.write("")
 bot = commands.Bot(command_prefix=get_prefix, intents=discord.Intents.all(), max_messages=500)
 
 # Bot event for when bot starts up
@@ -420,5 +414,11 @@ sys.excepthook = handle_exception
 
 # Run bot
 if __name__ == "__main__":
+    with open("output.txt", "w") as f:
+        f.write("")
+        print(log(False, "Initilizaing..."))
+    if debugging:
+        with open("debug.txt", "w") as f:
+            f.write("")
     bot.run(os.getenv("TOKEN"), log_handler=logging.FileHandler(filename='debug.txt', encoding='utf-8', mode='a') if debugging else None, log_level=logging.DEBUG)
     close_bot()
