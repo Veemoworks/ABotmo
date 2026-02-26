@@ -27,7 +27,7 @@ class Utils(commands.Cog):
         return choices[:25]
 
     @app_commands.command(name="whois", description="Get info about a user")
-    @app_commands.describe(user="User to get info from", ephemeral="Set to ephemeral?")
+    @app_commands.describe(user="User to get info from")
     @app_commands.allowed_contexts(True, True, True)
     async def whois(self, interaction: discord.Interaction, user: discord.User = None):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
