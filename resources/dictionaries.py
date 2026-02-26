@@ -59,7 +59,8 @@ cmduae = {
     "settings": ["[ options ]", "xpmessages"],
     "checkmod": ["{user} [ page ]", "AVeemo, 2"],
     "ban": ["{user} {reason} [ message ] [ delete_msgs ]", "AVeemo, Threatened to doxx a user, Permanent ban with no appeal"],
-    "unban": ["{user} {reason}", "AVeemo, Shown proof of them being framed"]
+    "unban": ["{user} {reason}", "AVeemo, Shown proof of them being framed"],
+    "set_rank": ["{user} [ level ] [ xp ]", "AVeemo, 5, 250"]
 }
 custom_urls = {
     1373049145572593784: {
