@@ -1,5 +1,5 @@
 import discord, psutil, ping3, re, platform
-from bot import startup, version, pid
+from bot import startup
 from datetime import datetime
 from discord import app_commands
 from discord.ext import commands
@@ -10,6 +10,7 @@ from Cogs.Classes.DiscordViews import ServerInfo, ProfileButtons
 from Cogs.Classes.DiscordButtons import CreditsButton
 from resources.arrays import veemoworksdevs, recnetdb
 from resources.dictionaries import botbadges, cmduae
+from resources.variables import version, pid
 from Cogs.Methods.methods import log
 
 ping3.EXCEPTIONS = True
