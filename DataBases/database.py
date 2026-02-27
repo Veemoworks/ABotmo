@@ -417,7 +417,7 @@ def server_settings(save, guild, stype=None, value=None):
             return f"Your server configuration for bot prefix has been updated to \"{value}\"."
         elif stype == "casenum":
             cur.execute(f"""
-                SELECT casenum FROM server_settings WHERE guild_id = '{guild_id}'""")
+                SELECT casenum FROM server_settings WHERE guild_id = '{guild_id}' {f"AND user = {value}" if value else ""}""")
             num = cur.fetchone()[0]
             num += 1
             cur.execute(f"""

@@ -28,7 +28,7 @@ class Moderation(commands.Cog):
                 await interaction.followup.send(f"You may not warn {user.mention} as they have the role <@&{role.id}> and are a moderator!")
                 return
         data = [ user.id, interaction.user.id, reason, message, "WARNING", int(datetime.now().timestamp())]
-        amt = server_settings(True, interaction.guild, "casenum")
+        amt = server_settings(True, interaction.guild, "casenum", user.id)
         await logChannel(self.bot, interaction, data, user, amt)
         await sendCase(interaction, data, user, amt)
         await interaction.followup.send(modlog(True, interaction, data))
@@ -78,7 +78,7 @@ class Moderation(commands.Cog):
         try:
             await user.timeout(until, reason=reason)
             data = [ user.id, interaction.user.id, reason, f"Muted for {length}", "MUTE", int(datetime.now().timestamp())]
-            amt = server_settings(True, interaction.guild, "casenum")
+            amt = server_settings(True, interaction.guild, "casenum", user.id)
             await logChannel(self.bot, interaction, data, user, amt)
             await sendCase(interaction, data, user, amt)
             await interaction.followup.send(modlog(True, interaction, data))
@@ -101,7 +101,7 @@ class Moderation(commands.Cog):
             if user.is_timed_out():
                 await user.timeout(discord.utils.utcnow(), reason=reason)
                 data = [ user.id, interaction.user.id, reason, None, "UNMUTE", int(datetime.now().timestamp())]
-                amt = server_settings(True, interaction.guild, "casenum")
+                amt = server_settings(True, interaction.guild, "casenum", user.id)
                 await logChannel(self.bot, interaction, data, user, amt)
                 await sendCase(interaction, data, user, amt)
                 await interaction.followup.send(f"Successfully unmuted {user.mention}!")
@@ -130,12 +130,12 @@ class Moderation(commands.Cog):
                     if str(role.id) in allowed_roles:
                         await interaction.followup.send(f"You may not ban {user.mention} as they have the role <@&{role.id}> and are a moderator!")
                         return
-                amt = server_settings(True, interaction.guild, "casenum")
+                amt = server_settings(True, interaction.guild, "casenum", user.id)
                 await sendCase(interaction, data, user, amt)
                 await t.ban(delete_message_days=delete_msgs, reason=reason)
             else:
                 user = self.bot.get_user(user.id)
-                amt = server_settings(True, interaction.guild, "casenum")
+                amt = server_settings(True, interaction.guild, "casenum", user.id)
                 await sendCase(interaction, data, user, amt)
                 await interaction.guild.ban(user, reason=reason, delete_message_days=delete_msgs)
 
@@ -165,13 +165,13 @@ class Moderation(commands.Cog):
                     if str(role.id) in allowed_roles:
                         await interaction.followup.send(f"You may not softban {user.mention} as they have the role <@&{role.id}> and are a moderator!")
                         return
-                amt = server_settings(True, interaction.guild, "casenum")
+                amt = server_settings(True, interaction.guild, "casenum", user.id)
                 await sendCase(interaction, data, user, amt)
                 await t.ban(delete_message_days=7, reason="Softban")
                 await asyncio.sleep(1)
                 await t.unban(reason="Unbanning from softban")
             else:
-                amt = server_settings(True, interaction.guild, "casenum")
+                amt = server_settings(True, interaction.guild, "casenum", user.id)
                 user = self.bot.get_user(user.id)
                 await interaction.guild.ban(user, delete_message_days=7, reason="Softban")
                 await asyncio.sleep(1)
@@ -200,7 +200,7 @@ class Moderation(commands.Cog):
                 return
         try:
             data = [ user.id, interaction.user.id, reason, message, "KICK", int(datetime.now().timestamp())]
-            amt = server_settings(True, interaction.guild, "casenum")
+            amt = server_settings(True, interaction.guild, "casenum", user.id)
             await sendCase(interaction, data, user, amt)
             await user.kick(reason=reason)
             await logChannel(self.bot, interaction, data, user, amt)
@@ -229,7 +229,7 @@ class Moderation(commands.Cog):
         try:
             data = [ user.id, interaction.user.id, reason, None, "UNBAN", int(datetime.now().timestamp())]
             await interaction.guild.unban(user, reason=reason)
-            amt = server_settings(True, interaction.guild, "casenum")
+            amt = server_settings(True, interaction.guild, "casenum", user.id)
             await logChannel(self.bot, interaction, data, user, amt)
             await interaction.followup.send(f"{user.mention} was successfully unbanned{f" with the reason: {reason}" if not reason == None else ""}!")
         except Exception as e:
