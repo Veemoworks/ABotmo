@@ -1,7 +1,7 @@
 import discord, json
 from discord import app_commands
 from discord.ext import commands
-from Cogs.Methods.methods import log, to_text, permission_check
+from Cogs.Methods.methods import log, to_text, permission_check, xpEnabledOnly
 from Cogs.Classes.DiscordViews import Config, XPConfig
 from resources.dictionaries import setting_users
 from DataBases.database import xp, server_settings, user_settings, xp_settings, server_channels
@@ -153,6 +153,7 @@ class Server(commands.Cog):
     @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
     @permission_check()
+    @xpEnabledOnly()
     async def set_rank(self, interaction: discord.Interaction, user: discord.Member, newlevel: int = None, newxp: int = None):
         print(log(False,
                   f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id} ({interaction.guild.name})!"))

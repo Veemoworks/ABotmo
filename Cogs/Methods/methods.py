@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from discord import app_commands
 from Cogs.Methods.asynchronous.methods import crash
 from resources.dictionaries import kirk
-from DataBases.database import server_settings
+from DataBases.database import server_settings, xp_settings
 load_dotenv(".env")
 
 # Regular functions here
@@ -44,6 +44,16 @@ def permission_check():
                 return True
         await interaction.response.send_message("You do not have permission to run this command!", ephemeral=True)
         return False
+
+    return app_commands.check(predicate)
+
+def xpEnabledOnly():
+    async def predicate(interaction: discord.Interaction):
+        currconfig: dict = xp_settings(False, interaction.guild, None)
+        if not currconfig["xpenabled"]:
+            await interaction.response.send_message("This command is disabled as this server does not have XP enabled!", ephemeral=True)
+            return False
+        return True
 
     return app_commands.check(predicate)
 
