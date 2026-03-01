@@ -71,7 +71,9 @@ async def sendCase(interaction, data, user, amt):
         embed.timestamp = datetime.now()
 
         await user.send(embed=embed)
-    except:
+    except discord.Forbidden or discord.HTTPException as e:
+        await interaction.followup.send(f"The user has still recieved the {data[4]}, but not a DM\n-# Error: {e}", ephemeral=True)
+    except Exception:
         pass
 
 
