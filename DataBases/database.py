@@ -201,7 +201,7 @@ def xp(save, guild, data=None, user=None, lvlup=True):
             return False, None
 
         dxp, level = row
-        next_level = 5 * (level ** 2) + 100 * level + 100
+        next_level = 5 * (level**2) + (level * 50) + 75
         con.close()
         return True, [dxp, level, next_level]
 
