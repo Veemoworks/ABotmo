@@ -4,7 +4,7 @@ from Cogs.BotEvents import load
 from datetime import datetime
 from dotenv import load_dotenv
 from Cogs.Methods.asynchronous.methods import get_prefix
-from Cogs.Methods.methods import handle_exception, log, close_bot
+from Cogs.Methods.methods import handle_exception, log
 
 debugging = False
 startup = datetime.now()
