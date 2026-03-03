@@ -109,7 +109,7 @@ class XPLevel(Modal):
         super().__init__(title="Enter a number")
         self.role = role
         self.add_item(TextInput(
-            label=f"Level Required for role: {role.name}",
+            label=f"Level Required for role: {role.name[:17] + "..." if len(role.name) >= 20 else role.name}",
             placeholder="Enter a number, if you enter anything else it'll be ignored.",
             style=discord.TextStyle.short
         ))
