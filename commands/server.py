@@ -149,14 +149,14 @@ class Server(commands.Cog):
                 await interaction.followup.send(f"**__{user.name}__** has no XP for {interaction.guild.name}.")
 
     @app_commands.command(name="set_rank", description="Modify a user's rank!")
-    @app_commands.describe(user="User to modify", newlevel="Change the user's level", newxp="Change the user's XP")
+    @app_commands.describe(user="User to modify", newlevel="Change the user's level", newxp="Change the user's XP", add="Add to current xp, else change it to value")
     @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
     @permission_check()
     @xpEnabledOnly()
-    async def set_rank(self, interaction: discord.Interaction, user: discord.Member, newlevel: int = None, newxp: int = None):
+    async def set_rank(self, interaction: discord.Interaction, user: discord.Member, newlevel: int = None, newxp: int = None, add: bool = False):
         print(log(False,
-                  f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id} ({interaction.guild.name})!"))
+                      f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id} ({interaction.guild.name})!"))
         if not newlevel and not newxp:
             await interaction.response.send_message("Please enter either a Level or XP to modify!")
             return
@@ -166,10 +166,10 @@ class Server(commands.Cog):
         hasdata, olddata = xp(False, interaction.guild, user=user)
         text = ""
         if newlevel:
-            text += f"Changed Level{f" from {olddata[1]}" if hasdata else ""} to {newlevel}\n"
+            text += f"Added {newlevel} Level{"s" if newlevel > 1 else ""}{f" to current level: {olddata[1] + newlevel}" if hasdata else ""}" if add else f"Changed Level{f" from {olddata[1]}" if hasdata else ""} to Level {newlevel}"
         if newxp:
-            text += f"Changed XP{f" from {olddata[0]}" if hasdata else ""} to {newxp}"
-        data = [newxp, newlevel]
+            text += f"Added {newxp} XP{f" to current XP: {olddata[0] + newxp}" if hasdata else ""}" if add else f"Changed XP{f" from {olddata[0]}" if hasdata else ""} to {newxp} XP"
+        data = [newxp, newlevel] if not add else [olddata[0] + newxp if newxp else None, olddata[1] + newlevel if newlevel else None]
         xp(True, interaction.guild, data, user, False)
         await interaction.response.send_message(f"Successfully changed {user.mention}'s rank\n{text}", allowed_mentions=discord.AllowedMentions(users=False))
 
