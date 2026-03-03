@@ -165,7 +165,7 @@ def xp(save, guild, data=None, user=None, lvlup=True):
                 xph, level, last_msg = row
                 if last_msg is None or data - last_msg >= g["cd"]:
                     new_xp = xph + random.randint(g["range"][0], g["range"][1])
-                    next_level = 5 * (level ** 2) + 100 * level + 100
+                    next_level = 5 * (level**2) + (level * 50) + 75
 
                     if new_xp >= next_level:
                         level += 1
