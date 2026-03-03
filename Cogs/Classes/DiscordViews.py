@@ -323,18 +323,15 @@ class XPRoles(Button):
         super().__init__(label="Level Roles", style=discord.ButtonStyle.primary)
 
     async def callback(self, interaction: discord.Interaction):
-        try:
-            guild_roles = [r for r in interaction.guild.roles if not r.is_default()]
-            view = XPRolePage(interaction, guild_roles, page=0)
+        guild_roles = [r for r in interaction.guild.roles if not r.is_default()]
+        view = XPRolePage(interaction, guild_roles, page=0)
 
-            embed = discord.Embed(
+        embed = discord.Embed(
                 title="Level Role Configuration",
                 description="Select 1 role from the list of roles below:",
                 color=discord.Color.green()
-            )
-            await interaction.response.edit_message(embed=embed, view=view)
-        except Exception as e:
-            print(e)
+        )
+        await interaction.response.edit_message(embed=embed, view=view)
 
 class XPPageButton(Button):
     def __init__(self, label: str, page: int, max_pages: int, mode: str, items):
