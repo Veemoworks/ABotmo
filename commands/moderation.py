@@ -28,10 +28,11 @@ class Moderation(commands.Cog):
                 await interaction.followup.send(f"You may not warn {user.mention} as they have the role <@&{role.id}> and are a moderator!")
                 return
         data = [ user.id, interaction.user.id, reason, message, "WARNING", int(datetime.now().timestamp())]
-        amt = server_settings(True, interaction.guild, "casenum", user.id)
-        await logChannel(self.bot, interaction, data, user, amt)
-        await sendCase(interaction, data, user, amt)
-        await interaction.followup.send(modlog(True, interaction, data))
+        msg = modlog(True, interaction, data)
+        server_settings(True, interaction.guild, "casenum")
+        await logChannel(self.bot, interaction, data, user, modlog(False, interaction, user=user, rem=True))
+        await sendCase(interaction, data, user, modlog(False, interaction, user=user, rem=True))
+        await interaction.followup.send(msg)
 
     @app_commands.command(name="mute", description="Timeout a user for a specific duration")
     @app_commands.describe(user="Enter a user", length="Enter a time (60s, 1m, 1h, 1d, 2w)", reason="Enter a reason")
@@ -78,10 +79,11 @@ class Moderation(commands.Cog):
         try:
             await user.timeout(until, reason=reason)
             data = [ user.id, interaction.user.id, reason, f"Muted for {length}", "MUTE", int(datetime.now().timestamp())]
-            amt = server_settings(True, interaction.guild, "casenum", user.id)
-            await logChannel(self.bot, interaction, data, user, amt)
-            await sendCase(interaction, data, user, amt)
-            await interaction.followup.send(modlog(True, interaction, data))
+            msg = modlog(True, interaction, data)
+            server_settings(True, interaction.guild, "casenum")
+            await logChannel(self.bot, interaction, data, user, modlog(False, interaction, user=user, rem=True))
+            await sendCase(interaction, data, user, modlog(False, interaction, user=user, rem=True))
+            await interaction.followup.send(msg)
         except Exception as e:
             await interaction.followup.send(f"An error occurred while running this command!\nError: {e}", view=AutoBugReport(interaction, e))
 
@@ -101,9 +103,9 @@ class Moderation(commands.Cog):
             if user.is_timed_out():
                 await user.timeout(discord.utils.utcnow(), reason=reason)
                 data = [ user.id, interaction.user.id, reason, None, "UNMUTE", int(datetime.now().timestamp())]
-                amt = server_settings(True, interaction.guild, "casenum", user.id)
-                await logChannel(self.bot, interaction, data, user, amt)
-                await sendCase(interaction, data, user, amt)
+                server_settings(True, interaction.guild, "casenum")
+                await logChannel(self.bot, interaction, data, user, modlog(False, interaction, user=user, rem=True))
+                await sendCase(interaction, data, user, modlog(False, interaction, user=user, rem=True))
                 await interaction.followup.send(f"Successfully unmuted {user.mention}!")
             else:
                 await interaction.followup.send(f"{user.mention} is not muted!")
@@ -130,17 +132,19 @@ class Moderation(commands.Cog):
                     if str(role.id) in allowed_roles:
                         await interaction.followup.send(f"You may not ban {user.mention} as they have the role <@&{role.id}> and are a moderator!")
                         return
-                amt = server_settings(True, interaction.guild, "casenum", user.id)
-                await sendCase(interaction, data, user, amt)
+                msg = modlog(True, interaction, data)
+                server_settings(True, interaction.guild, "casenum")
+                await sendCase(interaction, data, user, modlog(False, interaction, user=user, rem=True))
                 await t.ban(delete_message_days=delete_msgs, reason=reason)
             else:
+                msg = modlog(True, interaction, data)
                 user = self.bot.get_user(user.id)
-                amt = server_settings(True, interaction.guild, "casenum", user.id)
-                await sendCase(interaction, data, user, amt)
+                server_settings(True, interaction.guild, "casenum")
+                await sendCase(interaction, data, user, modlog(False, interaction, user=user, rem=True))
                 await interaction.guild.ban(user, reason=reason, delete_message_days=delete_msgs)
 
-            await logChannel(self.bot, interaction, data, user, amt)
-            await interaction.followup.send(modlog(True, interaction, data))
+            await logChannel(self.bot, interaction, data, user, modlog(False, interaction, user=user, rem=True))
+            await interaction.followup.send(msg)
         except Exception as e:
             await interaction.followup.send(f"An error occurred while running this command!\nError: {e}", view=AutoBugReport(interaction, e))
 
@@ -158,20 +162,22 @@ class Moderation(commands.Cog):
         t = interaction.guild.get_member(user.id)
         allowed_roles = server_settings(False, interaction.guild, "roles")
         data = [ user.id, interaction.user.id, reason, None, "SOFTBAN", int(datetime.now().timestamp())]
-        amt = 0
+        msg = ""
         try:
             if not t == None:
                 for role in t.roles:
                     if str(role.id) in allowed_roles:
                         await interaction.followup.send(f"You may not softban {user.mention} as they have the role <@&{role.id}> and are a moderator!")
                         return
-                amt = server_settings(True, interaction.guild, "casenum", user.id)
-                await sendCase(interaction, data, user, amt)
+                msg = modlog(True, interaction, data)
+                server_settings(True, interaction.guild, "casenum")
+                await sendCase(interaction, data, user, modlog(False, interaction, user=user, rem=True))
                 await t.ban(delete_message_days=7, reason="Softban")
                 await asyncio.sleep(1)
                 await t.unban(reason="Unbanning from softban")
             else:
-                amt = server_settings(True, interaction.guild, "casenum", user.id)
+                msg = modlog(True, interaction, data)
+                server_settings(True, interaction.guild, "casenum")
                 user = self.bot.get_user(user.id)
                 await interaction.guild.ban(user, delete_message_days=7, reason="Softban")
                 await asyncio.sleep(1)
@@ -179,8 +185,8 @@ class Moderation(commands.Cog):
         except Exception as e:
             await interaction.followup.send(f"An error occurred while running this command!\nError: {e}", view=AutoBugReport(interaction, e))
 
-        await logChannel(self.bot, interaction, data, user, amt)
-        await interaction.followup.send(modlog(True, interaction, data))
+        await logChannel(self.bot, interaction, data, user, modlog(False, interaction, user=user, rem=True))
+        await interaction.followup.send(msg)
 
     @app_commands.command(name="kick", description="Kick a user")
     @app_commands.describe(user="Enter a user", reason="Enter a reason", message="Optional Message")
@@ -200,11 +206,12 @@ class Moderation(commands.Cog):
                 return
         try:
             data = [ user.id, interaction.user.id, reason, message, "KICK", int(datetime.now().timestamp())]
-            amt = server_settings(True, interaction.guild, "casenum", user.id)
-            await sendCase(interaction, data, user, amt)
+            msg = modlog(True, interaction, data)
+            server_settings(True, interaction.guild, "casenum")
+            await sendCase(interaction, data, user, modlog(False, interaction, user=user, rem=True))
             await user.kick(reason=reason)
-            await logChannel(self.bot, interaction, data, user, amt)
-            await interaction.followup.send(modlog(True, interaction, data))
+            await logChannel(self.bot, interaction, data, user, modlog(False, interaction, user=user, rem=True))
+            await interaction.followup.send(msg)
         except Exception as e:
             await interaction.followup.send(f"An error occurred while running this command!\nError: {e}", view=AutoBugReport(interaction, e))
 
@@ -229,8 +236,8 @@ class Moderation(commands.Cog):
         try:
             data = [ user.id, interaction.user.id, reason, None, "UNBAN", int(datetime.now().timestamp())]
             await interaction.guild.unban(user, reason=reason)
-            amt = server_settings(True, interaction.guild, "casenum", user.id)
-            await logChannel(self.bot, interaction, data, user, amt)
+            server_settings(True, interaction.guild, "casenum")
+            await logChannel(self.bot, interaction, data, user, modlog(False, interaction, user=user, rem=True))
             await interaction.followup.send(f"{user.mention} was successfully unbanned{f" with the reason: {reason}" if not reason == None else ""}!")
         except Exception as e:
             await interaction.followup.send(f"An error occurred while running this command!\nError: {e}", view=AutoBugReport(interaction, e))
@@ -329,8 +336,7 @@ class Moderation(commands.Cog):
     async def mylogs(self, interaction: discord.Interaction):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.defer(ephemeral=True)
-        amt = modlog(False, interaction, user=interaction.user, rem=True)
-        embed = discord.Embed(description=f"You have {amt} modlogs!",color=discord.Color.brand_green())
+        embed = discord.Embed(description=f"You have {modlog(False, interaction, user=interaction.user, rem=True)} modlogs!",color=discord.Color.brand_green())
         embed.set_author(name=interaction.guild.name, icon_url=interaction.guild.icon.url if interaction.guild.icon else None)
         embed.set_footer(text=interaction.user.name, icon_url=interaction.user.avatar.url)
         embed.timestamp = datetime.now()

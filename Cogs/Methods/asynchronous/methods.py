@@ -41,16 +41,15 @@ async def get_prefix(bot, message):
 
 # log things to modlog channel
 async def logChannel(bot, interaction, data, user, amt):
-    rows = server_settings(False, interaction.guild, "casenum")
     embed = discord.Embed(color=discord.Color.yellow())
-    if interaction == discord.Interaction:
-        embed.set_author(name=f"CASE {rows} | {data[4]} | {user.name}", icon_url=user.avatar.url)
-        embed.add_field(name="User", value=f"{user.mention}")
-        embed.add_field(name="Moderator", value=f"{interaction.user.mention}")
-    else:
-        embed.set_author(name=f"CASE {rows} | {data[4]} | {user.name}", icon_url=interaction.user.avatar.url)
-        embed.add_field(name="User", value=f"{user.mention}")
-        embed.add_field(name="Moderator", value=f"{interaction.user.mention}")
+    # if interaction == discord.Interaction:
+    #     embed.set_author(name=f"CASE {rows} | {data[4]} | {user.name}", icon_url=user.avatar.url)
+    #     embed.add_field(name="User", value=f"{user.mention}")
+    #     embed.add_field(name="Moderator", value=f"{interaction.user.mention}")
+    # else:
+    embed.set_author(name=f"CASE {server_settings(False, interaction.guild, "casenum")} | {data[4]} | {user.name}", icon_url=interaction.user.avatar.url)
+    embed.add_field(name="User", value=f"{user.mention}")
+    embed.add_field(name="Moderator", value=f"{interaction.user.mention}")
     embed.add_field(name="Info", value=f"{data[4].lower().capitalize()if data[4].lower() == "message" else "Reason"}: {data[2]}")
     if data[4] == "WARNING" or data[4] == "BAN" or data[4] == "MODLOG REMOVAL" or data[4] == "KICK" or data[4] == "MUTE":
         embed.add_field(name="Message", value=f"{f"{data[3]}\n" if not data[3] == None else ""}User now has {amt} modlogs.")
@@ -59,8 +58,7 @@ async def logChannel(bot, interaction, data, user, amt):
 
 async def sendCase(interaction, data, user, amt):
     try:
-        rows = server_settings(False, interaction.guild, "casenum")
-        embed = discord.Embed(title=f"You have recieved a **{data[4]}** in __**{interaction.guild.name}**__!", description=f"CASE {rows}", color=discord.Color.brand_red())
+        embed = discord.Embed(title=f"You have recieved a **{data[4]}** in __**{interaction.guild.name}**__!", description=f"CASE {server_settings(False, interaction.guild, "casenum")}", color=discord.Color.brand_red())
         embed.set_thumbnail(url=interaction.guild.icon.url if interaction.guild.icon else None)
         embed.set_author(name=f"{interaction.guild.name} | {interaction.guild.id}", icon_url=interaction.guild.icon.url if interaction.guild.icon else None)
         embed.add_field(name="Reason:", value=data[2], inline=False)

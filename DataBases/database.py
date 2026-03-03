@@ -1,6 +1,6 @@
 import sqlite3, discord, random, json
 
-def modlog(save, interaction, data = None, user: discord.User = None, rem = False):
+def modlog(save, interaction, data = None, user: discord.User | discord.Member = None, rem = False):
     msg = None
     con = sqlite3.connect("DataBases/modlogs.db")
     cur = con.cursor()
@@ -25,7 +25,7 @@ def modlog(save, interaction, data = None, user: discord.User = None, rem = Fals
             );
         """)
 
-    if save and data and not rem:
+    if save and not rem:
         i = len(cur.execute(f"""
             SELECT * FROM '{guild_id}' WHERE user = '{data[0]}'""").fetchall()) + 1
         data.append(i)
@@ -114,6 +114,13 @@ def modlog(save, interaction, data = None, user: discord.User = None, rem = Fals
                 msg = (f"Successfully deleted all of {user.mention}'s logs!", True)
 
         con.commit()
+    elif not save and rem:
+        cur.execute(f"""
+                        SELECT i
+                        FROM '{guild_id}'
+                        WHERE user = '{user.id}'
+                    """)
+        msg = len(cur.fetchall())
     con.close()
     return msg
 
@@ -417,7 +424,7 @@ def server_settings(save, guild, stype=None, value=None):
             return f"Your server configuration for bot prefix has been updated to \"{value}\"."
         elif stype == "casenum":
             cur.execute(f"""
-                SELECT casenum FROM server_settings WHERE guild_id = '{guild_id}' {f"AND user = {value}" if value else ""}""")
+                SELECT casenum FROM server_settings WHERE guild_id = '{guild_id}'""")
             num = cur.fetchone()[0]
             num += 1
             cur.execute(f"""
