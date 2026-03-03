@@ -23,4 +23,3 @@ if __name__ == "__main__":
     bot = commands.Bot(command_prefix=get_prefix, intents=discord.Intents.all(), max_messages=500)
     asyncio.run(load(bot))
     bot.run(os.getenv("TOKEN"), log_handler=logging.FileHandler(filename='debug.txt', encoding='utf-8', mode='a') if debugging else None, log_level=logging.DEBUG)
-    close_bot(bot)
