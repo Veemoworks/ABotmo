@@ -1,5 +1,5 @@
-import sys, asyncio, traceback, discord, numpy as np, requests, json, os
-from PIL import Image
+import sys, asyncio, traceback, discord, numpy as np, requests, json, os, io
+from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime
 from dotenv import load_dotenv
 from discord import app_commands
@@ -30,6 +30,27 @@ def imgcol_gen(hex_color: str):
         img.close()
     return temp_path
 
+def levelCard(level: int, avatar: discord.Asset):
+    background = Image.new("RGBA", (320, 100), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(background)
+    draw.rounded_rectangle((60, 20, 310, 90), radius=18, fill=(47, 49, 54))
+
+    avatar = Image.open(io.BytesIO(requests.get(avatar.url).content)).convert("RGBA").resize((72, 72))
+    mask = Image.new("L", (72, 72), 0)
+    ImageDraw.Draw(mask).ellipse((0, 0, 72, 72), fill=255)
+    ring = Image.new("RGBA", (80, 80), (0, 0, 0, 0))
+    ImageDraw.Draw(ring).ellipse((0, 0, 80, 80), fill=(180, 180, 180))
+    ring.paste(avatar, (4, 4), mask)
+    background.paste(ring, (18, 110//2 - 80//2), ring)
+
+    font = ImageFont.truetype("arialbd.ttf", 26)
+    bbox = draw.textbbox((0, 0), f"Level {level-1} • {level}", font=font)
+    draw.text((115, 48 - (bbox[3] - bbox[1]) // 2), f"Level {level-1} • {level}", font=font, fill=(255, 255, 255))
+
+    buffer = io.BytesIO()
+    background.save(buffer, "PNG")
+    buffer.seek(0)
+    return buffer
 
 # Permission check on commands
 def permission_check():

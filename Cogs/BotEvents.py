@@ -1,7 +1,7 @@
 import discord, platform, time, os
 from datetime import datetime
 from discord.ext import commands
-from Cogs.Methods.methods import crash, log
+from Cogs.Methods.methods import crash, log, levelCard
 from resources.dictionaries import custom_urls
 from resources.links import warm
 from resources.variables import pid, version
@@ -434,7 +434,7 @@ class Events(commands.Cog):
 
     # On message events
     @commands.Cog.listener()
-    async def on_message(self, msg):
+    async def on_message(self, msg: discord.Message):
         if msg.author.bot:
             return
 
@@ -461,14 +461,18 @@ class Events(commands.Cog):
                                     allowed_mentions=discord.AllowedMentions(roles=False, users=False,
                                                                              replied_user=False))
                             else:
-                                await msg.guild.get_channel(data["channel"]).send(
+                                channel = msg.guild.get_channel(data["channel"])
+                                if discord.app_commands.checks.bot_has_permissions(attach_files=True):
+                                    await channel.send(f"{msg.author.mention} has successfully leveled up to Level {lvl}", file=discord.File(fp=levelCard(lvl, msg.author.avatar), filename="lvlup.png"))
+                                else:
+                                    await channel.send(
                                     f"{msg.author.mention} has successfully leveled up to Level {lvl}")
                         else:
                             enabled = user_settings(False, user.id, "xpmessage")
                             if enabled:
                                 if enabled == 2:
                                     await user.send(
-                                        f"{msg.author.mention}, you have succesfully leveled up to Level {lvl} in {guild.name} ({guild.id})!{"\n-# *You can toggle this message with /settings!*" if lvl % 5 == 0 else ""}")
+                                        f"You have succesfully leveled up to Level {lvl} in {guild.name} ({guild.id})!{"\n-# *You can toggle this message with /settings!*" if lvl % 5 == 0 else ""}")
                                 else:
                                     await msg.reply(
                                         f"{msg.author.mention}, you have succesfully leveled up to Level {lvl}!{"\n-# *You can toggle this message with /settings!*" if lvl % 5 == 0 else ""}",
