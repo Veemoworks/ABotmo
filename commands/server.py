@@ -166,9 +166,9 @@ class Server(commands.Cog):
         hasdata, olddata = xp(False, interaction.guild, user=user)
         text = ""
         if newlevel:
-            text += f"Added {newlevel} Level{"s" if newlevel > 1 else ""}{f" to current level: {olddata[1] + newlevel}" if hasdata else ""}" if add else f"Changed Level{f" from {olddata[1]}" if hasdata else ""} to Level {newlevel}"
+            text += f"Added {newlevel} Level{"s" if newlevel > 1 else ""}{f" to current level: {olddata[1] + newlevel}" if hasdata else ""}" if add else f"Changed Level{f" from {olddata[1]}" if hasdata else ""} to Level {newlevel}\n"
         if newxp:
-            text += f"Added {newxp} XP{f" to current XP: {olddata[0] + newxp}" if hasdata else ""}" if add else f"Changed XP{f" from {olddata[0]}" if hasdata else ""} to {newxp} XP"
+            text += f"Added {newxp} XP{f" to current XP: {olddata[0] + newxp}" if hasdata else ""}" if add else f"Changed XP{f" from {olddata[0]}" if hasdata else ""} to {newxp} XP\n"
         data = [newxp, newlevel] if not add else [olddata[0] + newxp if newxp else None, olddata[1] + newlevel if newlevel else None]
         xp(True, interaction.guild, data, user, False)
         await interaction.response.send_message(f"Successfully changed {user.mention}'s rank\n{text}", allowed_mentions=discord.AllowedMentions(users=False))
