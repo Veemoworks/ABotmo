@@ -1,9 +1,9 @@
-import discord, re, psutil, sys, os
+import discord, re, psutil, platform
 from bot import startup
-from datetime import datetime, timezone
 from discord.ext import commands
+from resources.variables import version, pid
 from Cogs.Methods.methods import log
-from Cogs.Methods.asynchronous.methods import logChannel, get_prefix
+from Cogs.Methods.asynchronous.methods import get_prefix
 from Cogs.Classes.DiscordViews import ServerInfo
 
 class UtilsPREFIX(commands.Cog):
@@ -118,16 +118,15 @@ class UtilsPREFIX(commands.Cog):
     async def stats(self, ctx: commands.Context):
         prefix = await get_prefix(self.bot, ctx.message)
         print(log(False,f"{ctx.author} ({ctx.author.id}) used {prefix}{ctx.command.qualified_name} in {ctx.guild.id} ({ctx.guild.name})!"))
-
         embed = discord.Embed(color=discord.Color.brand_green())
-        embed.set_author(name="ABotmo", icon_url=self.bot.user.avatar.url)
+        embed.set_author(name="ABotmo v" + version, icon_url=self.bot.user.avatar.url)
         embed.add_field(name="Latency:", value=f"{round(self.bot.latency * 1000)}ms")
         embed.add_field(name="Startup:", value=f"<t:{int(startup.timestamp())}> (<t:{int(startup.timestamp())}:R>)")
         embed.add_field(name="Guilds:", value=len(self.bot.guilds))
         embed.add_field(name="Users:", value=len(self.bot.users))
-        embed.add_field( name="RAM / Memory:", value=f"{round(psutil.virtual_memory().used / (1024**3), 2)}GB / " f"{round(psutil.virtual_memory().total / (1024**3), 2)}GB")
+        embed.add_field(name="RAM / Memory:", value=f"{round(psutil.virtual_memory().used / (1024**3), 2)}GB / {round(psutil.virtual_memory().total / (1024**3), 2)}GB")
         embed.add_field(name="CPU:", value=f"{psutil.cpu_percent()}% Util")
-        embed.set_footer(text=f"PID {os.getpid()} | Python {sys.version[:7].strip()} | "f"discord.py V{discord.__version__} | Shard {ctx.guild.shard_id}")
+        embed.set_footer(text=f"PID {pid} | Python {platform.python_version()} | discord.py V{discord.__version__} | Shard {self.bot.shard_id}")
 
         await ctx.send(embed=embed)
 
