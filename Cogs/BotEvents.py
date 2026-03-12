@@ -482,7 +482,9 @@ class Events(commands.Cog):
                         print(log(True, f"on_message raised an error: " + str(e)))
                         pass
 
-        await self.bot.process_commands(msg)
+        prefix = await get_prefix(self.bot, msg)
+        if not msg.content[:len(prefix)] == prefix:
+            await self.bot.process_commands(msg)
 
 async def setup(bot):
     await bot.add_cog(Events(bot))
