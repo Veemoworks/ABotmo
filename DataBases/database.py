@@ -125,6 +125,9 @@ def modlog(save, interaction, data = None, user: discord.User | discord.Member =
     return msg
 
 # <editor-fold desc="xp.db">
+def nextLevel(level: int):
+    return 5 * (level**2) + (level * 50) + 75
+
 def xp(save, guild, data=None, user=None, lvlup=True):
     returnval = None
     con = sqlite3.connect("DataBases/xp.db")
@@ -165,7 +168,7 @@ def xp(save, guild, data=None, user=None, lvlup=True):
                 xph, level, last_msg = row
                 if last_msg is None or data - last_msg >= g["cd"]:
                     new_xp = xph + random.randint(g["range"][0], g["range"][1])
-                    next_level = 5 * (level**2) + (level * 50) + 75
+                    next_level = nextLevel(level)
 
                     if new_xp >= next_level:
                         level += 1
@@ -201,7 +204,7 @@ def xp(save, guild, data=None, user=None, lvlup=True):
             return False, None
 
         dxp, level = row
-        next_level = 5 * (level**2) + (level * 50) + 75
+        next_level = nextLevel(level)
         con.close()
         return True, [dxp, level, next_level]
 
@@ -358,8 +361,6 @@ def xp_roles(save, guild: discord.Guild, level=None, role=None):
             data = data.get(level)
         con.close()
         return data
-
-
 # </editor-fold>
 
 # <editor-fold desc="settings.db">
