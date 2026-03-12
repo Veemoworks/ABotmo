@@ -1,10 +1,10 @@
-import discord, json
+import discord, json, random
 from discord import app_commands
 from discord.ext import commands
 from Cogs.Methods.methods import log, to_text, permission_check, xpEnabledOnly
 from Cogs.Classes.DiscordViews import Config, XPConfig
 from resources.dictionaries import setting_users
-from DataBases.database import xp, server_settings, user_settings, xp_settings, server_channels
+from DataBases.database import xp, server_settings, user_settings, xp_settings, server_channels, nextLevel
 
 class Server(commands.Cog):
     def __init__(self, bot):
@@ -165,6 +165,7 @@ class Server(commands.Cog):
             return
         hasdata, olddata = xp(False, interaction.guild, user=user)
         text = ""
+
         if newlevel:
             if add:
                 text += f"Added {newlevel} Level{"s" if newlevel > 1 else ""}{f" to user's level. ({olddata[1]} -> {olddata[1] + newlevel})" if hasdata else ""}\n"
@@ -175,6 +176,10 @@ class Server(commands.Cog):
                 text += f"Added {newxp} XP{f" to user's XP. ({olddata[0]} -> {olddata[0] + newxp})" if hasdata else ""}\n"
             else:
                 text += f"Changed XP{f" from {olddata[0]}" if hasdata else ""} to {newxp} XP\n"
+        else:
+            newxp = random.randint(nextLevel(olddata[1] + newlevel-1), nextLevel(olddata[1] + newlevel)) if add else random.randint(nextLevel(newlevel-1), nextLevel(newlevel))
+            text += f"-# *Set XP from {olddata[0]} to {newxp} to match the level due to no XP changes.*\n"
+
         data = [newxp, newlevel] if not add else [olddata[0] + newxp if newxp else None, olddata[1] + newlevel if newlevel else None]
         xp(True, interaction.guild, data, user, False)
         await interaction.response.send_message(f"Successfully changed {user.mention}'s rank\n{text}", allowed_mentions=discord.AllowedMentions(users=False))
