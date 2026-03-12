@@ -457,25 +457,25 @@ class Events(commands.Cog):
                         if data["messagetoggle"]:
                             if data["channel"] == 1:
                                 await msg.reply(
-                                    f"{msg.author.mention}, you have succesfully leveled up to Level {lvl}!",
+                                    f"{msg.author.mention}, you have succesfully leveled up to Level {lvl}{f", and got the role {role.mention}" if role else ""}!",
                                     allowed_mentions=discord.AllowedMentions(roles=False, users=False,
                                                                              replied_user=False))
                             else:
                                 channel = msg.guild.get_channel(data["channel"])
                                 if discord.app_commands.checks.bot_has_permissions(attach_files=True):
-                                    await channel.send(f"{msg.author.mention} has successfully leveled up to Level {lvl}", file=discord.File(fp=levelCard(lvl, msg.author.avatar), filename="lvlup.png"))
+                                    await channel.send(f"{msg.author.mention} has successfully leveled up to Level {lvl}{f", and got the role {role.mention}" if role else ""}!", file=discord.File(fp=levelCard(lvl, msg.author.avatar), filename="lvlup.png"))
                                 else:
                                     await channel.send(
-                                    f"{msg.author.mention} has successfully leveled up to Level {lvl}")
+                                    f"{msg.author.mention} has successfully leveled up to Level {lvl}{f", and got the role {role.mention}" if role else ""}")
                         else:
                             enabled = user_settings(False, user.id, "xpmessage")
                             if enabled:
                                 if enabled == 2:
                                     await user.send(
-                                        f"You have succesfully leveled up to Level {lvl} in {guild.name} ({guild.id})!{"\n-# *You can toggle this message with /settings!*" if lvl % 5 == 0 else ""}")
+                                        f"You have succesfully leveled up to Level {lvl} in {guild.name} ({guild.id}){f", and got the role {role.name}" if role else ""}!{"\n-# *You can toggle this message with /settings!*" if lvl % 5 == 0 else ""}")
                                 else:
                                     await msg.reply(
-                                        f"{msg.author.mention}, you have succesfully leveled up to Level {lvl}!{"\n-# *You can toggle this message with /settings!*" if lvl % 5 == 0 else ""}",
+                                        f"{msg.author.mention}, you have succesfully leveled up to Level {lvl}{f", and got the role {role.mention}" if role else ""}!{"\n-# *You can toggle this message with /settings!*" if lvl % 5 == 0 else ""}",
                                         allowed_mentions=discord.AllowedMentions(roles=False, users=False,
                                                                                  replied_user=False))
                     except Exception as e:
