@@ -231,7 +231,7 @@ class Events(commands.Cog):
         embed.set_author(name=msg.author.name, icon_url=msg.author.avatar.url)
         if not msg.attachments == []:
             stuff = [a.filename for a in msg.attachments]
-            embed.add_field(name="Attachments:", value=", ".join(stuff))
+            embed.add_field(name="Attachments:", value=",\n".join(stuff))
             file = msg.attachments[0]
             if len(msg.attachments) == 1 and file.content_type.find("image") > -1:
                 embed.set_image(url=file.proxy_url)
