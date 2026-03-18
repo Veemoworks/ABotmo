@@ -78,6 +78,17 @@ def xpEnabledOnly():
 
     return app_commands.check(predicate)
 
+# made this and realised it is USELESS... for now.
+def strToJson(string: str):
+    try:
+        return json.loads(string.replace("'",'"'))
+    except json.JSONDecodeError as e:
+        print(log(True, e))
+        return None
+    except Exception as e:
+        print(log(True, e))
+        return None
+
 # Exception handle for sys exceptions
 def handle_exception(exc_type, exc_value, exc_traceback, bot):
     if issubclass(exc_type, KeyboardInterrupt):
@@ -104,6 +115,7 @@ def to_text(data: dict, xpconfig=False):
     for key, value in data.items():
         _type = type(value)
         skib = value
+        plural = False
         if _type == int:
             if xpconfig:
                 if not key == "channel":
@@ -122,12 +134,15 @@ def to_text(data: dict, xpconfig=False):
             if xpconfig:
                 skib = f"{value[0]} to {value[1]}"
             else:
-                skib = ""
-                for val in value:
-                    skib += f"<@&{val}>"
-                msg.append(f"{kirk[key]} are {skib}")
-                continue
-        msg.append(f"{kirk[key]} is {skib}")
+                temp = [f"<@&{val}>" for val in value]
+                skib = ", ".join(temp)
+                plural = True
+        elif _type == dict:
+            if xpconfig:
+                temp = [f"{level}: <@&{roleid}>" for level, roleid in skib.items()]
+                skib = " | ".join(temp)
+                plural = True
+        msg.append(f"{kirk[key]} {"are" if plural else "is"} {skib}")
     return "\n".join(msg)
 
 # Log to a file and close the bot

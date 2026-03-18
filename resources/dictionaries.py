@@ -97,4 +97,5 @@ kirk = {
     "mchannel": "Channel Logs Channel",
     "role": "Role Logs Channel",
     "voice": "Voice Logs Channel",
+    "lroles": "Level Roles",
 }

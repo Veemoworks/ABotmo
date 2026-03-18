@@ -4,7 +4,8 @@ from discord.ext import commands
 from Cogs.Methods.methods import log, to_text, permission_check, xpEnabledOnly
 from Cogs.Classes.DiscordViews import Config, XPConfig
 from resources.dictionaries import setting_users
-from DataBases.database import xp, server_settings, user_settings, xp_settings, server_channels, nextLevel
+from DataBases.database import xp, server_settings, user_settings, xp_settings, server_channels, nextLevel, xp_roles
+
 
 class Server(commands.Cog):
     def __init__(self, bot):
@@ -49,10 +50,11 @@ class Server(commands.Cog):
             return
 
         currconfig: dict = xp_settings(False, interaction.guild, None)
+        currconfig["lroles"] = xp_roles(False, interaction.guild)
         if not currconfig["xpenabled"]:
             currconfig.clear()
             currconfig["xpenabled"] = 0
-        embed = discord.Embed(title="XP Configuration", description=f"Welcome to the XP Configuration Panel, {interaction.user.mention}\nOnly Administrators can access this command.\n\n**__Current Config:__**\n{to_text(currconfig, True)}\n\nYour changes will soon be adjusted, please wait...", color=discord.Color.brand_green())
+        embed = discord.Embed(title="XP Configuration", description=f"Welcome to the XP Configuration Panel, {interaction.user.mention}!\nOnly Administrators can access this command.\n\n**__Current Config:__**\n{to_text(currconfig, True)}\n\nYour changes will soon be adjusted, please wait...", color=discord.Color.brand_green())
         msg = await interaction.followup.send(embed=embed)
         embed.description = embed.description.removesuffix("Your changes will soon be adjusted, please wait...")
         if not xprange is None:
@@ -158,10 +160,10 @@ class Server(commands.Cog):
         print(log(False,
                       f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id} ({interaction.guild.name})!"))
         if not newlevel and not newxp:
-            await interaction.response.send_message("Please enter either a Level or XP to modify!")
+            await interaction.response.send_message("Please enter either a Level or XP to modify!", ephemeral=True)
             return
         if user.bot:
-            await interaction.response.send_message("You cannot modify a bot's rank!")
+            await interaction.response.send_message("You cannot modify a bot's rank!", ephemeral=True)
             return
         hasdata, olddata = xp(False, interaction.guild, user=user)
         text = ""

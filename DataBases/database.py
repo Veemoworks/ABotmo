@@ -327,7 +327,6 @@ def xp_roles(save, guild: discord.Guild, level=None, role=None):
 
     cur.execute(f"SELECT * FROM xp_roles WHERE guild_id = {gid}")
     row = cur.fetchone()
-    level = str(level)
     role = str(role)
     if not row:
         cur.execute(f"""
@@ -336,6 +335,7 @@ def xp_roles(save, guild: discord.Guild, level=None, role=None):
         """)
         con.commit()
     if save:
+        level = str(level)
         val = False
         cur.execute(f"SELECT data FROM xp_roles WHERE guild_id = {gid}")
         data: dict = json.loads(cur.fetchone()[0].replace("'", '"'))
@@ -358,7 +358,7 @@ def xp_roles(save, guild: discord.Guild, level=None, role=None):
         cur.execute(f"SELECT data FROM xp_roles WHERE guild_id = {gid}")
         data = json.loads(cur.fetchone()[0].replace("'", '"'))
         if not level is None:
-            data = data.get(level)
+            data = data.get(str(level))
         con.close()
         return data
 # </editor-fold>
