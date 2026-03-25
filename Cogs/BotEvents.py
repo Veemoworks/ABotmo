@@ -309,10 +309,10 @@ class Events(commands.Cog):
             embed.add_field(name="Name Changed:", value=f"{old.name} -> {new.name}")
             change = True
         if not removed == []:
-            embed.add_field(name="Removed Permissions:", value=", ".join(removed))
+            embed.add_field(name="Added Permissions:", value=", ".join(removed))
             change = True
         if not added == []:
-            embed.add_field(name="Added Permissions:", value=", ".join(added))
+            embed.add_field(name="Removed Permissions:", value=", ".join(added))
             change = True
         if not old.hoist == new.hoist:
             embed.add_field(name="Hoisted:", value=new.hoist)
