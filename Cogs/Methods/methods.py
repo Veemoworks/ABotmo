@@ -82,9 +82,6 @@ def xpEnabledOnly():
 def strToJson(string: str):
     try:
         return json.loads(string.replace("'",'"'))
-    except json.JSONDecodeError as e:
-        print(log(True, e))
-        return None
     except Exception as e:
         print(log(True, e))
         return None
