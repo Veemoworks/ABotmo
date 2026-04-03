@@ -440,49 +440,47 @@ class Events(commands.Cog):
 
         guild = msg.guild
         user = msg.author
-        prefix = await get_prefix(self.bot, msg)
-        if not msg.content[:len(prefix)] == prefix:
-            if guild:
-                if msg.content.startswith(await get_prefix(None, msg)):
-                    return
-                data = xp_settings(False, guild, None)
-                if data["xpenabled"]:
-                    lvl_up, lvl = xp(True, guild, int(time.time()), user)
+        if guild:
+            if msg.content.startswith(await get_prefix(None, msg)):
+                return
+            data = xp_settings(False, guild, None)
+            if data["xpenabled"]:
+                lvl_up, lvl = xp(True, guild, int(time.time()), user)
 
-                    if lvl_up:
-                        role = xp_roles(False, guild, lvl)
-                        try:
+                if lvl_up:
+                    role = xp_roles(False, guild, lvl)
+                    try:
+                        if not role is None:
+                            role = guild.get_role(int(role))
                             if not role is None:
-                                role = guild.get_role(int(role))
-                                if not role is None:
-                                    await user.add_roles(role, reason=f"Level up to {lvl}")
-                            if data["messagetoggle"]:
-                                if data["channel"] == 1:
+                                await user.add_roles(role, reason=f"Level up to {lvl}")
+                        if data["messagetoggle"]:
+                            if data["channel"] == 1:
                                     await msg.reply(
-                                        f"{msg.author.mention}, you have succesfully leveled up to Level {lvl}{f", and got the role {role.mention}" if role else ""}!",
+                                    f"{msg.author.mention}, you have succesfully leveled up to Level {lvl}{f", and got the role {role.mention}" if role else ""}!",
                                         allowed_mentions=discord.AllowedMentions(roles=False, users=False,
                                                                                  replied_user=False))
-                                else:
-                                    channel = msg.guild.get_channel(data["channel"])
-                                    if discord.app_commands.checks.bot_has_permissions(attach_files=True):
-                                        await channel.send(f"{msg.author.mention} has successfully leveled up to Level {lvl}{f", and got the role {role.mention}" if role else ""}!", file=discord.File(fp=levelCard(lvl, msg.author.avatar), filename="lvlup.png"))
-                                    else:
-                                        await channel.send(
-                                        f"{msg.author.mention} has successfully leveled up to Level {lvl}{f", and got the role {role.mention}" if role else ""}")
                             else:
-                                enabled = user_settings(False, user.id, "xpmessage")
-                                if enabled:
-                                    if enabled == 2:
-                                        await user.send(
-                                            f"You have succesfully leveled up to Level {lvl} in {guild.name} ({guild.id}){f", and got the role {role.name}" if role else ""}!{"\n-# *You can toggle this message with /settings!*" if lvl % 5 == 0 else ""}")
-                                    else:
-                                        await msg.reply(
+                                channel = msg.guild.get_channel(data["channel"])
+                                if discord.app_commands.checks.bot_has_permissions(attach_files=True):
+                                    await channel.send(f"{msg.author.mention} has successfully leveled up to Level {lvl}{f", and got the role {role.mention}" if role else ""}!", file=discord.File(fp=levelCard(lvl, msg.author.avatar), filename="lvlup.png"))
+                                else:
+                                    await channel.send(
+                                    f"{msg.author.mention} has successfully leveled up to Level {lvl}{f", and got the role {role.mention}" if role else ""}")
+                        else:
+                            enabled = user_settings(False, user.id, "xpmessage")
+                            if enabled:
+                                if enabled == 2:
+                                    await user.send(
+                                        f"You have succesfully leveled up to Level {lvl} in {guild.name} ({guild.id}){f", and got the role {role.name}" if role else ""}!{"\n-# *You can toggle this message with /settings!*" if lvl % 5 == 0 else ""}")
+                                else:
+                                    await msg.reply(
                                             f"{msg.author.mention}, you have succesfully leveled up to Level {lvl}{f", and got the role {role.mention}" if role else ""}!{"\n-# *You can toggle this message with /settings!*" if lvl % 5 == 0 else ""}",
                                             allowed_mentions=discord.AllowedMentions(roles=False, users=False,
                                                                                      replied_user=False))
-                        except Exception as e:
-                            print(log(True, f"on_message raised an error: " + str(e)))
-                            pass
+                    except Exception as e:
+                        print(log(True, f"on_message raised an error: " + str(e)))
+                        pass
 
         await self.bot.process_commands(msg)
 
