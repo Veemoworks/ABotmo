@@ -1,3 +1,3 @@
 veemoworksdevs = [1282579372980703232, 953342268088123473, 1120115279544995870 ]
 recnetdb = [ 1282579372980703232, 1169784328893517874, 284804878604435476, 1120115279544995870, 452249803414568982]
-logchannels = [ "modlog", "member", "message", "channel", "role", "voice", "all event" ]
+logchannels = [ "modlog", "member", "message", "channel", "role", "voice", "guild", "all event" ]

@@ -96,6 +96,9 @@ def strToJson(string: str):
         print(log(True, e))
         return None
 
+def toDiscordTimestamp(date: datetime = datetime.now(), fmat: str | None = None):
+    return f"<T:{int(date.timestamp())}{f":{fmat}" if fmat else ""}>"
+
 # Exception handle for sys exceptions
 def handle_exception(exc_type, exc_value, exc_traceback, bot):
     if issubclass(exc_type, KeyboardInterrupt):

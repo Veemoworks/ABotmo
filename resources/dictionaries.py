@@ -102,4 +102,5 @@ kirk = {
     "voice": "Voice Logs Channel",
     "lroles": "Level Roles",
     "banned": "Banned Words",
+    "guild": "Guild Logs Channel"
 }

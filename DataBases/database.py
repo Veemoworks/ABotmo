@@ -550,7 +550,7 @@ def server_channels(save, guild, channel, data=None):
 
     if not row:
         cur.execute(f"""
-            INSERT INTO server_channels (guild_id, modlog, member, message, channel, role, voice)
+            INSERT INTO server_channels (guild_id, modlog, member, message, channel, role, voice, guild)
             VALUES ({gid}, 0, 0, 0, 0, 0, 0);
         """)
         con.commit()
@@ -564,7 +564,8 @@ def server_channels(save, guild, channel, data=None):
                     message = {data},
                     channel = {data},
                     role = {data},
-                    voice = {data}
+                    voice = {data},
+                    guild = {data}
                 WHERE guild_id = {gid};
             """)
             con.commit()
@@ -612,6 +613,8 @@ def server_channels(save, guild, channel, data=None):
             return data[5]
         elif channel == "voice":
             return data[6]
+        elif channel == "guild":
+            return data[7]
         else:
             return {
                 "modlog": data[1],
@@ -619,7 +622,8 @@ def server_channels(save, guild, channel, data=None):
                 "message": data[3],
                 "channel": data[4],
                 "role": data[5],
-                "voice": data[6]
+                "voice": data[6],
+                "guild": data[7],
             }
 # </editor-fold>
 

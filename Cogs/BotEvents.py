@@ -1,7 +1,7 @@
 import discord, platform, time, os, re
 from datetime import datetime
 from discord.ext import commands
-from Cogs.Methods.methods import crash, log, levelCard, permCheck
+from Cogs.Methods.methods import crash, log, levelCard, permCheck, toDiscordTimestamp
 from resources.dictionaries import custom_urls
 from resources.links import warm
 from resources.variables import pid, version
@@ -100,6 +100,52 @@ class Events(commands.Cog):
                 except:
                     continue
 
+    @commands.Cog.listener()
+    async def on_guild_update(self, old: discord.Guild, new: discord.Guild):
+        embed = discord.Embed(color=discord.Color.yellow())
+        embed.set_author(name="Guild Update", icon_url=old.icon.url if old.icon else None)
+        summary = []
+        # TODO make this better eventually (not 13 if statements)
+        if old.banner != new.banner:
+            summary.append("- Server Banner Updated")
+            embed.set_image(url=new.banner.url if new.banner else None)
+            embed.add_field(name="Banner Update:", value=f"{old.banner.url if old.banner else None} -> {new.banner.url if new.banner else None}"[:1024])
+        if old.description != new.description:
+            summary.append("- Server Description Updated")
+            embed.add_field(name="Description Update:", value=f"{old.description} -> {new.description}"[:1024])
+        if old.dm_spam_detected_at != new.dm_spam_detected_at:
+            summary.append("- DM Spam Detected")
+            embed.add_field(name="DM Spam Detected:", value="At" + toDiscordTimestamp(new.dm_spam_detected_at, "R") if new.dm_spam_detected_at else None)
+        if old.nsfw_level != new.nsfw_level:
+            summary.append("- NSFW Level Updated")
+            embed.add_field(name="NSFW Level Update:", value=f"{old.nsfw_level.name.capitalize()} -> {new.nsfw_level.name.capitalize()}")
+        if old.icon != new.icon:
+            summary.append("- Server Icon Updated")
+            embed.add_field(name="Icon Updated:", value=f"{old.icon.url if old.icon else None} -> {new.icon.url if new.icon else None}"[:1024])
+        if old.name != new.name:
+            summary.append("- Server Name Updated")
+            embed.add_field(name="Name Updated:", value=f"{old.name} -> {new.name}")
+        if old.mfa_level != new.mfa_level:
+            summary.append("- Moderator MFA Requirement Updated")
+            embed.add_field(name="Mod MFA Requirement Update:", value=f"{old.mfa_level.name.capitalize().strip("_")} -> {new.mfa_level.name.capitalize().strip("_")}")
+        if old.owner != new.owner:
+            summary.append("- Server Owner Changed")
+            embed.add_field(name="Owner Update:", value=f"{old.owner.mention} ({old.owner_id}) -> {new.owner.mention} ({new.owner_id}")
+        if old.raid_detected_at != new.raid_detected_at:
+            summary.append("- Server Raid Detected")
+            embed.add_field(name="Server Raid:", value="At" + toDiscordTimestamp(new.raid_detected_at, "R"))
+        if old.vanity_url != new.vanity_url:
+            summary.append("- Vanity URL Updated")
+            embed.add_field(name="Vanity URL Update", value=f"{old.vanity_url} -> {new.vanity_url}")
+        if old.verification_level != new.verification_level:
+            summary.append("- Member Verification Level Updated")
+            embed.add_field(name="Verification Level Update:", value=f"{old.verification_level.name.capitalize()} -> {new.verification_level.name.capitalize()}")
+
+        if not embed.fields or not summary:
+            return
+        embed.description = "\n".join(summary)
+        await event(self.bot, new, "guild", new, embed)
+
     # <editor-fold desc="Member Events">
     @commands.Cog.listener()
     async def on_member_join(self, member):
@@ -107,6 +153,7 @@ class Events(commands.Cog):
         temp = discord.Embed(description=f"{member.mention} {member.name}", color=discord.Color.brand_green())
         temp.set_author(name="Member Joined", icon_url=member.avatar.url if member.avatar else None)
         temp.add_field(name="Account Created:", value=f"<t:{int(member.created_at.timestamp())}:R>")
+        temp.add_field(name="Member Count:", value=guild.member_count)
         await event(self.bot, guild, "member", member, temp)
         embed = discord.Embed(color=discord.Color.brand_green())
         for gid, _ in custom_urls.items():
@@ -131,6 +178,7 @@ class Events(commands.Cog):
         temp = discord.Embed(description=f"{member.mention} {member.name}", color=discord.Color.brand_red())
         temp.set_author(name="Member Left", icon_url=member.avatar.url if member.avatar else None)
         temp.add_field(name="Account Created:", value=f"<t:{int(member.created_at.timestamp())}:R>")
+        temp.add_field(name="Member Count:", value=guild.member_count)
         temp.add_field(name="Roles:", value="\n".join(roles) if roles else "No roles.")
         await event(self.bot, guild, "member", member, temp)
         embed = discord.Embed(color=discord.Color.brand_red())
@@ -456,7 +504,7 @@ class Events(commands.Cog):
                 embed.add_field(name="Banned Word:", value=bannedword)
                 embed.set_footer(text=f"User ID: {user.id}")
                 await event(self.bot, guild, "modlog", None, embed)
-                await msg.channel.send(f"{user.mention}, your message had a flagged word! Please be careful of what you say.", delete_after=6)
+                await msg.channel.send(f"{user.mention}, your message had a flagged word! Please be careful of what you say.\n-# Banned Word: {bannedword}", delete_after=6)
                 return
             if msg.content.startswith(await get_prefix(None, msg)):
                 return
