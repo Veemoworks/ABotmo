@@ -3,7 +3,7 @@ from discord import app_commands
 from discord.ext import commands
 from datetime import datetime, timedelta
 from Cogs.Methods.asynchronous.methods import logChannel, sendCase
-from Cogs.Methods.methods import permission_check, log
+from Cogs.Methods.methods import canUse, log
 from Cogs.Classes.DiscordViews import AutoBugReport
 from DataBases.database import modlog, server_settings
 
@@ -15,7 +15,7 @@ class Moderation(commands.Cog):
     @app_commands.describe(user="Enter a user", reason="Enter a reason", message="Optional Message")
     @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
-    @permission_check()
+    @canUse()
     async def warn(self, interaction: discord.Interaction, user: discord.Member, reason: str, message: str = None):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.defer(ephemeral=True)
@@ -38,7 +38,7 @@ class Moderation(commands.Cog):
     @app_commands.describe(user="Enter a user", length="Enter a time (60s, 1m, 1h, 1d, 2w)", reason="Enter a reason")
     @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
-    @permission_check()
+    @canUse()
     async def mute(self, interaction: discord.Interaction, user: discord.Member, length: str, reason: str):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f'{interaction.guild.id} ({interaction.guild.name})' if interaction.guild else 'DMs'}!"))
         await interaction.response.defer(ephemeral=True)
@@ -91,7 +91,7 @@ class Moderation(commands.Cog):
     @app_commands.describe(user="Enter a user", reason="Enter a reason")
     @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
-    @permission_check()
+    @canUse()
     async def unmute(self, interaction: discord.Interaction, user: discord.Member, reason: str = None):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f'{interaction.guild.id} ({interaction.guild.name})' if interaction.guild else 'DMs'}!"))
         await interaction.response.defer(ephemeral=True)
@@ -116,7 +116,7 @@ class Moderation(commands.Cog):
     @app_commands.describe(user="Enter a user", reason="Enter a reason", message="Optional Message", delete_msgs="Delete messages from the user within a certain amount of days.")
     @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
-    @permission_check()
+    @canUse()
     async def ban(self, interaction: discord.Interaction, user: discord.User, reason: str, message: str = None, delete_msgs: int = 0):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.defer(ephemeral=True)
@@ -152,7 +152,7 @@ class Moderation(commands.Cog):
     @app_commands.describe(user="Enter a user", reason="Enter a reason")
     @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
-    @permission_check()
+    @canUse()
     async def softban(self, interaction: discord.Interaction, user: discord.User, reason: str = None):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.defer(ephemeral=True)
@@ -192,7 +192,7 @@ class Moderation(commands.Cog):
     @app_commands.describe(user="Enter a user", reason="Enter a reason", message="Optional Message")
     @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
-    @permission_check()
+    @canUse()
     async def kick(self, interaction: discord.Interaction, user: discord.Member, reason: str, message: str = None):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.defer(ephemeral=True)
@@ -219,7 +219,7 @@ class Moderation(commands.Cog):
     @app_commands.describe(user="Enter a user", reason="Enter a reason")
     @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
-    @permission_check()
+    @canUse()
     async def unban(self, interaction: discord.Interaction, user: discord.User, reason: str = None):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.defer(ephemeral=True)
@@ -246,7 +246,7 @@ class Moderation(commands.Cog):
     @app_commands.describe(user="Enter a user", message=r"Enter the message you'd like to send (\ for a new line)")
     @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
-    @permission_check()
+    @canUse()
     async def msg(self, interaction: discord.Interaction, user: discord.Member, message: str):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.defer(ephemeral=True)
@@ -277,7 +277,7 @@ class Moderation(commands.Cog):
     @app_commands.describe(user="Enter a user", page="Page number (each page has a limit of 25 modlogs)")
     @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
-    @permission_check()
+    @canUse()
     async def modlogs(self, interaction: discord.Interaction, user: discord.User, page: int = 1):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.defer(ephemeral=True)
@@ -293,7 +293,7 @@ class Moderation(commands.Cog):
     @app_commands.describe(user="Enter a user", page="Page number (each page has a limit of 25 modlogs)")
     @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
-    @permission_check()
+    @canUse()
     async def checkmod(self, interaction: discord.Interaction, user: discord.User, page: int = 1):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.defer(ephemeral=True)
@@ -310,7 +310,7 @@ class Moderation(commands.Cog):
     @app_commands.describe(user="User to remove from", index="Index number of the moderation log (* for all)", reason="Reason to remove")
     @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
-    @permission_check()
+    @canUse()
     async def remlog(self, interaction: discord.Interaction, user: discord.User, index: str, reason: str = None):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.defer(ephemeral=True)

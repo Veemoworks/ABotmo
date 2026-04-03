@@ -47,11 +47,13 @@ async def logChannel(bot, interaction, data, user, amt):
     #     embed.add_field(name="User", value=f"{user.mention}")
     #     embed.add_field(name="Moderator", value=f"{interaction.user.mention}")
     # else:
-    embed.set_author(name=f"CASE {server_settings(False, interaction.guild, "casenum")} | {data[4]} | {user.name}", icon_url=interaction.user.avatar.url)
+    case = server_settings(False, interaction.guild, "casenum")
+    embed.set_author(name=f"CASE {case} | {data[4]} | {user.name}", icon_url=interaction.user.avatar.url if interaction.user.avatar else None)
     embed.add_field(name="User", value=f"{user.mention}")
     embed.add_field(name="Moderator", value=f"{interaction.user.mention}")
     embed.add_field(name="Info", value=f"{data[4].lower().capitalize()if data[4].lower() == "message" else "Reason"}: {data[2]}")
-    if data[4] == "WARNING" or data[4] == "BAN" or data[4] == "MODLOG REMOVAL" or data[4] == "KICK" or data[4] == "MUTE":
+    embed.set_footer(text=f"CASE ID: {case} | USER ID: {user.id} | MOD ID: {interaction.user.id}")
+    if data[4] in [ "WARNING", "BAN","MODLOG REMOVAL", "KICK", "MUTE" ]:
         embed.add_field(name="Message", value=f"{f"{data[3]}\n" if not data[3] == None else ""}User now has {amt} modlogs.")
 
     await event(bot, interaction.guild, "modlog", user, embed)
@@ -132,7 +134,8 @@ async def event(bot, guild, eventtype, ref, embed):
         webhooks(True, guild, [newwebhook.id, newwebhook.token, channel.id])
         webhook = [newwebhook.id, newwebhook.token]
     embed.timestamp = datetime.now()
-    embed.set_footer(text=f"{eventtype.capitalize()} ID: {ref.id}")
+    if not embed.footer:
+        embed.set_footer(text=f"{eventtype.capitalize()} ID: {ref.id}")
     resp = requests.post(f"https://discord.com/api/webhooks/{webhook[0]}/{webhook[1]}", json={ "avatar_url": bot.user.avatar.url, "embeds": [embed.to_dict()]}, headers=headers)
     if not resp.ok:
         print(f"\033[31m[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [ERROR   ] An error occured in sending an event!: {resp.status_code}: {resp.content}")

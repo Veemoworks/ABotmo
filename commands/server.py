@@ -1,7 +1,7 @@
 import discord, json, random
 from discord import app_commands
 from discord.ext import commands
-from Cogs.Methods.methods import log, to_text, permission_check, xpEnabledOnly
+from Cogs.Methods.methods import log, to_text, canUse, xpEnabledOnly
 from Cogs.Classes.DiscordViews import Config, XPConfig
 from resources.dictionaries import setting_users
 from DataBases.database import xp, server_settings, user_settings, xp_settings, server_channels, nextLevel, xp_roles
@@ -154,7 +154,7 @@ class Server(commands.Cog):
     @app_commands.describe(user="User to modify", newlevel="Change the user's level", newxp="Change the user's XP", add="Add to current xp, else change it to value")
     @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
-    @permission_check()
+    @canUse()
     @xpEnabledOnly()
     async def set_rank(self, interaction: discord.Interaction, user: discord.Member, newlevel: int = None, newxp: int = None, add: bool = False):
         print(log(False,

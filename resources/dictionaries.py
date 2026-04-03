@@ -64,8 +64,11 @@ cmduae = {
 }
 custom_urls = {
     1373049145572593784: {
-        "welcome": "https://cdn.discordapp.com/attachments/1423149697987510375/1450662191685439549/OnettWelcome.png?ex=69644f72&is=6962fdf2&hm=9ddb6093d8cfe9df36742786704ecdd61fc5f4726b40e533baf03bc184b125e3&",
-        "goodbye": "https://cdn.discordapp.com/attachments/1423149697987510375/1452089132087246981/ezgif.com-video-to-gif-converter.gif?ex=6962e8e3&is=69619763&hm=7452d9090f0c0f19c9111ca31dcd5da06559d394d0edce095b9f979f6df3a530&"
+        # "welcome": "https://cdn.discordapp.com/attachments/1423149697987510375/1450662191685439549/OnettWelcome.png?ex=69644f72&is=6962fdf2&hm=9ddb6093d8cfe9df36742786704ecdd61fc5f4726b40e533baf03bc184b125e3&",
+        # "goodbye": "https://cdn.discordapp.com/attachments/1423149697987510375/1452089132087246981/ezgif.com-video-to-gif-converter.gif?ex=6962e8e3&is=69619763&hm=7452d9090f0c0f19c9111ca31dcd5da06559d394d0edce095b9f979f6df3a530&"
+
+        "welcome": "https://media.discordapp.net/attachments/1395156236231770202/1489105954078462112/Untitled280_20260331231136.png?ex=69d086fd&is=69cf357d&hm=67caa322c6712d2fcdc168cace9b29dd75093afd250c72f1326bd12d6460896e&animated=true",
+        "goodbye": "https://media.discordapp.net/attachments/1395156236231770202/1489105954472595596/Untitled280_20260331231141.png?ex=69d086fd&is=69cf357d&hm=30f6baa4c1b29fcbb1c668252aaa931163421df40c9f1c4a49c32123e6f87c62&animated=true"
     }
 }
 setting_users = {
@@ -98,4 +101,5 @@ kirk = {
     "role": "Role Logs Channel",
     "voice": "Voice Logs Channel",
     "lroles": "Level Roles",
+    "banned": "Banned Words",
 }

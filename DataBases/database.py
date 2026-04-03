@@ -412,7 +412,6 @@ def server_settings(save, guild, stype=None, value=None):
             con.commit()
             con.close()
             return msg
-
         elif stype == "prefix":
             cur.execute("""
                 UPDATE server_settings
@@ -436,11 +435,30 @@ def server_settings(save, guild, stype=None, value=None):
             con.commit()
             con.close()
             return num
+        elif stype == "banned":
+            try:
+                cur.execute(f"SELECT banned FROM server_settings WHERE guild_id = {guild_id}")
+                banned: list = json.loads(cur.fetchone()[0])
+
+                if value in banned:
+                    banned.remove(value)
+                    msg = f"Removed {value} from the banned word list."
+                else:
+                    banned.append(value)
+                    msg = f"Added {value} to the banned word list."
+
+                cur.execute(f"UPDATE server_settings SET banned = '{json.dumps(banned)}' WHERE guild_id = {guild_id}")
+
+                con.commit()
+                con.close()
+                return msg
+            except Exception as e:
+                print(e)
         else:
             return "fella..."
     else:
         cur.execute("""
-            SELECT roles, prefix, casenum
+            SELECT roles, prefix, casenum, banned
             FROM server_settings
             WHERE guild_id = ?;
         """, (guild_id,))
@@ -453,11 +471,14 @@ def server_settings(save, guild, stype=None, value=None):
             return data[1]
         elif stype == "casenum":
             return data[2]
+        elif stype == "banned":
+            return json.loads(data[3])
         else:
             return {
                 "roles": json.loads(data[0]),
                 "prefix": data[1],
                 "casenum": data[2],
+                "banned": data[3],
             }
 
 def user_settings(save, userid: int, setting, data=None):

@@ -104,6 +104,19 @@ class PrefixChange(Modal):
         for field in self.children:
             await interaction.response.send_message(server_settings(True, interaction.guild, "prefix", field.value), ephemeral=True)
 
+class BannedModify(Modal):
+    def __init__(self):
+        super().__init__(title="Enter a word to ban")
+        self.add_item(TextInput(
+            label="Banned Word:",
+            placeholder="Enter a word, to remove one type in the same word.",
+            style=discord.TextStyle.short
+        ))
+
+    async def on_submit(self, interaction: discord.Interaction):
+        for field in self.children:
+            await interaction.response.send_message(server_settings(True, interaction.guild, "banned", field.value), ephemeral=True)
+
 class XPLevel(Modal):
     def __init__(self, role):
         super().__init__(title="Enter a number")

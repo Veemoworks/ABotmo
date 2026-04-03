@@ -4,7 +4,7 @@ from datetime import datetime
 from discord import app_commands
 from discord.ext import commands
 from Cogs.Methods.asynchronous.methods import get_prefix
-from Cogs.Methods.methods import permission_check, imgcol_gen
+from Cogs.Methods.methods import canUse, imgcol_gen
 from Cogs.Classes.DiscordModals import BugReport, BotSuggest
 from Cogs.Classes.DiscordViews import ServerInfo, ProfileButtons
 from Cogs.Classes.DiscordButtons import CreditsButton
@@ -167,7 +167,7 @@ class Utils(commands.Cog):
     @app_commands.describe(amount="Amount of messages to purge (1–100)", user="Purge messages from a specific user", bots="Delete messages from bots only", embeds="Delete messages with embeds only", files="Delete messages with attachments only", links="Delete messages with links only", mentions="Delete messages with mentions only")
     @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
-    @permission_check()
+    @canUse()
     async def purge_slash(self, interaction: discord.Interaction, amount: int, user: discord.User = None, bots: bool = False, embeds: bool = False, files: bool = False, links: bool = False, mentions: bool = False):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.defer(ephemeral=True)

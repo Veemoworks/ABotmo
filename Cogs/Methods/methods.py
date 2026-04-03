@@ -53,7 +53,7 @@ def levelCard(level: int, avatar: discord.Asset):
     return buffer
 
 # Permission check on commands
-def permission_check():
+def canUse():
     async def predicate(interaction: discord.Interaction):
         user = interaction.guild.get_member(interaction.user.id)
         allowed_roles = server_settings(False, interaction.guild, "roles")
@@ -67,6 +67,16 @@ def permission_check():
         return False
 
     return app_commands.check(predicate)
+
+# permission check but like, not for commands lol
+def permCheck(guild, user):
+    allowed_roles = server_settings(False, guild, "roles")
+    if not allowed_roles:
+        return False
+    for role in user.roles:
+        if str(role.id) in allowed_roles:
+            return True
+    return False
 
 def xpEnabledOnly():
     async def predicate(interaction: discord.Interaction):

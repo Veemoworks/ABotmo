@@ -1,5 +1,5 @@
 import discord, requests, os, json
-from Cogs.Classes.DiscordModals import PrefixChange
+from Cogs.Classes.DiscordModals import PrefixChange, BannedModify
 from resources.dictionaries import headers, devs
 
 # All of discord.ui.button here
@@ -9,6 +9,13 @@ class PrefixChangeButton(discord.ui.Button):
 
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.send_modal(PrefixChange())
+
+class BannedWordModify(discord.ui.Button):
+    def __init__(self):
+        super().__init__(label="Banned Words", style=discord.ButtonStyle.secondary)
+
+    async def callback(self, interaction: discord.Interaction):
+        await interaction.response.send_modal(BannedModify())
 
 class BugReportSend(discord.ui.Button):
     def __init__(self, exception, interaction, view):

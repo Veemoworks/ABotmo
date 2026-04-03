@@ -1,13 +1,13 @@
-import discord, platform, time, os
+import discord, platform, time, os, re
 from datetime import datetime
 from discord.ext import commands
-from Cogs.Methods.methods import crash, log, levelCard
+from Cogs.Methods.methods import crash, log, levelCard, permCheck
 from resources.dictionaries import custom_urls
 from resources.links import warm
 from resources.variables import pid, version
 from Cogs.Methods.asynchronous.botStatus import status, kuma, ramthing
 from Cogs.Methods.asynchronous.methods import event, get_prefix
-from DataBases.database import xp, user_settings, xp_settings, xp_roles
+from DataBases.database import xp, user_settings, xp_settings, xp_roles, server_settings
 
 class Events(commands.Cog):
     def __init__(self, client: commands.Bot):
@@ -105,7 +105,7 @@ class Events(commands.Cog):
     async def on_member_join(self, member):
         guild = member.guild
         temp = discord.Embed(description=f"{member.mention} {member.name}", color=discord.Color.brand_green())
-        temp.set_author(name="Member Joined", icon_url=member.avatar.url)
+        temp.set_author(name="Member Joined", icon_url=member.avatar.url if member.avatar else None)
         temp.add_field(name="Account Created:", value=f"<t:{int(member.created_at.timestamp())}:R>")
         await event(self.bot, guild, "member", member, temp)
         embed = discord.Embed(color=discord.Color.brand_green())
@@ -129,7 +129,7 @@ class Events(commands.Cog):
         guild = member.guild
         roles = [r.mention for r in member.roles if not r.is_default()]
         temp = discord.Embed(description=f"{member.mention} {member.name}", color=discord.Color.brand_red())
-        temp.set_author(name="Member Left", icon_url=member.avatar.url)
+        temp.set_author(name="Member Left", icon_url=member.avatar.url if member.avatar else None)
         temp.add_field(name="Account Created:", value=f"<t:{int(member.created_at.timestamp())}:R>")
         temp.add_field(name="Roles:", value="\n".join(roles) if roles else "No roles.")
         await event(self.bot, guild, "member", member, temp)
@@ -151,7 +151,7 @@ class Events(commands.Cog):
     @commands.Cog.listener()
     async def on_member_update(self, old: discord.Member, new):
         embed = discord.Embed(colour=discord.Colour.yellow())
-        embed.set_author(name=new.name, icon_url=new.avatar.url)
+        embed.set_author(name=new.name, icon_url=new.avatar.url if new.avatar else None)
         summary = new.mention + " has been updated:\n"
         oldroles = [r.mention for r in old.roles if not r.is_default()]
         newroles = [r.mention for r in new.roles if not r.is_default()]
@@ -192,8 +192,8 @@ class Events(commands.Cog):
     async def on_member_ban(self, guild, user):
         user = self.bot.get_user(user.id)  # getting discord.User just in case event sends discord.Member
         embed = discord.Embed(color=discord.Colour.brand_red())
-        embed.set_author(name="Member Banned", icon_url=user.avatar.url)
-        embed.set_thumbnail(url=user.avatar.url)
+        embed.set_author(name="Member Banned", icon_url=user.avatar.url if user.avatar else None)
+        embed.set_thumbnail(url=user.avatar.url if user.avatar else None)
         embed.description = f"{user.mention} {user.name}"
 
         await event(self.bot, guild, "member", user, embed)
@@ -202,8 +202,8 @@ class Events(commands.Cog):
     async def on_member_unban(self, guild, user):
         user = self.bot.get_user(user.id)  # getting discord.User just in case event sends discord.Member
         embed = discord.Embed(color=discord.Colour.brand_green())
-        embed.set_author(name="Member Unbanned", icon_url=user.avatar.url)
-        embed.set_thumbnail(url=user.avatar.url)
+        embed.set_author(name="Member Unbanned", icon_url=user.avatar.url if user.avatar else None)
+        embed.set_thumbnail(url=user.avatar.url if user.avatar else None)
         embed.description = f"{user.mention} {user.name}"
 
         await event(self.bot, guild, "member", user, embed)
@@ -213,11 +213,13 @@ class Events(commands.Cog):
     # <editor-fold desc="Message Events">
     @commands.Cog.listener()
     async def on_message_edit(self, old, new):
+        if old.author == self.bot.user:
+            return
         if old.content == new.content:
             return
         embed = discord.Embed(description=f"Message edited in {old.channel.mention}\n[Jump to Message]({old.jump_url})",
                               colour=discord.Colour.brand_green())
-        embed.set_author(name=old.author.name, icon_url=old.author.avatar.url)
+        embed.set_author(name=old.author.name, icon_url=old.author.avatar.url if old.author.avatar else None)
         embed.add_field(name="Before:",
                         value=f"{old.content[:1021]}{"..." if len(old.content) >= 1024 else old.content[1022:1024]}")
         embed.add_field(name="After:",
@@ -226,9 +228,11 @@ class Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_delete(self, msg: discord.Message):
+        if msg.author == self.bot.user:
+            return
         embed = discord.Embed(title=f"Message deleted in {msg.channel.mention}", description=msg.content,
                               colour=discord.Colour.brand_red())
-        embed.set_author(name=msg.author.name, icon_url=msg.author.avatar.url)
+        embed.set_author(name=msg.author.name, icon_url=msg.author.avatar.url if msg.author.avatar else None)
         if not msg.attachments == []:
             stuff = [a.filename for a in msg.attachments]
             embed.add_field(name="Attachments:", value=",\n".join(stuff))
@@ -409,7 +413,7 @@ class Events(commands.Cog):
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, old, new):
         embed = discord.Embed(color=discord.Color.yellow())
-        embed.set_author(name=member.name, icon_url=member.avatar.url)
+        embed.set_author(name=member.name, icon_url=member.avatar.url if member.avatar else None)
         things = []
         if not old.channel == new.channel:
             if old.channel is None:
@@ -441,6 +445,19 @@ class Events(commands.Cog):
         guild = msg.guild
         user = msg.author
         if guild:
+            bannedlist: list = server_settings(False, guild, "banned")
+            bannedword = next((word for word in bannedlist if re.search(rf"\b{re.escape(word)}\b", msg.content.strip(), re.IGNORECASE)),None)
+
+            if bannedword and not permCheck(guild, user):
+                await msg.delete(delay=0)
+                embed = discord.Embed(description=f"Message Content:\n{msg.content.lower().replace(bannedword, f"**{bannedword}**")[:4079]}", color=discord.Color.yellow())
+                embed.set_author(name="FLAGGED WORD", icon_url=user.avatar.url if user.avatar else None)
+                embed.add_field(name="User:", value=user.mention)
+                embed.add_field(name="Banned Word:", value=bannedword)
+                embed.set_footer(text=f"User ID: {user.id}")
+                await event(self.bot, guild, "modlog", None, embed)
+                await msg.channel.send(f"{user.mention}, your message had a flagged word! Please be careful of what you say.", delete_after=6)
+                return
             if msg.content.startswith(await get_prefix(None, msg)):
                 return
             data = xp_settings(False, guild, None)
