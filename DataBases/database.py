@@ -478,7 +478,7 @@ def server_settings(save, guild, stype=None, value=None):
                 "roles": json.loads(data[0]),
                 "prefix": data[1],
                 "casenum": data[2],
-                "banned": data[3],
+                "banned": json.loads(data[3]),
             }
 
 def user_settings(save, userid: int, setting, data=None):

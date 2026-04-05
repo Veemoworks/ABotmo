@@ -24,8 +24,7 @@ class Server(commands.Cog):
         currconfig = server_settings(False, interaction.guild, None)
         currconfig = currconfig | server_channels(False, interaction.guild, None)
         currconfig.pop("casenum")
-        val = currconfig.pop("channel")
-        currconfig["mchannel"] = val
+        currconfig["mchannel"] = currconfig.pop("channel")
         embed = discord.Embed(
             title="Server Configuration",
             description=f"Welcome to the Server Configuration Panel, {interaction.user.mention}!\n"
@@ -34,6 +33,7 @@ class Server(commands.Cog):
                         "Choose what you’d like to configure below:",
             color=discord.Color.brand_green()
         )
+        embed.set_author(name=interaction.guild.name, icon_url=interaction.guild.icon.url if interaction.guild.icon else None)
         view = Config(interaction)
         await interaction.followup.send(embed=embed, view=view)
 
@@ -55,6 +55,7 @@ class Server(commands.Cog):
             currconfig.clear()
             currconfig["xpenabled"] = 0
         embed = discord.Embed(title="XP Configuration", description=f"Welcome to the XP Configuration Panel, {interaction.user.mention}!\nOnly Administrators can access this command.\n\n**__Current Config:__**\n{to_text(currconfig, True)}\n\nYour changes will soon be adjusted, please wait...", color=discord.Color.brand_green())
+        embed.set_author(name=interaction.guild.name, icon_url=interaction.guild.icon.url if interaction.guild.icon else None)
         msg = await interaction.followup.send(embed=embed)
         embed.description = embed.description.removesuffix("Your changes will soon be adjusted, please wait...")
         if not xprange is None:

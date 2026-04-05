@@ -144,7 +144,10 @@ def to_text(data: dict, xpconfig=False):
             if xpconfig:
                 skib = f"{value[0]} to {value[1]}"
             else:
-                temp = [f"<@&{val}>" for val in value]
+                if value[-1].isnumeric():
+                    temp = [f"<@&{val}>" for val in value]
+                else:
+                    temp = [val for val in value]
                 skib = ", ".join(temp)
                 plural = True
         elif _type == dict:
