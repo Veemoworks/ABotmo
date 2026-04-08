@@ -8,5 +8,5 @@ sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
     client_id=os.getenv("SPOTIFYID"),
     client_secret=os.getenv("SPOTIFYSECRET")
 ))
-version = "0.7.18"
+version = "2.16.1"
 pid = os.getpid()
