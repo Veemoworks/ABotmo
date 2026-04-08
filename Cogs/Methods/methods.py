@@ -35,7 +35,7 @@ def levelCard(level: int, avatar: discord.Asset):
     draw = ImageDraw.Draw(background)
     draw.rounded_rectangle((60, 20, 310, 90), radius=18, fill=(47, 49, 54))
 
-    avatar = Image.open(io.BytesIO(requests.get(avatar.url).content)).convert("RGBA").resize((72, 72))
+    avatar = Image.open(io.BytesIO(requests.get(avatar.url if avatar else "https://discord.com/assets/788f05731f8aa02e.png?size=1024&format=webp&quality=lossless").content)).convert("RGBA").resize((72, 72))
     mask = Image.new("L", (72, 72), 0)
     ImageDraw.Draw(mask).ellipse((0, 0, 72, 72), fill=255)
     ring = Image.new("RGBA", (80, 80), (0, 0, 0, 0))
