@@ -42,18 +42,13 @@ async def get_prefix(bot, message):
 # log things to modlog channel
 async def logChannel(bot, interaction, data, user, amt):
     embed = discord.Embed(color=discord.Color.yellow())
-    # if interaction == discord.Interaction:
-    #     embed.set_author(name=f"CASE {rows} | {data[4]} | {user.name}", icon_url=user.avatar.url)
-    #     embed.add_field(name="User", value=f"{user.mention}")
-    #     embed.add_field(name="Moderator", value=f"{interaction.user.mention}")
-    # else:
     case = server_settings(False, interaction.guild, "casenum")
     embed.set_author(name=f"CASE {case} | {data[4]} | {user.name}", icon_url=interaction.user.avatar.url if interaction.user.avatar else None)
     embed.add_field(name="User", value=f"{user.mention}")
     embed.add_field(name="Moderator", value=f"{interaction.user.mention}")
-    embed.add_field(name="Info", value=f"{data[4].lower().capitalize()if data[4].lower() == "message" else "Reason"}: {data[2]}")
-    embed.set_footer(text=f"CASE ID: {case} | USER ID: {user.id} | MOD ID: {interaction.user.id}")
-    if data[4] in [ "WARNING", "BAN","MODLOG REMOVAL", "KICK", "MUTE" ]:
+    embed.add_field(name="Info", value=f"{data[4].lower().capitalize()if data[4].lower() in ["message", "modlog removal"] else "Reason"}: {data[2]}")
+    embed.set_footer(text=f"LOG ID: {data[-1]}")
+    if data[4] in [ "WARNING", "BAN", "MODLOG REMOVAL", "KICK", "MUTE" ]:
         embed.add_field(name="Message", value=f"{f"{data[3]}\n" if not data[3] == None else ""}User now has {amt} modlogs.")
 
     await event(bot, interaction.guild, "modlog", user, embed)

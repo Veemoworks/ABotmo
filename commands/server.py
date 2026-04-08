@@ -95,6 +95,10 @@ class Server(commands.Cog):
                 channel = 1
             else:
                 channel = channel.id
+        if not message is None:
+            message = int(message)
+        if not xpenabled is None:
+            xpenabled = int(xpenabled)
         temp = {
             "messagetoggle": message,
             "channel": channel,

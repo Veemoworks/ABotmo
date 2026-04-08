@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from Cogs.Methods.asynchronous.methods import logChannel, sendCase
 from Cogs.Methods.methods import canUse, log
 from Cogs.Classes.DiscordViews import AutoBugReport
-from DataBases.database import modlog, server_settings
+from DataBases.database import modlog, server_settings, getUUID
 
 class Moderation(commands.Cog):
     def __init__(self, bot):
@@ -29,17 +29,18 @@ class Moderation(commands.Cog):
                 return
         data = [ user.id, interaction.user.id, reason, message, "WARNING", int(datetime.now().timestamp())]
         msg = modlog(True, interaction, data)
+        data.append(msg[1])
         server_settings(True, interaction.guild, "casenum")
         await logChannel(self.bot, interaction, data, user, modlog(False, interaction, user=user, rem=True))
         await sendCase(interaction, data, user, modlog(False, interaction, user=user, rem=True))
-        await interaction.followup.send(msg)
+        await interaction.followup.send(msg[0])
 
     @app_commands.command(name="mute", description="Timeout a user for a specific duration")
     @app_commands.describe(user="Enter a user", length="Enter a time (60s, 1m, 1h, 1d, 2w)", reason="Enter a reason")
     @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
     @canUse()
-    async def mute(self, interaction: discord.Interaction, user: discord.Member, length: str, reason: str):
+    async def mute(self, interaction: discord.Interaction, user: discord.Member, length: str, reason: str = None):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f'{interaction.guild.id} ({interaction.guild.name})' if interaction.guild else 'DMs'}!"))
         await interaction.response.defer(ephemeral=True)
         if user.bot:
@@ -80,10 +81,11 @@ class Moderation(commands.Cog):
             await user.timeout(until, reason=reason)
             data = [ user.id, interaction.user.id, reason, f"Muted for {length}", "MUTE", int(datetime.now().timestamp())]
             msg = modlog(True, interaction, data)
+            data.append(msg[1])
             server_settings(True, interaction.guild, "casenum")
             await logChannel(self.bot, interaction, data, user, modlog(False, interaction, user=user, rem=True))
             await sendCase(interaction, data, user, modlog(False, interaction, user=user, rem=True))
-            await interaction.followup.send(msg)
+            await interaction.followup.send(msg[0])
         except Exception as e:
             await interaction.followup.send(f"An error occurred while running this command!\nError: {e}", view=AutoBugReport(interaction, e))
 
@@ -103,6 +105,8 @@ class Moderation(commands.Cog):
             if user.is_timed_out():
                 await user.timeout(discord.utils.utcnow(), reason=reason)
                 data = [ user.id, interaction.user.id, reason, None, "UNMUTE", int(datetime.now().timestamp())]
+                msg = modlog(True, interaction, data)
+                data.append(msg[1])
                 server_settings(True, interaction.guild, "casenum")
                 await logChannel(self.bot, interaction, data, user, modlog(False, interaction, user=user, rem=True))
                 await sendCase(interaction, data, user, modlog(False, interaction, user=user, rem=True))
@@ -117,7 +121,7 @@ class Moderation(commands.Cog):
     @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
     @canUse()
-    async def ban(self, interaction: discord.Interaction, user: discord.User, reason: str, message: str = None, delete_msgs: int = 0):
+    async def ban(self, interaction: discord.Interaction, user: discord.User, reason: str = None, message: str = None, delete_msgs: int = 0):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.defer(ephemeral=True)
         if user.bot:
@@ -142,9 +146,9 @@ class Moderation(commands.Cog):
                 server_settings(True, interaction.guild, "casenum")
                 await sendCase(interaction, data, user, modlog(False, interaction, user=user, rem=True))
                 await interaction.guild.ban(user, reason=reason, delete_message_days=delete_msgs)
-
+            data.append(msg[1])
             await logChannel(self.bot, interaction, data, user, modlog(False, interaction, user=user, rem=True))
-            await interaction.followup.send(msg)
+            await interaction.followup.send(msg[0])
         except Exception as e:
             await interaction.followup.send(f"An error occurred while running this command!\nError: {e}", view=AutoBugReport(interaction, e))
 
@@ -184,9 +188,9 @@ class Moderation(commands.Cog):
                 await interaction.guild.unban(user, reason="Unbanning from softban")
         except Exception as e:
             await interaction.followup.send(f"An error occurred while running this command!\nError: {e}", view=AutoBugReport(interaction, e))
-
+        data.append(msg[1])
         await logChannel(self.bot, interaction, data, user, modlog(False, interaction, user=user, rem=True))
-        await interaction.followup.send(msg)
+        await interaction.followup.send(msg[0])
 
     @app_commands.command(name="kick", description="Kick a user")
     @app_commands.describe(user="Enter a user", reason="Enter a reason", message="Optional Message")
@@ -207,11 +211,12 @@ class Moderation(commands.Cog):
         try:
             data = [ user.id, interaction.user.id, reason, message, "KICK", int(datetime.now().timestamp())]
             msg = modlog(True, interaction, data)
+            data.append(msg[1])
             server_settings(True, interaction.guild, "casenum")
             await sendCase(interaction, data, user, modlog(False, interaction, user=user, rem=True))
             await user.kick(reason=reason)
             await logChannel(self.bot, interaction, data, user, modlog(False, interaction, user=user, rem=True))
-            await interaction.followup.send(msg)
+            await interaction.followup.send(msg[0])
         except Exception as e:
             await interaction.followup.send(f"An error occurred while running this command!\nError: {e}", view=AutoBugReport(interaction, e))
 
@@ -235,6 +240,8 @@ class Moderation(commands.Cog):
 
         try:
             data = [ user.id, interaction.user.id, reason, None, "UNBAN", int(datetime.now().timestamp())]
+            msg = modlog(True, interaction, data)
+            data.append(msg[1])
             await interaction.guild.unban(user, reason=reason)
             server_settings(True, interaction.guild, "casenum")
             await logChannel(self.bot, interaction, data, user, modlog(False, interaction, user=user, rem=True))
@@ -258,7 +265,7 @@ class Moderation(commands.Cog):
             return
 
         message = message.replace("\\", "\n")
-        data = [ user.id, interaction.user.id, message, None, "MESSAGE", int(datetime.now().timestamp())]
+        data = [ user.id, interaction.user.id, message, None, "MESSAGE", int(datetime.now().timestamp()), None]
         case = server_settings(True, interaction.guild, "casenum")
         embed = discord.Embed(title=f"You have recieved a **MESSAGE** from __**{interaction.guild.name}**__!", description=f"-# CASE {case}",color=discord.Color.brand_green())
         embed.set_thumbnail(url=interaction.guild.icon.url if interaction.guild.icon else None)
@@ -274,20 +281,23 @@ class Moderation(commands.Cog):
             await interaction.followup.send(f"An error occurred while running this command!\nError: {e}", view=AutoBugReport(interaction, e))
 
     @app_commands.command(name="modlogs", description="View the moderation logs of a member")
-    @app_commands.describe(user="Enter a user", page="Page number (each page has a limit of 25 modlogs)")
+    @app_commands.describe(user="Enter a user", logid="Log ID of a Moderation Log", page="Page number (each page has a limit of 25 modlogs)",)
     @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
     @canUse()
-    async def modlogs(self, interaction: discord.Interaction, user: discord.User, page: int = 1):
+    async def modlogs(self, interaction: discord.Interaction, user: discord.User = None, logid: str = None, page: int = 1):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.defer(ephemeral=True)
-        if user.bot:
+        if user and user.bot:
             await interaction.followup.send(f"You can not view the modlogs of {user.mention}, they are a bot!")
             return
         if page < 1:
             await interaction.followup.send("Please enter a page number thats bigger than 0!")
             return
-        await interaction.followup.send(embed=modlog(False, interaction, [page, False], user))
+        if not user and not logid:
+            await interaction.followup.send("Please enter either a user to see their full logs or a Log ID to see details of that log.")
+            return
+        await interaction.followup.send(embed=modlog(False, interaction, [page, logid, False], user))
 
     @app_commands.command(name="checkmod", description="View the moderation logs a moderator has done")
     @app_commands.describe(user="Enter a user", page="Page number (each page has a limit of 25 modlogs)")
@@ -303,31 +313,25 @@ class Moderation(commands.Cog):
         if page < 1:
             await interaction.followup.send("Please enter a page number thats bigger than 0!")
             return
-        modlogs = modlog(False, interaction, [page, True], user)
+        modlogs = modlog(False, interaction, [page, None, True], user)
         await interaction.followup.send(embeds=[modlogs])
 
     @app_commands.command(name="remlog", description="Remove a moderation log")
-    @app_commands.describe(user="User to remove from", index="Index number of the moderation log (* for all)", reason="Reason to remove")
+    @app_commands.describe(logid="Log ID of the Moderation Log (* for all)", user="User to remove from (Required if deleting all logs)", reason="Reason to remove")
     @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
     @canUse()
-    async def remlog(self, interaction: discord.Interaction, user: discord.User, index: str, reason: str = None):
+    async def remlog(self, interaction: discord.Interaction, logid: str, user: discord.User = None, reason: str = None):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.defer(ephemeral=True)
-        if user.bot:
+        if user and user.bot:
             await interaction.followup.send(f"You can not remove a mod log from {user.mention}, they are a bot!")
             return
-        if not index.isnumeric():
-            if not index == "*":
-                await interaction.followup.send(f"Please input a number or \"*\" and not {index}")
-                return
-        else:
-            index = int(index)
 
-        thing = modlog(True, interaction, index, user, True)
+        thing = modlog(True, interaction, logid, user, True)
 
         if thing[1]:
-            await logChannel(self.bot, interaction, [ user.id, interaction.user.id, index, reason, "MODLOG REMOVAL", int(datetime.now().timestamp())], user, server_settings(True, interaction.guild, "casenum"))
+            await logChannel(self.bot, interaction, [thing[2], interaction.user.id, "Removed all Logs" if logid == "*" else f"Removed '{logid}'", reason, "MODLOG REMOVAL", int(datetime.now().timestamp()), logid], interaction.guild.get_member(thing[2]), 0 if logid == "*" else thing[3])
         await interaction.followup.send(thing[0])
 
     @app_commands.command(name="mylogs", description="See your log count for this server!")
