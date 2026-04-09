@@ -1,5 +1,4 @@
-import datetime
-import sqlite3, mssql_python as sql, discord, random, json, string, os, dotenv
+import datetime, mssql_python as sql, discord, random, json, string, os, dotenv
 dotenv.load_dotenv(".env")
 
 uuidFormat = "____-___-______-___"
