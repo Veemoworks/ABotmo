@@ -2,19 +2,21 @@ import datetime, mssql_python as sql, discord, random, json, string, os, dotenv
 dotenv.load_dotenv(".env")
 
 uuidFormat = "____-___-______-___"
-uuidChars = [char for char in string.ascii_lowercase[:6] + string.digits]
+uuidChars = [c for c in string.ascii_lowercase[:6] + string.digits]
 columns = {
-    "modlogs": """[user]    BIGINT,
-        mod       BIGINT,
+    "modlogs": """guild_id  bigint       not null,
+        [user]    bigint,
+        mod       bigint,
         reason    varchar(max),
         message   varchar(max),
         type      varchar(max),
         timestamp int,
-        i         int,
-        id        varchar(max)""",
-    "xp": """[user] BIGINT,
+        i         smallint,
+        id        varchar(max) not null""",
+    "xp": """guild_id big int not null,
+        [user] BIGINT not null,
         xp BIGINT,
-        level int,
+        level smallint,
         last_msg int""",
     "xp_settings": """guild_id BIGINT,
         messagetoggle bit,
@@ -31,15 +33,16 @@ columns = {
     "user_settings": """user BIGINTY,
         xpmessage tinyint""",
     "server_channels": """guild_id BIGINT,
-            modlog BIGINT,
-            member BIGINT,
-            message BIGINT,
-            channel BIGINT,
-            role BIGINT,
-            voice BIGINT""",
-    "webhooks": """id BIGINT,
-            token varchar(max),
-            channel BIGINT""",
+        modlog BIGINT,
+        member BIGINT,
+        message BIGINT,
+        channel BIGINT,
+        role BIGINT,
+        voice BIGINT""",
+    "webhooks": """guild_id bigint not null,
+        id BIGINT,
+        token varchar(max),
+        channel BIGINT""",
 }
 
 def connectToDB(database: str):
@@ -65,12 +68,12 @@ def getUUID():
     con.close()
     return uuid
 
-def checkTableExists(con: sql.db_connection.Connection, cur: sql.cursor.Cursor, name: str, db_name: str):
+def checkTableExists(con: sql.db_connection.Connection, cur: sql.cursor.Cursor, name: str):
     cur.execute(f"""
     if not exists(select * from sys.tables where name='{name}')
         create table main.[{name}]
         (
-            {columns[db_name]}
+            {columns[name]}
         )"""
     )
     con.commit()
@@ -78,43 +81,44 @@ def checkTableExists(con: sql.db_connection.Connection, cur: sql.cursor.Cursor, 
 def modlog(save, interaction: discord.Interaction, data = None, user: discord.User | discord.Member = None, rem = False):
     msg = None
     con, cur = connectToDB("modlogs")
-    gid = str(interaction.guild.id)
-    checkTableExists(con, cur, gid, "modlogs")
+    gid = interaction.guild.id
+    checkTableExists(con, cur, "modlogs")
 
     if save and not rem:
+        data.insert(0, gid)
         i = len(cur.execute(f"""
-            SELECT * FROM main.[{gid}] WHERE [user] = '{data[0]}'""").fetchall()) + 1
+            SELECT * FROM main.modlogs WHERE [user] = {data[1]} AND guild_id = {gid}""").fetchall()) + 1
         data.append(i)
         uuid = getUUID()
         data.append(uuid)
         cur.execute(f"""
-            INSERT INTO main.[{gid}] ([user], mod, reason, message, type, timestamp, i, id)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+            INSERT INTO main.modlogs (guild_id, [user], mod, reason, message, type, timestamp, i, id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
         """, data)
         con.commit()
-        msg = (f"Successfully gave <@{data[0]}> a {data[4].lower()}, they now have {i} modlogs!\n-# Modlog ID: {uuid}", uuid)
+        msg = (f"Successfully gave <@{data[1]}> a {data[5].lower()}, they now have {i} modlogs!\n-# Modlog ID: {uuid}", uuid)
     elif not save and not rem:
         if data[1]:
             msg = discord.Embed(color=discord.Color.dark_green())
             msg.set_author(name=f"LOG '{data[1]}' DETAILS")
-            cur.execute(f"SELECT * FROM main.[{gid}] WHERE id = '{data[1]}'")
+            cur.execute(f"SELECT * FROM main.modlogs WHERE id = '{data[1]}' AND guild_id = {gid}")
             row = cur.fetchone()
             if row:
-                user = interaction.guild.get_member(row[0])
+                user = interaction.guild.get_member(row[1])
                 msg.author.icon_url = user.avatar.url if user and user.avatar else None
-                msg.description = f"<t:{row[5]}:R>, <@{row[1]}> issued a **{row[4]}** on <@{row[0]}>"
-                msg.add_field(name="Index:", value=row[6])
-                msg.add_field(name="Reason:", value=row[2])
-                msg.add_field(name="Message:", value=row[3])
-                msg.set_footer(text=f"User ID: {row[0]} | Mod ID: {row[1]}")
-                msg.timestamp = datetime.datetime.fromtimestamp(row[5])
+                msg.description = f"<t:{row[6]}:R>, <@{row[2]}> issued a **{row[5]}** on <@{row[1]}>"
+                msg.add_field(name="Index:", value=row[7])
+                msg.add_field(name="Reason:", value=row[3])
+                msg.add_field(name="Message:", value=row[4])
+                msg.set_footer(text=f"User ID: {row[1]} | Mod ID: {row[2]}")
+                msg.timestamp = datetime.datetime.fromtimestamp(row[6])
             else:
                 msg.description = "Moderation Log not found! Ensure the ID is correct."
         elif data[2] and user:
             cur.execute(f"""
                             SELECT type, timestamp, [user], id
-                            FROM main.[{gid}]
-                            WHERE mod = '{user.id}'
+                            FROM main.modlogs
+                            WHERE mod = '{user.id}' AND guild_id = {gid}
                         """)
             rows = cur.fetchall()
             msg = discord.Embed(color=discord.Color.dark_green())
@@ -142,8 +146,8 @@ def modlog(save, interaction: discord.Interaction, data = None, user: discord.Us
         else:
             cur.execute(f"""
                 SELECT type, timestamp, i, id
-                FROM main.[{gid}]
-                WHERE [user] = '{user.id}'
+                FROM main.modlogs
+                WHERE [user] = '{user.id}' AND guild_id = {gid}
                 ORDER BY i;
             """)
             rows = cur.fetchall()
@@ -171,29 +175,29 @@ def modlog(save, interaction: discord.Interaction, data = None, user: discord.Us
             False, user)
         print(data, user)
         if data.strip() == "*" and user:
-            cur.execute(f"""DELETE FROM main.[{gid}] WHERE user = {user.id}""")
+            cur.execute(f"""DELETE FROM main.modlogs WHERE user = {user.id} AND guild_id = {gid}""")
             msg = (f"Successfully deleted all of {user.mention}'s logs!", True, user)
         elif not data.strip().find("-") == -1:
             cur.execute(f"""
-                    SELECT [user] FROM main.[{gid}] WHERE id = '{data}'"""
+                    SELECT [user] FROM main.modlogs WHERE id = '{data}' AND guild_id = {gid}"""
                     )
             t = cur.fetchone()
             if t:
                 cur.execute(f"""
-                    DELETE FROM main.[{gid}] WHERE id = '{data}'""")
-                msg = (f"Successfully deleted Log '{data}' from the Discord Server's database!", True, t[0], len(cur.execute(f"""SELECT * FROM main.[{gid}] WHERE user = '{t[0]}'""").fetchall()))
+                    DELETE FROM main.modlogs WHERE id = '{data}' AND guild_id = {gid}""")
+                msg = (f"Successfully deleted Log '{data}' from the Discord Server's database!", True, t[0], len(cur.execute(f"""SELECT * FROM main.modlogs WHERE user = '{t[0]}'""").fetchall()))
         con.commit()
     elif not save and rem:
         cur.execute(f"""
                         SELECT i
-                        FROM main.[{gid}]
-                        WHERE [user] = '{user.id}'
+                        FROM main.modlogs
+                        WHERE [user] = '{user.id}' AND guild_id = {gid}
                     """)
         msg = len(cur.fetchall())
     con.close()
     return msg
 
-# <editor-fold desc="xp.db">
+# <editor-fold desc="xp">
 def nextLevel(level: int):
     return 5 * (level**2) + (level * 50) + 75
 
@@ -201,20 +205,20 @@ def xp(save, guild, data=None, user=None, lvlup=True):
     returnval = None
     con, cur = connectToDB("xp")
     gid = str(guild.id)
-    checkTableExists(con, cur, gid, "xp")
+    checkTableExists(con, cur, "xp")
 
     if save:
         if lvlup:
             cur.execute(f"""
-                        SELECT xp, level, last_msg FROM main.[{gid}]
-                        WHERE [user] = '{user.id}'   
+                        SELECT xp, level, last_msg FROM main.guildxp
+                        WHERE [user] = {user.id} AND guild_id = {gid}
                     """)
             row = cur.fetchone()
             if row == None:
                 t: dict = xp_settings(False, guild, None)
                 cur.execute(f"""
-                            INSERT INTO main.[{gid}]
-                            VALUES ({user.id}, {random.randint(t["range"][0], t["range"][1])}, 0, {data})
+                            INSERT INTO main.guildxp
+                            VALUES ({gid}, {user.id}, {random.randint(t["range"][0], t["range"][1])}, 0, {data})
                             """)
                 con.commit()
                 level = 0
@@ -230,9 +234,9 @@ def xp(save, guild, data=None, user=None, lvlup=True):
                         returnval = True
 
                     cur.execute(f"""
-                                UPDATE main.[{gid}]
+                                UPDATE main.guildxp
                                 SET xp = '{new_xp}', level = '{level}', last_msg = '{data}'
-                                WHERE [user] = '{user.id}'
+                                WHERE [user] = '{user.id}' AND guild_id = {gid}
                             """)
                     con.commit()
             con.close()
@@ -240,17 +244,17 @@ def xp(save, guild, data=None, user=None, lvlup=True):
         else:
             newxp, newlevel = data
             cur.execute(f"""
-                        UPDATE main.[{gid}]
+                        UPDATE main.guildxp
                         SET {f"xp = '{newxp}'" if newxp else ""}{", " if newlevel and newxp else ""}{f"level = '{newlevel}'" if newlevel else ""}
-                        WHERE [user] = '{user.id}' 
+                        WHERE [user] = '{user.id}' AND guild_id = {gid}
                     """)
             con.commit()
             con.close()
             return [newxp, newlevel]
     else:
         cur.execute(f"""
-            SELECT xp, level FROM main.[{gid}]
-            WHERE [user] = '{user.id}'
+            SELECT xp, level FROM main.guildxp
+            WHERE [user] = '{user.id}' AND guild_id = {gid}
         """)
 
         row = cur.fetchone()
@@ -266,7 +270,7 @@ def xp(save, guild, data=None, user=None, lvlup=True):
 def xp_settings(save, guild: discord.Guild, data):
     con, cur = connectToDB("xp")
     gid = guild.id
-    checkTableExists(con, cur, "xp_settings", "xp_settings")
+    checkTableExists(con, cur, "xp_settings")
 
     cur.execute(f"SELECT * FROM main.[xp_settings] WHERE guild_id = {gid}")
     row = cur.fetchone()
@@ -362,7 +366,7 @@ def xp_settings(save, guild: discord.Guild, data):
 def xp_roles(save, guild: discord.Guild, level=None, role=None):
     con, cur = connectToDB("xp")
     gid = guild.id
-    checkTableExists(con, cur, "xp_roles", "xp_roles")
+    checkTableExists(con, cur, "xp_roles")
 
     cur.execute(f"SELECT * FROM main.[xp_roles] WHERE guild_id = {gid}")
     row = cur.fetchone()
@@ -402,11 +406,11 @@ def xp_roles(save, guild: discord.Guild, level=None, role=None):
         return data
 # </editor-fold>
 
-# <editor-fold desc="settings.db">
+# <editor-fold desc="settings">
 def server_settings(save, guild, stype=None, value=None):
     con, cur = connectToDB("settings")
     gid = str(guild.id)
-    checkTableExists(con, cur, "server_settings", "server_settings")
+    checkTableExists(con, cur, "server_settings")
 
     cur.execute(f"SELECT * FROM main.[server_settings] WHERE guild_id = {gid}")
     row = cur.fetchone()
@@ -511,7 +515,7 @@ def server_settings(save, guild, stype=None, value=None):
 def user_settings(save, userid: int, setting, data=None):
     returnval = False
     con, cur = connectToDB("settings")
-    checkTableExists(con, cur, "user_settings", "user_settings") # temp - 0 = off, 1 = on (server), 2 = on (dms)
+    checkTableExists(con, cur, "user_settings") # temp - 0 = off, 1 = on (server), 2 = on (dms)
 
     cur.execute(f"SELECT * FROM main.[user_settings] WHERE user = {userid}")
     row = cur.fetchone()
@@ -552,7 +556,7 @@ def user_settings(save, userid: int, setting, data=None):
 def server_channels(save, guild, channel, data=None):
     con, cur = connectToDB("settings")
     gid = guild.id
-    checkTableExists(con, cur, "server_channels", "server_channels")
+    checkTableExists(con, cur, "server_channels")
 
     cur.execute(f"SELECT * FROM main.[server_channels] WHERE guild_id = {gid}")
     row = cur.fetchone()
@@ -635,27 +639,30 @@ def server_channels(save, guild, channel, data=None):
 # </editor-fold>
 
 def webhooks(save, guild, data):
-    # data format = (id, token, name, channel)
-    con, cur = connectToDB("webhooks")
-    gid = guild.id
-    checkTableExists(con, cur, gid, "webhooks")
+    try:
+        # data format = (id, token, name, channel)
+        con, cur = connectToDB("master")
+        gid = guild.id
+        checkTableExists(con, cur, "webhooks")
 
-    if save:
-        cur.execute(f"""
-                INSERT INTO main.[{gid}] (
-                    id, token, channel
-                ) VALUES ({data[0]}, '{data[1]}', {data[2]})
-        """)
-        con.commit()
-        con.close()
-        return True
-    else:
-        cur.execute(f"""
-                SELECT * FROM main.[{gid}] WHERE channel = {data[0]} AND id = {data[1]}
-        """)
-        data = cur.fetchone()
-        if data:
+        if save:
+            cur.execute(f"""
+                    INSERT INTO main.webhooks (
+                        guild_id, id, token, channel
+                    ) VALUES ({gid}, {data[0]}, '{data[1]}', {data[2]})
+            """)
+            con.commit()
             con.close()
-            return data
-        con.close()
-        return False
+            return True
+        else:
+            cur.execute(f"""
+                    SELECT * FROM main.webhooks WHERE guild_id = {gid} AND channel = {data[0]} AND id = {data[1]}
+            """)
+            data = cur.fetchone()
+            if data:
+                con.close()
+                return data
+            con.close()
+            return False
+    except Exception as e:
+        print(e)
