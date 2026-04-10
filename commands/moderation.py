@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from Cogs.Methods.asynchronous.methods import logChannel, sendCase
 from Cogs.Methods.methods import canUse, log
 from Cogs.Classes.DiscordViews import AutoBugReport
-from DataBases.database import modlog, server_settings, getUUID
+from DataBases.database import modlog, server_settings
 
 class Moderation(commands.Cog):
     def __init__(self, bot):
@@ -342,10 +342,9 @@ class Moderation(commands.Cog):
         await interaction.response.defer(ephemeral=True)
         embed = discord.Embed(description=f"You have {modlog(False, interaction, user=interaction.user, rem=True)} modlogs!",color=discord.Color.brand_green())
         embed.set_author(name=interaction.guild.name, icon_url=interaction.guild.icon.url if interaction.guild.icon else None)
-        embed.set_footer(text=interaction.user.name, icon_url=interaction.user.avatar.url)
+        embed.set_footer(text=interaction.user.name, icon_url=interaction.user.avatar.url if interaction.user.avatar else None)
         embed.timestamp = datetime.now()
 
         await interaction.followup.send(embed=embed)
-
 async def setup(bot):
     await bot.add_cog(Moderation(bot))
