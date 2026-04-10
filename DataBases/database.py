@@ -171,11 +171,11 @@ def modlog(save, interaction: discord.Interaction, data = None, user: discord.Us
     elif save and rem:
         msg = (
             f"Could not find Log '`{data}`', an error occured, or no user was specified.\nEnsure the Log ID exists, is from this server, or the user is correct.\n-# *User only required if you're deleting all logs.*",
-            False, user)
+            False, user, 0)
 
         if data.strip() == "*" and user:
             cur.execute(f"""DELETE FROM main.modlogs WHERE [user] = {user.id} AND guild_id = {gid}""")
-            msg = (f"Successfully deleted all of {user.mention}'s logs!", True, user.id)
+            msg = (f"Successfully deleted all of {user.mention}'s logs!", True, user.id, 0)
         elif not data.strip().find("-") == -1:
             cur.execute(f"""
                     SELECT [user] FROM main.modlogs WHERE id = '{data}' AND guild_id = {gid}"""
@@ -184,7 +184,7 @@ def modlog(save, interaction: discord.Interaction, data = None, user: discord.Us
             if t:
                 cur.execute(f"""
                     DELETE FROM main.modlogs WHERE id = '{data}' AND guild_id = {gid}""")
-                msg = (f"Successfully deleted Log '{data}' from the Discord Server's database!", True, t[0], len(cur.execute(f"""SELECT * FROM main.modlogs WHERE user = '{t[0]}'""").fetchall()))
+                msg = (f"Successfully deleted Log '{data}' from the Discord Server's database!", True, t[0], len(cur.execute(f"""SELECT * FROM main.modlogs WHERE user = {t[0]} AND guild_id = {gid}""").fetchall()))
         con.commit()
     elif not save and rem:
         cur.execute(f"""
