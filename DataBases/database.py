@@ -134,10 +134,10 @@ def modlog(save, interaction: discord.Interaction, data = None, user: discord.Us
                     data[0] = tpages
                 msg.description = f"Page {data[0]} / {tpages}\n-# Each page is 25 modlogs - TOTAL LOGS: {len(rows)}"
                 rows = rows[25 * (data[0] - 1):25 * data[0]]
-                i = 0
+                i = 25*(data[0]-1)
                 for row in rows:
                     i += 1
-                    msg.add_field(name=f"{i+(target-26)}. <t:{row[1]}>",
+                    msg.add_field(name=f"{i}. <t:{row[1]}>",
                                   value=f"**{row[0]}** on <@{row[2]}> ~ {row[3]}",
                                   inline=False)
                 msg.set_footer(text=user.id)
