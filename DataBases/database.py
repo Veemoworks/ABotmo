@@ -133,7 +133,7 @@ def modlog(save, interaction: discord.Interaction, data = None, user: discord.Us
                 i = 0
                 for row in rows:
                     i += 1
-                    msg.add_field(name=f"{i}. <t:{row[1]}>",
+                    msg.add_field(name=f"{i+(target-26)}. <t:{row[1]}>",
                                   value=f"**{row[0]}** on <@{row[2]}> ~ {row[3]}",
                                   inline=False)
                 msg.set_footer(text=user.id)
