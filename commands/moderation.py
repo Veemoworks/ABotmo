@@ -331,7 +331,7 @@ class Moderation(commands.Cog):
         thing = modlog(True, interaction, logid, user, True)
 
         if thing[1]:
-            await logChannel(self.bot, interaction, [thing[2], interaction.user.id, "Removed all Logs" if logid == "*" else f"Removed '{logid}'", reason, "MODLOG REMOVAL", int(datetime.now().timestamp()), logid], interaction.guild.get_member(thing[2]), 0 if logid == "*" else thing[3])
+            await logChannel(self.bot, interaction, [thing[2], interaction.user.id, "Removed all Logs" if logid == "*" else f"Removed '{logid}'", reason, "MODLOG REMOVAL", int(datetime.now().timestamp()), logid], interaction.guild.get_member(thing[2]), thing[3])
         await interaction.followup.send(thing[0])
 
     @app_commands.command(name="mylogs", description="See your log count for this server!")
