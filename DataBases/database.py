@@ -39,8 +39,7 @@ columns = {
         channel BIGINT,
         role BIGINT,
         voice BIGINT""",
-    "webhooks": """guild_id bigint not null,
-        id BIGINT,
+    "webhooks": """id BIGINT,
         token varchar(max),
         channel BIGINT""",
 }
@@ -173,10 +172,10 @@ def modlog(save, interaction: discord.Interaction, data = None, user: discord.Us
         msg = (
             f"Could not find Log '`{data}`', an error occured, or no user was specified.\nEnsure the Log ID exists, is from this server, or the user is correct.\n-# *User only required if you're deleting all logs.*",
             False, user)
-        print(data, user)
+
         if data.strip() == "*" and user:
-            cur.execute(f"""DELETE FROM main.modlogs WHERE user = {user.id} AND guild_id = {gid}""")
-            msg = (f"Successfully deleted all of {user.mention}'s logs!", True, user)
+            cur.execute(f"""DELETE FROM main.modlogs WHERE [user] = {user.id} AND guild_id = {gid}""")
+            msg = (f"Successfully deleted all of {user.mention}'s logs!", True, user.id)
         elif not data.strip().find("-") == -1:
             cur.execute(f"""
                     SELECT [user] FROM main.modlogs WHERE id = '{data}' AND guild_id = {gid}"""
@@ -639,30 +638,27 @@ def server_channels(save, guild, channel, data=None):
 # </editor-fold>
 
 def webhooks(save, guild, data):
-    try:
-        # data format = (id, token, name, channel)
-        con, cur = connectToDB("master")
-        gid = guild.id
-        checkTableExists(con, cur, "webhooks")
+    # data format = (id, token, name, channel)
+    con, cur = connectToDB("master")
+    gid = guild.id
+    checkTableExists(con, cur, "webhooks")
 
-        if save:
-            cur.execute(f"""
-                    INSERT INTO main.webhooks (
-                        guild_id, id, token, channel
-                    ) VALUES ({gid}, {data[0]}, '{data[1]}', {data[2]})
-            """)
-            con.commit()
+    if save:
+        cur.execute(f"""
+                INSERT INTO main.webhooks (
+                    id, token, channel
+                ) VALUES ({data[0]}, '{data[1]}', {data[2]})
+        """)
+        con.commit()
+        con.close()
+        return True
+    else:
+        cur.execute(f"""
+                SELECT * FROM main.webhooks WHERE channel = {data[0]} AND id = {data[1]}
+        """)
+        data = cur.fetchone()
+        if data:
             con.close()
-            return True
-        else:
-            cur.execute(f"""
-                    SELECT * FROM main.webhooks WHERE guild_id = {gid} AND channel = {data[0]} AND id = {data[1]}
-            """)
-            data = cur.fetchone()
-            if data:
-                con.close()
-                return data
-            con.close()
-            return False
-    except Exception as e:
-        print(e)
+            return data
+        con.close()
+        return False
