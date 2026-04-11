@@ -13,7 +13,7 @@ columns = {
         timestamp int,
         i         smallint,
         id        varchar(max) not null""",
-    "xp": """guild_id big int not null,
+    "xp": """guild_id bigint not null,
         [user] BIGINT not null,
         xp BIGINT,
         level smallint,
