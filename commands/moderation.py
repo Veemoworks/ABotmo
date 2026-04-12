@@ -201,7 +201,8 @@ class Moderation(commands.Cog):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.defer(ephemeral=True)
         if user.bot:
-            await interaction.followup.send(f"You can not kick {user.mention}, they are a bot!")
+            await user.kick(reason=reason)
+            await interaction.followup.send(f"Successfully kicked bot {user.mention} ({user.id})!")
             return
         allowed_roles = server_settings(False, interaction.guild, "roles")
         for role in user.roles:
