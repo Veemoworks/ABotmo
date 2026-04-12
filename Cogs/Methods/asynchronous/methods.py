@@ -40,18 +40,22 @@ async def get_prefix(bot, message):
     return prefix or ";;"
 
 # log things to modlog channel
-async def logChannel(bot, interaction, data, user, amt):
+async def logChannel(bot, interaction, data: list, user, amt):
+    if data[0] == interaction.guild.id:
+        data.pop(0)
+    if data[-1] == data[-2]:
+        data.pop(-1)
     embed = discord.Embed(color=discord.Color.yellow())
     case = server_settings(data[4] == "MODLOG REMOVAL", interaction.guild, "casenum")
     embed.set_author(name=f"CASE {case} | {data[4]} | {user.name}", icon_url=interaction.user.avatar.url if interaction.user.avatar else None)
-    embed.add_field(name="User", value=f"{user.mention}")
-    embed.add_field(name="Moderator", value=f"{interaction.user.mention}")
-    embed.add_field(name="Info", value=f"{"" if data[4] in ["MESSAGE", "MODLOG REMOVAL"] else "Reason: "}{data[2]}\nUser now has {amt} modlogs.")
+    embed.add_field(name="User:", value=f"{user.mention}")
+    embed.add_field(name="Moderator:", value=f"{interaction.user.mention}")
+    embed.add_field(name="Info:", value=f"{"" if data[4] in ["MESSAGE", "MODLOG REMOVAL"] else "Reason: "}{data[2]}\n{"" if data in ["MESSAGE"] else f"User now has {amt} modlogs."}")
     embed.set_footer(text=f"LOG ID: {data[-1]}")
-    if data[4] in [ "WARNING", "BAN", "KICK", "MUTE" ]:
-        embed.add_field(name="Message", value=data[3])
+    if data[4] in [ "WARNING", "BAN", "KICK", "MUTE" ] and not data[3] is None:
+        embed.add_field(name="Message:", value=data[3])
     elif data[4] in [ "MODLOG REMOVAL" ]:
-        embed.add_field(name="Reason", value=data[3])
+        embed.add_field(name="Reason:", value=data[3])
 
     await event(bot, interaction.guild, "modlog", user, embed)
 
