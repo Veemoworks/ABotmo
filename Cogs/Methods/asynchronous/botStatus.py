@@ -1,7 +1,8 @@
-import discord, aiohttp, os, psutil, asyncio
+import discord, aiohttp, os, psutil
 from discord.ext import tasks
 from Cogs.Methods.asynchronous.methods import crash
 from Cogs.Methods.methods import log
+from resources.variables import pid
 
 # All bot status related things
 @tasks.loop(minutes=3)
@@ -39,8 +40,9 @@ async def ramthing():
     for process in psutil.process_iter():
         if process.name() == "WindowsTerminal.exe":
             p = process
-    mem = psutil.Process(p.pid).memory_full_info()
-    usage = mem.uss / (1024**2)
-    if usage >= 2000:
+            break
+    usage = (psutil.Process(p.pid).memory_full_info().uss / (1024**2)) + (psutil.Process(pid).memory_full_info().uss / (1024**2))
+    if usage >= 4000:
         os.system("cls")
-        print(log(False, f"Cleared Console, RAM usage was: {round((usage / 16000) * 100, 2)}% ({round(usage)}MB / 16000MB)"))
+        print(log(False, f"Cleared Console"))
+    print(log(False, f"RAM Usage Report: {round((usage / 16000) * 100, 2)}% ({round(usage)}MB / 16000MB)"))
