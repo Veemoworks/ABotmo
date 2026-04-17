@@ -144,6 +144,7 @@ def to_text(data: dict, xpconfig=False):
             if xpconfig:
                 skib = f"{value[0]} to {value[1]}"
             else:
+                if not value: continue
                 if value[-1].isnumeric():
                     temp = [f"<@&{val}>" for val in value]
                 else:
