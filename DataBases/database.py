@@ -416,8 +416,8 @@ def server_settings(save, guild, stype=None, value=None):
 
     if not row:
         cur.execute(f"""
-            INSERT INTO main.[server_settings] (guild_id, roles, prefix, casenum)
-            VALUES ({gid}, '[]', ';;', 0);
+            INSERT INTO main.[server_settings] (guild_id, roles, prefix, casenum, banned)
+            VALUES ({gid}, '[]', ';;', 0, '[]');
         """)
         con.commit()
 
@@ -562,7 +562,7 @@ def server_channels(save, guild, channel, data=None):
     if not row:
         cur.execute(f"""
             INSERT INTO main.[server_channels] (guild_id, [modlog], member, message, channel, role, voice, guild)
-            VALUES ({gid}, 0, 0, 0, 0, 0, 0);
+            VALUES ({gid}, 0, 0, 0, 0, 0, 0, 0);
         """)
         con.commit()
     if save:
