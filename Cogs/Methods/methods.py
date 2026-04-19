@@ -139,7 +139,7 @@ def to_text(data: dict, xpconfig=False):
                     else:
                         skib = f"<#{value}>"
             else:
-                skib = f"<#{value}>"
+                skib = "None" if value == 0 else f"<#{value}>"
         elif _type == list:
             if xpconfig:
                 skib = f"{value[0]} to {value[1]}"
