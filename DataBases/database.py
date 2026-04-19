@@ -568,7 +568,7 @@ def server_channels(save, guild, channel, data=None):
     if save:
         if channel == "all event":
             cur.execute(f"""
-                UPDATE server_channels
+                UPDATE main.[server_channels]
                 SET modlog = {data},
                     member = {data},
                     message = {data},
