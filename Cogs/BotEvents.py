@@ -276,7 +276,7 @@ class Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_delete(self, msg: discord.Message):
-        if msg.author == self.bot.user:
+        if msg.author == self.bot.user or msg.author.name == "ABotmo Logs":
             return
         embed = discord.Embed(title=f"Message deleted in {msg.channel.mention}", description=msg.content,
                               colour=discord.Colour.brand_red())
@@ -495,8 +495,21 @@ class Events(commands.Cog):
         if guild:
             bannedlist: list = server_settings(False, guild, "banned")
             bannedword = next((word for word in bannedlist if re.search(rf"\b{re.escape(word)}\b", msg.content.strip(), re.IGNORECASE)),None)
-
-            if bannedword and not permCheck(guild, user):
+            if guild.id == 1373049145572593784:
+                link = re.findall(r'https?://\S+', msg.content.strip(), re.IGNORECASE)
+                if not guild.get_member(user.id).guild_permissions.embed_links and link:
+                    channel = msg.channel
+                    await msg.delete(delay=0)
+                    await channel.send(f"{user.mention}, you can not send suspicious links here unless you have the \"Embed Links\" permission!", delete_after=8)
+                    embed = discord.Embed(
+                        description=f"Message Content:\n{msg.content}", color=discord.Color.yellow())
+                    embed.set_author(name="FLAGGED WORD", icon_url=user.avatar.url if user.avatar else None)
+                    embed.add_field(name="User:", value=user.mention)
+                    embed.add_field(name="Banned Link(s):", value=", ".join(link))
+                    embed.set_footer(text=f"User ID: {user.id}")
+                    await event(self.bot, guild, "modlog", None, embed)
+                    return
+            if bannedword and (not permCheck(guild, user) and not guild.id == 1373049145572593784):
                 await msg.delete(delay=0)
                 embed = discord.Embed(description=f"Message Content:\n{msg.content.lower().replace(bannedword, f"**{bannedword}**")[:4079]}", color=discord.Color.yellow())
                 embed.set_author(name="FLAGGED WORD", icon_url=user.avatar.url if user.avatar else None)
