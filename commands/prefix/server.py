@@ -31,13 +31,13 @@ class ServerPREFIX(commands.Cog):
             currxp, level, nxt_lvl = xpinfo
             nxt_lvl -= currxp
             if has_perms:
-                embed.description = f"**Level**: {level}\n**XP**: {currxp}\n**{nxt_lvl} XP** needed."
+                embed.description = f"**Level**: {level}\n**XP**: {currxp}\n**{nxt_lvl} XP** needed"
                 embed.set_author(name=f"@{user.name}'s XP for {ctx.guild.name}.",
                                  icon_url=user.display_avatar.url)
                 await ctx.send(embed=embed)
             else:
                 await ctx.send(
-                    f"**__{user.name}__**\n**Level**: {level}\n**XP**: {currxp}\n**{nxt_lvl} XP** needed.")
+                    f"**__{user.name}__**\n**Level**: {level}\n**XP**: {currxp}\n**{nxt_lvl} XP** needed")
         else:
             if has_perms:
                 embed.set_author(

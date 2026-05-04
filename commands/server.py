@@ -144,11 +144,11 @@ class Server(commands.Cog):
                 currxp, level, nxt_lvl = xpinfo
                 nxt_lvl -= currxp
                 if has_perms:
-                    embed.description = f"**Level**: {level}\n**XP**: {currxp}\n**{nxt_lvl} XP** needed."
+                    embed.description = f"**Level**: {level}\n**XP**: {currxp}\n**{nxt_lvl} XP** needed"
                     embed.set_author(name=f"@{user.name}'s XP for {interaction.guild.name}.", icon_url=user.display_avatar.url)
                     await interaction.followup.send(embed=embed)
                 else:
-                    await interaction.followup.send(f"**__{user.name}__**\n**Level**: {level}\n**XP**: {currxp}\n**{nxt_lvl} XP** needed.")
+                    await interaction.followup.send(f"**__{user.name}__**\n**Level**: {level}\n**XP**: {currxp}\n**{nxt_lvl} XP** needed")
             else:
                 if has_perms:
                     embed.set_author(name=f"@{user.name} has no XP {f"{f"for {interaction.guild.name}" if not interaction.guild.name == "" else "as an external app"}"}", icon_url=user.display_avatar.url)
