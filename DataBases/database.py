@@ -234,8 +234,8 @@ def xp(save, guild, data=None, user=None, lvlup=True):
 
                     cur.execute(f"""
                                 UPDATE main.guildxp
-                                SET xp = '{new_xp}', level = '{level}', last_msg = '{data}'
-                                WHERE [user] = '{user.id}' AND guild_id = {gid}
+                                SET xp = {new_xp}, level = {level}, last_msg = {data}
+                                WHERE [user] = {user.id} AND guild_id = {gid}
                             """)
                     con.commit()
             con.close()
@@ -244,8 +244,8 @@ def xp(save, guild, data=None, user=None, lvlup=True):
             newxp, newlevel = data
             cur.execute(f"""
                         UPDATE main.guildxp
-                        SET {f"xp = '{newxp}'" if newxp else ""}{", " if newlevel and newxp else ""}{f"level = '{newlevel}'" if newlevel else ""}
-                        WHERE [user] = '{user.id}' AND guild_id = {gid}
+                        SET {f"xp = {newxp}" if newxp else ""}{", " if newlevel and newxp else ""}{f"level = {newlevel}" if newlevel else ""}
+                        WHERE [user] = {user.id} AND guild_id = {gid}
                     """)
             con.commit()
             con.close()
@@ -253,7 +253,7 @@ def xp(save, guild, data=None, user=None, lvlup=True):
     else:
         cur.execute(f"""
             SELECT xp, level FROM main.guildxp
-            WHERE [user] = '{user.id}' AND guild_id = {gid}
+            WHERE [user] = {user.id} AND guild_id = {gid}
         """)
 
         row = cur.fetchone()
