@@ -260,10 +260,27 @@ class Events(commands.Cog):
 
     # <editor-fold desc="Message Events">
     @commands.Cog.listener()
-    async def on_message_edit(self, old, new):
+    async def on_message_edit(self, old: discord.Message, new: discord.Message):
         if old.author == self.bot.user:
             return
         if old.content == new.content:
+            return
+        bannedword = next(
+            (word for word in server_settings(False, new.guild, "banned") if re.search(rf"\b{re.escape(word)}\b", new.content.strip(), re.IGNORECASE)),
+            None)
+        if bannedword and (not permCheck(new.guild, new.author) or new.guild.id == 1373049145572593784):
+            await new.delete(delay=0)
+            embed = discord.Embed(
+                description=f"Message Content:\n{new.content.lower().replace(bannedword, f"**{bannedword}**")[:4079]}",
+                color=discord.Color.yellow())
+            embed.set_author(name="FLAGGED WORD", icon_url=new.author.avatar.url if new.author.avatar else None)
+            embed.add_field(name="User:", value=new.author.mention)
+            embed.add_field(name="Banned Word:", value=bannedword)
+            embed.set_footer(text=f"User ID: {new.author.id}")
+            await event(self.bot, new.guild, "modlog", None, embed)
+            await new.channel.send(
+                f"{new.author.mention}, your message had a flagged word! Please be careful of what you say.\n-# Banned Word: {bannedword}",
+                delete_after=6)
             return
         embed = discord.Embed(description=f"Message edited in {old.channel.mention}\n[Jump to Message]({old.jump_url})",
                               colour=discord.Colour.brand_green())
@@ -509,7 +526,7 @@ class Events(commands.Cog):
                     embed.set_footer(text=f"User ID: {user.id}")
                     await event(self.bot, guild, "modlog", None, embed)
                     return
-            if bannedword and (not permCheck(guild, user) and not guild.id == 1373049145572593784):
+            if bannedword and (not permCheck(guild, user) or guild.id == 1373049145572593784):
                 await msg.delete(delay=0)
                 embed = discord.Embed(description=f"Message Content:\n{msg.content.lower().replace(bannedword, f"**{bannedword}**")[:4079]}", color=discord.Color.yellow())
                 embed.set_author(name="FLAGGED WORD", icon_url=user.avatar.url if user.avatar else None)
