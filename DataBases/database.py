@@ -392,7 +392,7 @@ def xp_roles(save, guild: discord.Guild, level=None, role=None):
         else:
             data[level] = role
             val = True
-        cur.execute(f"UPDATE main.[xp_roles] SET data = \"{str(data)}\" WHERE guild_id = {gid}")
+        cur.execute(f"UPDATE main.[xp_roles] SET data = '{str(data).replace("'", '"')}' WHERE guild_id = {gid}")
         con.commit()
         con.close()
         return val
