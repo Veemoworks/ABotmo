@@ -170,6 +170,9 @@ class Events(commands.Cog):
             await self.bot.get_channel(1418384488098037771).send(
                 f"Welcome to Stop N' Go, {member.mention}!! I hope you enjoy your stop :D",
                 allowed_mentions=discord.AllowedMentions(users=False))
+        elif guild.id == 1489081230455476246:
+            channel = self.bot.get_channel(1489096330495397989)
+            await channel.send(f"{member.mention} has joined! Make sure to punch Partygoer on your way in, and watch out for edgy maniacs with hacks.\nWe are now at {guild.member_count} members.")
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
@@ -195,6 +198,9 @@ class Events(commands.Cog):
             await self.bot.get_channel(1418384488098037771).send(
                 f"Oh...goodbye, {member.mention}...you have stopped and gone....",
                 allowed_mentions=discord.AllowedMentions(users=False))
+        elif guild.id == 1489081230455476246:
+            channel = self.bot.get_channel(1489096330495397989)
+            await channel.send(f"{member.mention} couldn't evade a ban. Well, they aren't BANNED, they just left and this is a humorous leave message due to the name of the game.\nWe are now at {guild.member_count} members.")
 
     @commands.Cog.listener()
     async def on_member_update(self, old: discord.Member, new):
