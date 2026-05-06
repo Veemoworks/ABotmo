@@ -1,44 +1,56 @@
-[03-02-2026 15:16:43] [INFO    ] Initilizaing...
-[03-02-2026 15:16:44] [INFO    ] ABotmo v0.6.14
-[03-02-2026 15:16:44] [INFO    ] Logged in as ABotmo#9330
-[03-02-2026 15:16:44] [INFO    ] discord.py V2.6.4
-[03-02-2026 15:16:44] [INFO    ] Python 3.14.2
-[03-02-2026 15:16:44] [INFO    ] Running on: Windows 11 (nt)
-[03-02-2026 15:16:44] [INFO    ] Synced 30 commands
-[03-02-2026 15:16:44] [INFO    ] Registering new commands from: fun, utils, moderation, server, prefix.utils, prefix.server.
-[03-02-2026 15:16:44] [INFO    ] Command silly (</silly:1399764476961624248>) Registered!
-[03-02-2026 15:16:44] [INFO    ] Command warn (</warn:1400083690586898527>) Registered!
-[03-02-2026 15:16:44] [INFO    ] Command serverconfig (</serverconfig:1400176415638556684>) Registered!
-[03-02-2026 15:16:44] [INFO    ] Command modlogs (</modlogs:1400564269199917087>) Registered!
-[03-02-2026 15:16:44] [INFO    ] Command playlists (</playlists:1400817625608753262>) Registered!
-[03-02-2026 15:16:44] [INFO    ] Command whois (</whois:1400817625608753263>) Registered!
-[03-02-2026 15:16:44] [INFO    ] Command applications (</applications:1400817625608753264>) Registered!
-[03-02-2026 15:16:44] [INFO    ] Command links (</links:1400817625608753265>) Registered!
-[03-02-2026 15:16:44] [INFO    ] Command discography (</discography:1400826613729460234>) Registered!
-[03-02-2026 15:16:44] [INFO    ] Command evil (</evil:1400826613729460235>) Registered!
-[03-02-2026 15:16:44] [INFO    ] Command bugreport (</bugreport:1400826613729460236>) Registered!
-[03-02-2026 15:16:44] [INFO    ] Command suggestion (</suggestion:1400828322237255813>) Registered!
-[03-02-2026 15:16:44] [INFO    ] Command help (</help:1402434849154924665>) Registered!
-[03-02-2026 15:16:44] [INFO    ] Command ban (</ban:1404018231043297310>) Registered!
-[03-02-2026 15:16:44] [INFO    ] Command unban (</unban:1412364950525055007>) Registered!
-[03-02-2026 15:16:44] [INFO    ] Command rank (</rank:1422972213862072451>) Registered!
-[03-02-2026 15:16:44] [INFO    ] Command purge (</purge:1427615388644151449>) Registered!
-[03-02-2026 15:16:44] [INFO    ] Command serverinfo (</serverinfo:1427775605113356360>) Registered!
-[03-02-2026 15:16:44] [INFO    ] Command stats (</stats:1441449914352533664>) Registered!
-[03-02-2026 15:16:44] [INFO    ] Command softban (</softban:1441474260429307986>) Registered!
-[03-02-2026 15:16:44] [INFO    ] Command kick (</kick:1441474260429307987>) Registered!
-[03-02-2026 15:16:44] [INFO    ] Command remlog (</remlog:1441474260429307988>) Registered!
-[03-02-2026 15:16:44] [INFO    ] Command roleinfo (</roleinfo:1442172685051494450>) Registered!
-[03-02-2026 15:16:44] [INFO    ] Command mylogs (</mylogs:1443668305335549964>) Registered!
-[03-02-2026 15:16:44] [INFO    ] Command mute (</mute:1443704269617238086>) Registered!
-[03-02-2026 15:16:44] [INFO    ] Command unmute (</unmute:1443752319609999370>) Registered!
-[03-02-2026 15:16:44] [INFO    ] Command message (</message:1443752319609999371>) Registered!
-[03-02-2026 15:16:44] [INFO    ] Command settings (</settings:1460306006692335777>) Registered!
-[03-02-2026 15:16:44] [INFO    ] Command checkmod (</checkmod:1466326306797912198>) Registered!
-[03-02-2026 15:16:44] [INFO    ] Command xpconfig (</xpconfig:1467585730837479436>) Registered!
-[03-02-2026 15:16:44] [INFO    ] Successfully changed status with 8 servers!
-[03-02-2026 15:16:45] [INFO    ] READY TO KILL ALL FELLAS...
-[03-02-2026 15:16:45] [ERROR   ] [KUMA] Unexpected response: 530
-[03-02-2026 15:16:51] [INFO    ] veraveemo (333585549837336577) used stats in DMs!
-[03-02-2026 15:18:16] [INFO    ] veraveemo (333585549837336577) used stats in DMs!
-[03-02-2026 15:19:44] [INFO    ] Successfully changed status with 8 servers!
+[06-05-2026 20:03:32] [INFO    ] Initilizaing...
+[06-05-2026 20:03:39] [INFO    ] ABotmo v2.18.17
+[06-05-2026 20:03:39] [INFO    ] Logged in as ABotmo#9330
+[06-05-2026 20:03:39] [INFO    ] discord.py V2.7.1
+[06-05-2026 20:03:39] [INFO    ] Python 3.14.2
+[06-05-2026 20:03:39] [INFO    ] Running on: Windows 11 (nt)
+[06-05-2026 20:03:39] [INFO    ] Application ID: 33228
+[06-05-2026 20:03:39] [INFO    ] Synced 31 commands
+[06-05-2026 20:03:39] [INFO    ] Registering new commands from: fun, utils, moderation, server, prefix.utils, prefix.server.
+[06-05-2026 20:03:39] [INFO    ] Command silly (</silly:1399764476961624248>) Registered!
+[06-05-2026 20:03:39] [INFO    ] Command warn (</warn:1400083690586898527>) Registered!
+[06-05-2026 20:03:39] [INFO    ] Command serverconfig (</serverconfig:1400176415638556684>) Registered!
+[06-05-2026 20:03:39] [INFO    ] Command modlogs (</modlogs:1400564269199917087>) Registered!
+[06-05-2026 20:03:39] [INFO    ] Command playlists (</playlists:1400817625608753262>) Registered!
+[06-05-2026 20:03:39] [INFO    ] Command whois (</whois:1400817625608753263>) Registered!
+[06-05-2026 20:03:39] [INFO    ] Command applications (</applications:1400817625608753264>) Registered!
+[06-05-2026 20:03:39] [INFO    ] Command links (</links:1400817625608753265>) Registered!
+[06-05-2026 20:03:39] [INFO    ] Command discography (</discography:1400826613729460234>) Registered!
+[06-05-2026 20:03:39] [INFO    ] Command evil (</evil:1400826613729460235>) Registered!
+[06-05-2026 20:03:39] [INFO    ] Command bugreport (</bugreport:1400826613729460236>) Registered!
+[06-05-2026 20:03:39] [INFO    ] Command suggestion (</suggestion:1400828322237255813>) Registered!
+[06-05-2026 20:03:39] [INFO    ] Command help (</help:1402434849154924665>) Registered!
+[06-05-2026 20:03:39] [INFO    ] Command ban (</ban:1404018231043297310>) Registered!
+[06-05-2026 20:03:39] [INFO    ] Command unban (</unban:1412364950525055007>) Registered!
+[06-05-2026 20:03:39] [INFO    ] Command rank (</rank:1422972213862072451>) Registered!
+[06-05-2026 20:03:39] [INFO    ] Command purge (</purge:1427615388644151449>) Registered!
+[06-05-2026 20:03:39] [INFO    ] Command serverinfo (</serverinfo:1427775605113356360>) Registered!
+[06-05-2026 20:03:39] [INFO    ] Command stats (</stats:1441449914352533664>) Registered!
+[06-05-2026 20:03:39] [INFO    ] Command softban (</softban:1441474260429307986>) Registered!
+[06-05-2026 20:03:39] [INFO    ] Command kick (</kick:1441474260429307987>) Registered!
+[06-05-2026 20:03:39] [INFO    ] Command remlog (</remlog:1441474260429307988>) Registered!
+[06-05-2026 20:03:39] [INFO    ] Command roleinfo (</roleinfo:1442172685051494450>) Registered!
+[06-05-2026 20:03:39] [INFO    ] Command mylogs (</mylogs:1443668305335549964>) Registered!
+[06-05-2026 20:03:39] [INFO    ] Command mute (</mute:1443704269617238086>) Registered!
+[06-05-2026 20:03:39] [INFO    ] Command unmute (</unmute:1443752319609999370>) Registered!
+[06-05-2026 20:03:39] [INFO    ] Command message (</message:1443752319609999371>) Registered!
+[06-05-2026 20:03:39] [INFO    ] Command settings (</settings:1460306006692335777>) Registered!
+[06-05-2026 20:03:39] [INFO    ] Command checkmod (</checkmod:1466326306797912198>) Registered!
+[06-05-2026 20:03:39] [INFO    ] Command xpconfig (</xpconfig:1467585730837479436>) Registered!
+[06-05-2026 20:03:39] [INFO    ] Command set_rank (</set_rank:1476485191093456919>) Registered!
+[06-05-2026 20:03:39] [INFO    ] RAM Usage Report: 0.73% (116MB / 16000MB)
+[06-05-2026 20:03:39] [INFO    ] Successfully changed status with 10 servers!
+[06-05-2026 20:03:40] [INFO    ] READY TO KILL ALL FELLAS...
+[06-05-2026 20:03:40] [ERROR   ] [KUMA] Unexpected response: 530
+[06-05-2026 20:06:39] [INFO    ] Successfully changed status with 10 servers!
+[06-05-2026 20:08:36] [ERROR   ] [KUMA] Unexpected response: 530
+[06-05-2026 20:09:39] [INFO    ] Successfully changed status with 10 servers!
+[06-05-2026 20:12:39] [INFO    ] Successfully changed status with 10 servers!
+[06-05-2026 20:13:34] [ERROR   ] [KUMA] Unexpected response: 530
+[06-05-2026 20:15:39] [INFO    ] Successfully changed status with 10 servers!
+[06-05-2026 20:18:30] [ERROR   ] [KUMA] Unexpected response: 530
+[06-05-2026 20:18:39] [INFO    ] Successfully changed status with 10 servers!
+[06-05-2026 20:21:10] [INFO    ] veraveemo (333585549837336577) used rank in 1418384480061624444 (Stop N' Go!!)!
+[06-05-2026 20:21:39] [INFO    ] Successfully changed status with 10 servers!
+[06-05-2026 20:23:30] [ERROR   ] [KUMA] Unexpected response: 530
+[06-05-2026 20:24:39] [INFO    ] Successfully changed status with 10 servers!

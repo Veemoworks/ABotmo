@@ -122,40 +122,38 @@ class Server(commands.Cog):
     @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
     async def rank(self, interaction: discord.Interaction, user: discord.Member = None):
-        try:
-            print(log(False,f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id} ({interaction.guild.name})!"))
-            has_perms = app_commands.checks.bot_has_permissions(embed_links=True)
-            embed = discord.Embed(color=discord.Color.brand_green())
-            await interaction.response.defer()
+        print(log(False,f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id} ({interaction.guild.name})!"))
+        has_perms = app_commands.checks.bot_has_permissions(embed_links=True)
+        embed = discord.Embed(color=discord.Color.brand_green())
+        await interaction.response.defer()
 
-            if not server_settings(False, interaction.guild, "xpenabled"):
-                if has_perms:
-                    embed.set_author(name="This server has XP disabled!", icon_url=interaction.guild.icon.url)
-                    await interaction.followup.send(embed=embed)
-                    return
-                await interaction.followup.send("This server has XP disabled!")
+        if not server_settings(False, interaction.guild, "xpenabled"):
+            if has_perms:
+                embed.set_author(name="This server has XP disabled!", icon_url=interaction.guild.icon.url)
+                await interaction.followup.send(embed=embed)
                 return
+            await interaction.followup.send("This server has XP disabled!")
+            return
 
-            if user == None:
-                user = interaction.user
-            data, xpinfo = xp(False, interaction.guild, user=user)
+        if user == None:
+            user = interaction.user
+        data, xpinfo = xp(False, interaction.guild, user=user)
 
-            if data:
-                currxp, level, nxt_lvl = xpinfo
-                nxt_lvl -= currxp
-                if has_perms:
-                    embed.description = f"**Level**: {level}\n**XP**: {currxp}\n**{nxt_lvl} XP** needed"
-                    embed.set_author(name=f"@{user.name}'s XP for {interaction.guild.name}.", icon_url=user.display_avatar.url)
-                    await interaction.followup.send(embed=embed)
-                else:
-                    await interaction.followup.send(f"**__{user.name}__**\n**Level**: {level}\n**XP**: {currxp}\n**{nxt_lvl} XP** needed")
+        if data:
+            currxp, level, nxt_lvl = xpinfo
+            nxt_lvl -= currxp
+            if has_perms:
+                embed.description = f"**Level**: {level}\n**XP**: {currxp}\n**{nxt_lvl} XP** needed"
+                embed.set_author(name=f"@{user.name}'s XP for {interaction.guild.name}.", icon_url=user.display_avatar.url)
+                await interaction.followup.send(embed=embed)
             else:
-                if has_perms:
-                    embed.set_author(name=f"@{user.name} has no XP {f"{f"for {interaction.guild.name}" if not interaction.guild.name == "" else "as an external app"}"}", icon_url=user.display_avatar.url)
-                    await interaction.followup.send(embed=embed)
-                else:
-                    await interaction.followup.send(f"**__{user.name}__** has no XP for {interaction.guild.name}.")
-        except Exception as e: print(e)
+                await interaction.followup.send(f"**__{user.name}__**\n**Level**: {level}\n**XP**: {currxp}\n**{nxt_lvl} XP** needed")
+        else:
+            if has_perms:
+                embed.set_author(name=f"@{user.name} has no XP {f"{f"for {interaction.guild.name}" if not interaction.guild.name == "" else "as an external app"}"}", icon_url=user.display_avatar.url)
+                await interaction.followup.send(embed=embed)
+            else:
+                await interaction.followup.send(f"**__{user.name}__** has no XP for {interaction.guild.name}.")
 
     @app_commands.command(name="set_rank", description="Modify a user's rank!")
     @app_commands.describe(user="User to modify", newlevel="Change the user's level", newxp="Change the user's XP", add="Add to current xp, else change it to value")
