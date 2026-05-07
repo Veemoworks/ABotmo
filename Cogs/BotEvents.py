@@ -526,7 +526,7 @@ class Events(commands.Cog):
                 link = re.findall(r'https?://\S+', msg.content.strip(), re.IGNORECASE)
                 gg = re.findall(r'.gg/', msg.content.strip(), re.IGNORECASE)
                 invite = re.findall(r'/invite/', msg.content.strip(), re.IGNORECASE)
-                if not guild.get_member(user.id).guild_permissions.embed_links:
+                if not guild.get_member(user.id).guild_permissions.embed_links and (link or gg or invite):
                     chosen = link or gg or invite
                     channel = msg.channel
                     await msg.delete(delay=0)
