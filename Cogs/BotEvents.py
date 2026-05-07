@@ -526,8 +526,9 @@ class Events(commands.Cog):
                     await channel.send(f"{user.mention}, you can not send suspicious links here unless you have the \"Embed Links\" permission!", delete_after=8)
                     embed = discord.Embed(
                         description=f"Message Content:\n{msg.content}", color=discord.Color.yellow())
-                    embed.set_author(name="FLAGGED WORD", icon_url=user.avatar.url if user.avatar else None)
+                    embed.set_author(name="FLAGGED LINK(S)", icon_url=user.avatar.url if user.avatar else None)
                     embed.add_field(name="User:", value=user.mention)
+                    embed.add_field(name="Channel:", value=msg.channel.mention)
                     embed.add_field(name="Banned Link(s):", value=", ".join(link))
                     embed.set_footer(text=f"User ID: {user.id}")
                     await event(self.bot, guild, "modlog", None, embed)
