@@ -524,7 +524,10 @@ class Events(commands.Cog):
             bannedword = next((word for word in bannedlist if re.search(rf"\b{re.escape(word)}\b", msg.content.strip(), re.IGNORECASE)),None)
             if guild.id == 1373049145572593784:
                 link = re.findall(r'https?://\S+', msg.content.strip(), re.IGNORECASE)
-                if not guild.get_member(user.id).guild_permissions.embed_links and link:
+                gg = re.findall(r'.gg/', msg.content.strip(), re.IGNORECASE)
+                invite = re.findall(r'/invite/', msg.content.strip(), re.IGNORECASE)
+                if not guild.get_member(user.id).guild_permissions.embed_links:
+                    chosen = link or gg or invite
                     channel = msg.channel
                     await msg.delete(delay=0)
                     await channel.send(f"{user.mention}, you can not send suspicious links here unless you have the \"Embed Links\" permission!", delete_after=8)
@@ -533,7 +536,7 @@ class Events(commands.Cog):
                     embed.set_author(name="FLAGGED LINK(S)", icon_url=user.avatar.url if user.avatar else None)
                     embed.add_field(name="User:", value=user.mention)
                     embed.add_field(name="Channel:", value=msg.channel.mention)
-                    embed.add_field(name="Banned Link(s):", value=", ".join(link))
+                    embed.add_field(name="Banned Link(s):", value=", ".join(chosen))
                     embed.set_footer(text=f"User ID: {user.id}")
                     await event(self.bot, guild, "modlog", None, embed)
                     return
