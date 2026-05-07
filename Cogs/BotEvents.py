@@ -318,7 +318,7 @@ class Events(commands.Cog):
         first = msgs[0]
         thing = []
         for msg in msgs:
-            thing.append(f"{msg.author.mention}: {msg.content[:30]}{"..." if len(msg) >= 30 else ""}")
+            thing.append(f"{msg.author.mention}: {msg.content[:30]}{"..." if len(msg.content) >= 30 else ""}")
         embed = discord.Embed(title=f"Bulk Delete in {first.channel.mention}",
                               description=f"**{len(msgs)} messages deleted.**\n{"\n".join(thing)}", color=discord.Color.brand_red())
         embed.set_author(name=first.guild.name, icon_url=first.guild.icon.url if first.guild.icon else None)
