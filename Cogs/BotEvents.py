@@ -4,7 +4,7 @@ from discord.ext import commands
 from Cogs.Methods.methods import crash, log, levelCard, permCheck, toDiscordTimestamp
 from resources.dictionaries import custom_urls
 from resources.links import warm
-from resources.variables import pid, version
+from resources.variables import pid, version, noMentions, noRoleMentions
 from Cogs.Methods.asynchronous.botStatus import status, kuma, ramthing
 from Cogs.Methods.asynchronous.methods import event, get_prefix
 from DataBases.database import xp, user_settings, xp_settings, xp_roles, server_settings
@@ -568,15 +568,14 @@ class Events(commands.Cog):
                             if data["channel"] == 1:
                                     await msg.reply(
                                     f"{msg.author.mention}, you have succesfully leveled up to Level {lvl}{f", and got the role {role.mention}" if role else ""}!",
-                                        allowed_mentions=discord.AllowedMentions(roles=False, users=False,
-                                                                                 replied_user=False))
+                                        allowed_mentions=noMentions)
                             else:
                                 channel = msg.guild.get_channel(data["channel"])
                                 if discord.app_commands.checks.bot_has_permissions(attach_files=True):
-                                    await channel.send(f"{msg.author.mention} has successfully leveled up to Level {lvl}{f", and got the role {role.mention}" if role else ""}!", file=discord.File(fp=levelCard(lvl, msg.author.avatar), filename="lvlup.png"))
+                                    await channel.send(f"{msg.author.mention} has successfully leveled up to Level {lvl}{f", and got the role {role.mention}" if role else ""}!", file=discord.File(fp=levelCard(lvl, msg.author.avatar), filename="lvlup.png"), allowed_mentions=noRoleMentions)
                                 else:
                                     await channel.send(
-                                    f"{msg.author.mention} has successfully leveled up to Level {lvl}{f", and got the role {role.mention}" if role else ""}")
+                                    f"{msg.author.mention} has successfully leveled up to Level {lvl}{f", and got the role {role.mention}" if role else ""}", allowed_mentions=noRoleMentions)
                         else:
                             enabled = user_settings(False, user.id, "xpmessage")
                             if enabled:
@@ -586,8 +585,7 @@ class Events(commands.Cog):
                                 else:
                                     await msg.reply(
                                             f"{msg.author.mention}, you have succesfully leveled up to Level {lvl}{f", and got the role {role.mention}" if role else ""}!{"\n-# *You can toggle this message with /settings!*" if lvl % 5 == 0 else ""}",
-                                            allowed_mentions=discord.AllowedMentions(roles=False, users=False,
-                                                                                     replied_user=False))
+                                            allowed_mentions=noRoleMentions)
                     except Exception as e:
                         print(log(True, f"on_message raised an error: " + str(e)))
                         pass
