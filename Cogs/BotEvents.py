@@ -148,7 +148,7 @@ class Events(commands.Cog):
 
     # <editor-fold desc="Member Events">
     @commands.Cog.listener()
-    async def on_member_join(self, member):
+    async def on_member_join(self, member: discord.Member):
         guild = member.guild
         temp = discord.Embed(description=f"{member.mention} {member.name}", color=discord.Color.brand_green())
         temp.set_author(name="Member Joined", icon_url=member.avatar.url if member.avatar else None)
@@ -173,6 +173,10 @@ class Events(commands.Cog):
         elif guild.id == 1489081230455476246:
             channel = self.bot.get_channel(1489096330495397989)
             await channel.send(f"{member.mention} has joined! Make sure to punch Partygoer on your way in, and watch out for edgy maniacs with hacks.\nWe are now at {guild.member_count} members.")
+        elif guild.id == 1501806820254285905:
+            role = member.guild.get_role(1501860189291155476)
+            await member.add_roles(role)
+            
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
