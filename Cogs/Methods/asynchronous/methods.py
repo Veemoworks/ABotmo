@@ -1,5 +1,5 @@
 import requests, json, discord, asyncio, random, os, dotenv
-from DataBases.database import server_settings, server_channels, webhooks
+from Cogs.database import server_settings, server_channels, webhooks
 from resources.links import warm
 from resources.dictionaries import headers
 from datetime import datetime

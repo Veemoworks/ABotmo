@@ -1,5 +1,5 @@
 import discord, requests, json, os, dotenv
-from DataBases.database import server_settings, xp_roles
+from Cogs.database import server_settings, xp_roles
 from resources.dictionaries import headers
 from discord.ui import Modal, TextInput
 dotenv.load_dotenv(".env")

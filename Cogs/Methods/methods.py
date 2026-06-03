@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from discord import app_commands
 from Cogs.Methods.asynchronous.methods import crash
 from resources.dictionaries import kirk
-from DataBases.database import server_settings, xp_settings
+from Cogs.database import server_settings, xp_settings
 load_dotenv(".env")
 
 # Regular functions here

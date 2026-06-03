@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from Cogs.Methods.methods import log
 from Cogs.Methods.asynchronous.methods import get_prefix
-from DataBases.database import xp, server_settings
+from Cogs.database import xp, server_settings
 class ServerPREFIX(commands.Cog):
     def __init__(self, bot):
         self.bot = bot

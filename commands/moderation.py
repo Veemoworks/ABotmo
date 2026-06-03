@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from Cogs.Methods.asynchronous.methods import logChannel, sendCase
 from Cogs.Methods.methods import canUse, log
 from Cogs.Classes.DiscordViews import AutoBugReport
-from DataBases.database import modlog, server_settings
+from Cogs.database import modlog, server_settings
 
 class Moderation(commands.Cog):
     def __init__(self, bot):

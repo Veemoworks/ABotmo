@@ -4,7 +4,7 @@ from discord.ext import commands
 from Cogs.Methods.methods import log, to_text, canUse, xpEnabledOnly
 from Cogs.Classes.DiscordViews import Config, XPConfig
 from resources.dictionaries import setting_users
-from DataBases.database import xp, server_settings, user_settings, xp_settings, server_channels, nextLevel, xp_roles
+from Cogs.database import xp, server_settings, user_settings, xp_settings, server_channels, nextLevel, xp_roles
 
 
 class Server(commands.Cog):

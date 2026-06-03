@@ -2,7 +2,7 @@ import discord
 from discord.ui import View, Button, Select
 from Cogs.Classes.DiscordButtons import PrefixChangeButton, BugReportSend, BannedWordModify
 from Cogs.Classes.DiscordModals import XPLevel
-from DataBases.database import server_settings, server_channels
+from Cogs.database import server_settings, server_channels
 from resources.arrays import logchannels
 
 class AutoBugReport(View):

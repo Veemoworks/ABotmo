@@ -7,7 +7,7 @@ from resources.links import warm
 from resources.variables import pid, version, noMentions, noRoleMentions
 from Cogs.Methods.asynchronous.botStatus import status, kuma, ramthing
 from Cogs.Methods.asynchronous.methods import event, get_prefix
-from DataBases.database import xp, user_settings, xp_settings, xp_roles, server_settings
+from Cogs.database import xp, user_settings, xp_settings, xp_roles, server_settings
 
 class Events(commands.Cog):
     def __init__(self, client: commands.Bot):
