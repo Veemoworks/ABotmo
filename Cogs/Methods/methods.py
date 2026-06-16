@@ -52,24 +52,9 @@ def levelCard(level: int, avatar: discord.Asset):
     buffer.seek(0)
     return buffer
 
-# Permission check on commands
-def canUse():
-    async def predicate(interaction: discord.Interaction):
-        user = interaction.guild.get_member(interaction.user.id)
-        allowed_roles = server_settings(False, interaction.guild, "roles")
-        if not allowed_roles:
-            await interaction.response.send_message("You do not have permission to run this command!", ephemeral=True)
-            return False
-        for role in user.roles:
-            if str(role.id) in allowed_roles:
-                return True
-        await interaction.response.send_message("You do not have permission to run this command!", ephemeral=True)
-        return False
-
-    return app_commands.check(predicate)
-
 # permission check but like, not for commands lol
-def permCheck(guild, user):
+def permCheck(guild, user: discord.Member):
+    if user.guild_permissions.administrator: return True
     allowed_roles = server_settings(False, guild, "roles")
     if not allowed_roles:
         return False
@@ -77,6 +62,17 @@ def permCheck(guild, user):
         if str(role.id) in allowed_roles:
             return True
     return False
+
+# Permission check on commands
+def canUse():
+    async def predicate(interaction: discord.Interaction):
+        user = interaction.guild.get_member(interaction.user.id)
+        hasPerms = permCheck(interaction.guild, user)
+        if not hasPerms:
+            await interaction.response.send_message("You do not have permission to run this command!", ephemeral=True)
+        return hasPerms
+
+    return app_commands.check(predicate)
 
 def xpEnabledOnly():
     async def predicate(interaction: discord.Interaction):
