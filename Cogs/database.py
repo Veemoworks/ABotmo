@@ -13,7 +13,7 @@ columns = {
         timestamp int,
         i         smallint,
         id        varchar(max) not null""",
-    "xp": """guild_id bigint not null,
+    "guildxp": """guild_id bigint not null,
         [user] BIGINT not null,
         xp BIGINT,
         level int,
@@ -204,7 +204,7 @@ def xp(save, guild, data=None, user=None, lvlup=True):
     returnval = None
     con, cur = connectToDB("xp")
     gid = str(guild.id)
-    checkTableExists(con, cur, "xp")
+    checkTableExists(con, cur, "guildxp")
 
     if save:
         if lvlup:
