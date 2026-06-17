@@ -59,7 +59,7 @@ async def logChannel(bot, interaction, data: list, user, amt):
 
     await event(bot, interaction.guild, "modlog", user, embed)
 
-async def sendCase(interaction, data, user, amt):
+async def sendCase(interaction: discord.Interaction, data, user, amt):
     try:
         embed = discord.Embed(title=f"You have recieved a **{data[4]}** in __**{interaction.guild.name}**__!", description=f"CASE {server_settings(False, interaction.guild, "casenum")}", color=discord.Color.brand_red())
         embed.set_thumbnail(url=interaction.guild.icon.url if interaction.guild.icon else None)
@@ -73,10 +73,10 @@ async def sendCase(interaction, data, user, amt):
 
         await user.send(embed=embed)
     except discord.Forbidden or discord.HTTPException as e:
-        await interaction.followup.send(f"The user has still recieved the {data[4]}, but not a DM\n-# Error: {e}", ephemeral=True)
+        ogMsg = await interaction.original_response()
+        await interaction.edit_original_response(content=f"{ogMsg.content}\n\nThe user has still recieved the {data[4]}, but not a DM\n-# Error: {e}")
     except Exception:
         pass
-
 
 # for /silly and /evil
 async def calculator(interaction: discord.Interaction, ctype: str, mention: str):
