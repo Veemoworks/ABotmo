@@ -639,7 +639,7 @@ def server_channels(save, guild, channel, data=None):
 
 def webhooks(save, guild, data):
     # data format = (id, token, name, channel)
-    con, cur = connectToDB("master")
+    con, cur = connectToDB("settings")
     gid = guild.id
     checkTableExists(con, cur, "webhooks")
 
