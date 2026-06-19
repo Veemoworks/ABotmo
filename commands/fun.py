@@ -66,7 +66,7 @@ class Fun(commands.Cog):
     @app_commands.command(name="silly", description="Get your silliness percentage")
     @app_commands.describe(user="Enter a user")
     @app_commands.allowed_contexts(True, True, True)
-    async def silly(self, interaction: discord.Interaction, user: discord.Member = None):
+    async def silly(self, interaction: discord.Interaction, user: discord.User = None):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         if user == None:
             user = interaction.user
@@ -76,7 +76,7 @@ class Fun(commands.Cog):
     @app_commands.command(name="evil", description="Get your evilness percentage")
     @app_commands.describe(user="Enter a user")
     @app_commands.allowed_contexts(True, True, True)
-    async def evil(self, interaction: discord.Interaction, user: discord.Member = None):
+    async def evil(self, interaction: discord.Interaction, user: discord.User = None):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         if user == None:
             user = interaction.user

@@ -105,13 +105,9 @@ def handle_exception(exc_type, exc_value, exc_traceback, bot):
 
 # Log to a file
 def log(error, msg):
-    now = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
-    with open("output.txt", "a") as f:
-        f.write(f"[{now}] {"[ERROR   ]" if error else "[INFO    ]"} {msg}\n")
-    if error:
-        return f"\033[31m[{now}] [ERROR   ] {msg}"
-    else:
-        return f"\033[92m[{now}] [INFO    ] {msg}"
+    log = f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] {"[ERROR   ]" if error else "[INFO    ]"} {msg}"
+    with open("output.txt", "a") as f: f.write(log)
+    return log
 
 # lowkirk forgot about this file
 # uhh thing that wait what was i gonn add

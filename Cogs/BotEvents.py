@@ -31,7 +31,7 @@ class Events(commands.Cog):
                     # Sync self.bot tree.
                     synced = await self.bot.tree.sync()
                     now = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
-                    thing = (f"\033[92m[{now}] [INFO    ] ABotmo v{version}\n"
+                    thing = (f"[{now}] [INFO    ] ABotmo v{version}\n"
                              f"[{now}] [INFO    ] Logged in as {self.bot.user}\n"
                              f"[{now}] [INFO    ] discord.py V{discord.__version__}\n"
                              f"[{now}] [INFO    ] Python {platform.python_version()}\n"

@@ -9,7 +9,8 @@ if __name__ == "__main__":
     with open("output.txt", "w") as f:
         msg = f"[{startup.strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] Initilizaing..."
         f.write(msg + "\n")
-        print(f"\033[92m{msg}")
+        f.close()
+    print(msg)
     bot = discord.ext.commands.Bot(get_prefix, intents=discord.Intents.all(), max_messages=500)
     asyncio.run(load(bot))
     bot.run(os.getenv("TOKEN"), log_handler=None)
