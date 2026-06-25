@@ -1,8 +1,8 @@
-import discord, random
+import discord, random, os, threading
 from discord import app_commands
 from discord.ext import commands
 from Cogs.Methods.asynchronous.methods import calculator
-from Cogs.Methods.methods import log
+from Cogs.Methods.methods import log, canUse
 from resources.variables import sp
 
 class Fun(commands.Cog):
@@ -82,6 +82,17 @@ class Fun(commands.Cog):
             user = interaction.user
 
         await calculator(interaction, "evil", user.mention)
+
+    @app_commands.command(name="system")
+    @app_commands.allowed_contexts(True, False, True)
+    @canUse()
+    async def system(self, interaction: discord.Interaction, cmd: str):
+        print(log(False,f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
+        if not interaction.guild.id in [1517394897701699646,1385658782520049704]: await interaction.response.send_message("no perms gurt"); return
+        await interaction.response.defer()
+        os.system(cmd)
+        print(log(False, cmd))
+        await interaction.followup.send(cmd)
 
 async def setup(bot):
     await bot.add_cog(Fun(bot))
