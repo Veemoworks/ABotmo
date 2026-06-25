@@ -292,9 +292,7 @@ class Moderation(commands.Cog):
         if user and user.bot:
             await interaction.followup.send(f"You can not view the modlogs of {user.mention}, they are a bot!")
             return
-        if page < 1:
-            await interaction.followup.send("Please enter a page number thats bigger than 0!")
-            return
+        if page < 1: page = 1
         if not user and not logid:
             await interaction.followup.send("Please enter either a user to see their full logs or a Log ID to see details of that log.")
             return
