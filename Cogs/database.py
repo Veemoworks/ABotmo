@@ -4,15 +4,15 @@ dotenv.load_dotenv(".env")
 uuidFormat = "____-___-______-___"
 uuidChars = [c for c in string.ascii_lowercase[:6] + string.digits]
 columns = {
-    "modlogs": """guild_id  bigint       not null,
+    "modlogs": f"""guild_id  bigint       not null,
         [user]    bigint,
         mod       bigint,
         reason    varchar(max),
         message   varchar(max),
-        type      varchar(max),
+        type      varchar(7),
         timestamp int,
         i         smallint,
-        id        varchar(max) not null""",
+        id        varchar({len(uuidFormat)}) not null""",
     "guildxp": """guild_id bigint not null,
         [user] BIGINT not null,
         xp BIGINT,
@@ -172,25 +172,23 @@ def modlog(save, interaction: discord.Interaction, data = None, user: discord.Us
         msg = (
             f"Could not find Log '`{data}`', an error occured, or no user was specified.\nEnsure the Log ID exists, is from this server, or the user is correct.\n-# *User only required if you're deleting all logs.*",
             False, user, 0)
-
-        if data.strip() == "*" and user:
+        data = data.strip()
+        if data == "*" and user:
             cur.execute(f"""DELETE FROM main.modlogs WHERE [user] = {user.id} AND guild_id = {gid}""")
             msg = (f"Successfully deleted all of {user.mention}'s logs!", True, user.id, 0)
-        elif not data.strip().find("-") == -1:
-            cur.execute(f"""
-                    SELECT [user] FROM main.modlogs WHERE id = '{data}' AND guild_id = {gid}"""
-                    )
+        elif data.find("-") != -1:
+            data = data.strip("\"'")
+            cur.execute(f"SELECT [user] FROM main.modlogs WHERE id = '{data}' AND guild_id = {gid}")
             t = cur.fetchone()
             if t:
-                cur.execute(f"""
-                    DELETE FROM main.modlogs WHERE id = '{data}' AND guild_id = {gid}""")
+                cur.execute(f"DELETE FROM main.modlogs WHERE id = '{data}' AND guild_id = {gid}")
                 msg = (f"Successfully deleted Log '{data}' from the Discord Server's database!", True, t[0], len(cur.execute(f"""SELECT * FROM main.modlogs WHERE user = {t[0]} AND guild_id = {gid}""").fetchall()))
         con.commit()
     elif not save and rem:
         cur.execute(f"""
                         SELECT i
                         FROM main.modlogs
-                        WHERE [user] = '{user.id}' AND guild_id = {gid}
+                        WHERE [user] = {user.id} AND guild_id = {gid}
                     """)
         msg = len(cur.fetchall())
     con.close()
