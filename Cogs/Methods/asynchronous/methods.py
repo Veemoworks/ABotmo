@@ -27,9 +27,9 @@ async def crash(error):
         res = requests.post(
             os.getenv("LOGWEBHOOK"),
             data=json.dumps(data), headers=headers)
-        print(f"\033[92m[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] {res.status_code}: Error message sent successfully.")
+        print(f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] {res.status_code}: Error message sent successfully.")
     except Exception as e:
-        print(f"\033[31m[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [ERROR   ] Failed to send error message: {e}")
+        print(f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [ERROR   ] Failed to send error message: {e}")
 
 # Get bot prefix for a guild
 async def get_prefix(bot, message):
