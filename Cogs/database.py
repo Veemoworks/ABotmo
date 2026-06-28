@@ -5,14 +5,15 @@ uuidFormat = "____-___-______-___"
 uuidChars = [c for c in string.ascii_lowercase[:6] + string.digits]
 columns = {
     "modlogs": f"""guild_id  bigint       not null,
-        [user]    bigint,
-        mod       bigint,
-        reason    varchar(max),
-        message   varchar(max),
-        type      varchar(7),
-        timestamp int,
-        i         smallint,
-        id        varchar({len(uuidFormat)}) not null""",
+        [user]     bigint,
+        mod        bigint,
+        reason     varchar(max),
+        message    varchar(max),
+        type       varchar(7),
+        timestamp  int,
+        i          smallint,
+        id         varchar({len(uuidFormat)}) not null,
+        appealable bit not null default 1""",
     "guildxp": """guild_id bigint not null,
         [user] BIGINT not null,
         xp BIGINT,
@@ -29,7 +30,8 @@ columns = {
     "server_settings": """guild_id BIGINT,
         roles varchar(max),
         prefix varchar(max),
-        casenum int""",
+        casenum int,
+        appeal bigint""",
     "user_settings": """user BIGINT,
         xpmessage tinyint""",
     "server_channels": """guild_id BIGINT,
@@ -91,8 +93,8 @@ def modlog(save, interaction: discord.Interaction, data = None, user: discord.Us
         uuid = getUUID()
         data.append(uuid)
         cur.execute(f"""
-            INSERT INTO main.modlogs (guild_id, [user], mod, reason, message, type, timestamp, i, id)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+            INSERT INTO main.modlogs (guild_id, [user], mod, reason, message, type, timestamp, appealable, i, id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         """, data)
         con.commit()
         msg = (f"Successfully gave <@{data[1]}> a {data[5].lower()}, they now have {i} modlogs!\n-# Modlog ID: {uuid}", uuid)
@@ -109,6 +111,7 @@ def modlog(save, interaction: discord.Interaction, data = None, user: discord.Us
                 msg.add_field(name="Index:", value=row[7])
                 msg.add_field(name="Reason:", value=row[3])
                 msg.add_field(name="Message:", value=row[4])
+                msg.add_field(name="Appealable:", value=row[9])
                 msg.set_footer(text=f"User ID: {row[1]} | Mod ID: {row[2]}")
                 msg.timestamp = datetime.datetime.fromtimestamp(row[6])
             else:
@@ -178,10 +181,11 @@ def modlog(save, interaction: discord.Interaction, data = None, user: discord.Us
             msg = (f"Successfully deleted all of {user.mention}'s logs!", True, user.id, 0)
         elif data.find("-") != -1:
             data = data.strip("\"'")
-            cur.execute(f"SELECT [user] FROM main.modlogs WHERE id = '{data}' AND guild_id = {gid}")
+            data = (data,)
+            cur.execute(f"SELECT [user] FROM main.modlogs WHERE id = ? AND guild_id = {gid}", data)
             t = cur.fetchone()
             if t:
-                cur.execute(f"DELETE FROM main.modlogs WHERE id = '{data}' AND guild_id = {gid}")
+                cur.execute(f"DELETE FROM main.modlogs WHERE id = ? AND guild_id = {gid}", data)
                 msg = (f"Successfully deleted Log '{data}' from the Discord Server's database!", True, t[0], len(cur.execute(f"""SELECT * FROM main.modlogs WHERE user = {t[0]} AND guild_id = {gid}""").fetchall()))
         con.commit()
     elif not save and rem:
@@ -482,11 +486,24 @@ def server_settings(save, guild, stype=None, value=None):
             con.commit()
             con.close()
             return msg
+        elif stype == "appeal":
+            msg = f"Successfully set appeal channel to <#{value}>!"
+            cur.execute(f"SELECT appeal FROM main.[server_settings] WHERE guild_id = {gid}")
+            current = cur.fetchone()[0]
+            if value == current:
+                msg = f"Removed appeal channel (<#{value}>) from database."
+                value = "null"
+
+            cur.execute(f"UPDATE main.[server_settings] SET appeal = {value} WHERE guild_id = {gid}")
+
+            con.commit()
+            con.close()
+            return msg
         else:
             return "fella..."
     else:
         cur.execute("""
-            SELECT roles, prefix, casenum, banned
+            SELECT roles, prefix, casenum, banned, appeal
             FROM main.[server_settings]
             WHERE guild_id = ?;
         """, (gid,))
@@ -501,12 +518,15 @@ def server_settings(save, guild, stype=None, value=None):
             return data[2]
         elif stype == "banned":
             return json.loads(data[3])
+        elif stype == "appeal":
+            return data[4]
         else:
             return {
                 "roles": json.loads(data[0]),
                 "prefix": data[1],
                 "casenum": data[2],
                 "banned": json.loads(data[3]),
+                "appeal": data[4],
             }
 
 def user_settings(save, userid: int, setting, data=None):

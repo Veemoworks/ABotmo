@@ -8,7 +8,9 @@ from resources.variables import pid
 @tasks.loop(minutes=3)
 async def status(bot):
     try:
-        await bot.change_presence(activity=discord.CustomActivity(name=f"Helping {len(bot.guilds)} {'servers' if len(bot.guilds) > 1 else 'server'}"))
+        # stat = f"Helping {len(bot.guilds)} {'servers' if len(bot.guilds) > 1 else 'server'}"
+        stat = f"Currently being updated! Please expect bugs and some things not to work."
+        await bot.change_presence(activity=discord.CustomActivity(name=stat))
         print(log(False, f"Successfully changed status with {len(bot.guilds)} {"servers" if len(bot.guilds) > 1 else "server"}!"))
     except Exception as e:
         await crash(e)

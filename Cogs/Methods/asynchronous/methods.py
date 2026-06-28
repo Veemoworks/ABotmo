@@ -1,5 +1,7 @@
 import requests, json, discord, asyncio, random, os, dotenv
 from Cogs.database import server_settings, server_channels, webhooks
+from Cogs.Classes.DiscordButtons import ModalButton
+from Cogs.Classes.DiscordModals import AppealLog
 from resources.links import warm
 from resources.dictionaries import headers
 from datetime import datetime
@@ -40,7 +42,7 @@ async def get_prefix(bot, message):
     return prefix or ";;"
 
 # log things to modlog channel
-async def logChannel(bot, interaction, data: list, user, amt):
+async def logChannel(bot, interaction, data: list, user):
     if data[0] == interaction.guild.id:
         data.pop(0)
     if data[-1] == data[-2]:
@@ -50,7 +52,7 @@ async def logChannel(bot, interaction, data: list, user, amt):
     embed.set_author(name=f"CASE {case} | {data[4]} | {user.name}", icon_url=interaction.user.avatar.url if interaction.user.avatar else None)
     embed.add_field(name="User:", value=f"{user.mention}")
     embed.add_field(name="Moderator:", value=f"{interaction.user.mention}")
-    embed.add_field(name="Info:", value=f"{"" if data[4] in ["MESSAGE", "MODLOG REMOVAL"] else "Reason: "}{data[2]}\n{"" if data in ["MESSAGE"] else f"User now has {amt} modlogs."}")
+    embed.add_field(name="Info:", value=f"{data[2] if data[4] in ["MESSAGE", "MODLOG REMOVAL"] else f"Reason: {data[2]}\nAppealable: {data[-3]}"}\n{"" if data[4] in ["MESSAGE"] else f"User now has {data[-2]} modlogs."}")
     embed.set_footer(text=f"LOG ID: {data[-1]}")
     if data[4] in [ "WARNING", "BAN", "KICK", "MUTE" ] and not data[3] is None:
         embed.add_field(name="Message:", value=data[3])
@@ -59,24 +61,28 @@ async def logChannel(bot, interaction, data: list, user, amt):
 
     await event(bot, interaction.guild, "modlog", user, embed)
 
-async def sendCase(interaction: discord.Interaction, data, user, amt):
+async def sendCase(interaction: discord.Interaction, data, user, canAppeal):
     try:
-        embed = discord.Embed(title=f"You have recieved a **{data[4]}** in __**{interaction.guild.name}**__!", description=f"CASE {server_settings(False, interaction.guild, "casenum")}", color=discord.Color.brand_red())
+        case = server_settings(False, interaction.guild, "casenum")
+        embed = discord.Embed(title=f"You have recieved a **{data[4]}** in __**{interaction.guild.name}**__!", description=f"CASE {case}", color=discord.Color.brand_red())
         embed.set_thumbnail(url=interaction.guild.icon.url if interaction.guild.icon else None)
         embed.set_author(name=f"{interaction.guild.name} | {interaction.guild.id}", icon_url=interaction.guild.icon.url if interaction.guild.icon else None)
         embed.add_field(name="Reason:", value=data[2], inline=False)
         if not data[3] == None:
             embed.add_field(name="Mod Message:", value=data[3], inline=False)
-        embed.add_field(name="Modlogs:", value=amt, inline=False)
-        embed.set_footer(text='Use "/mylogs" to see your log count anytime in any server')
+        embed.add_field(name="Modlogs:", value=data[-2], inline=False)
+        embed.set_footer(text='"/mylogs" for log count & "/appeal" to appeal the modlog')
         embed.timestamp = datetime.now()
 
-        await user.send(embed=embed)
-    except discord.Forbidden or discord.HTTPException as e:
-        ogMsg = await interaction.original_response()
-        await interaction.edit_original_response(content=f"{ogMsg.content}\n\nThe user has still recieved the {data[4]}, but not a DM\n-# Error: {e}")
-    except Exception:
-        pass
+        class View(discord.ui.View):
+            def __init__(self, msg: discord.Message):
+                super().__init__(timeout=None)
+                if canAppeal and server_settings(False, interaction.guild, "appeal"): self.add_item(ModalButton("Appeal", AppealLog, 1, interaction.guild, case, self, msg, style=discord.ButtonStyle.primary));
+
+        message = await user.send(embed=embed)
+        await message.edit(view=View(message))
+    except Exception as e: return False, e;
+    return True, ""
 
 # for /silly and /evil
 async def calculator(interaction: discord.Interaction, ctype: str, mention: str):

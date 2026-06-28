@@ -1,8 +1,8 @@
-import discord, requests, json, os, dotenv
+import discord, requests, json, os
+from datetime import datetime
 from Cogs.database import server_settings, xp_roles
 from resources.dictionaries import headers
 from discord.ui import Modal, TextInput
-dotenv.load_dotenv(".env")
 
 # All of discord.ui.modal here
 class BugReport(Modal):
@@ -103,6 +103,74 @@ class PrefixChange(Modal):
     async def on_submit(self, interaction: discord.Interaction):
         for field in self.children:
             await interaction.response.send_message(server_settings(True, interaction.guild, "prefix", field.value), ephemeral=True)
+
+class AppealLog(Modal):
+    def __init__(self, guild: discord.Guild, case = None, view: discord.ui.View = None, ogInteract: discord.Message = None):
+        super().__init__(title="Appeal this Log")
+        self.guild = guild
+        self.case = case
+        if case is None:
+            self.add_item(TextInput(
+                label="Case No.",
+                placeholder="Enter the case number the log message came with",
+                id = 0,
+            ))
+        self.add_item(TextInput(
+            label="Reason for Appeal:",
+            placeholder="Enter the reason you'd like to appeal your log",
+            style=discord.TextStyle.paragraph,
+            id = 1,
+        ))
+        self.add_item(TextInput(
+            label="Other:",
+            placeholder="Type in anything else you would like to say",
+            style=discord.TextStyle.paragraph,
+            required=False,
+            id = 2,
+        ))
+        self.add_item(TextInput(
+            label="If applicable, do you accept the Rules?",
+            placeholder="y/n",
+            id = 3,
+            max_length=3,
+            min_length=1
+        ))
+        self.ogInteract = ogInteract
+        self.view = view
+
+    async def on_submit(self, interaction: discord.Interaction):
+        case = self.case
+        if case is None: case = self.find_item(0).value;
+        reason = self.find_item(1).value
+        other = self.find_item(2).value
+        accept = self.find_item(3).value
+
+        if self.view:
+            for item in self.view.children:
+                item.disabled = True
+            if self.ogInteract:
+                await self.ogInteract.edit(view=self.view)
+
+        channel = server_settings(False, self.guild, "appeal")
+        if channel:
+            channel = self.guild.get_channel(channel)
+            if channel:
+                from Cogs.Classes.DiscordViews import AppealEmbed
+                embed = discord.Embed(title="Moderation Appeal", description=f"An appeal was sent by {interaction.user.mention} ({interaction.user.id}) | ({interaction.user.name})", color=discord.Color.green(), timestamp=datetime.now())
+                embed.add_field(name="Case No.", value=case)
+                embed.add_field(name="Reason:", value=reason or str(None))
+                embed.add_field(name="Other Info:", value=other)
+                embed.add_field(name="Read and Accepted Rules:", value=accept)
+                msg = await channel.send(content="# Status: __OPEN__\n## Votes:\nAccept: **0**\nDecline: **0**", embed=embed)
+                await msg.edit(view=AppealEmbed(msg, interaction.user, case))
+                await interaction.response.send_message("Appeal successfully sent! Awaiting Moderators response, a message will be sent on the outcome.", ephemeral=True)
+            else:
+                await interaction.response.send_message(
+                    "This server does not have appeals set up! Please contact the Server Owner / Admin to set it up!",
+                    ephemeral=True)
+        else:
+            await interaction.response.send_message("This server does not have appeals set up! Please contact the Server Owner / Admin to set it up!", ephemeral=True)
+        del self
 
 class BannedModify(Modal):
     def __init__(self):

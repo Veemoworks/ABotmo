@@ -1,14 +1,13 @@
-import os, spotipy, discord
-from dotenv import load_dotenv
+import os, spotipy, discord, dotenv
 from spotipy.oauth2 import SpotifyClientCredentials
 
-load_dotenv()
+dotenv.load_dotenv()
 
 sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
     client_id=os.getenv("SPOTIFYID"),
     client_secret=os.getenv("SPOTIFYSECRET")
 ))
-version = "2.18.32"
+version = "2.19.0"
 pid = os.getpid()
 noMentions = discord.AllowedMentions(roles=False, users=False, replied_user=False)
 noRoleMentions = discord.AllowedMentions(roles=False, users=True, replied_user=True)

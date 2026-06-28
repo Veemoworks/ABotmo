@@ -92,7 +92,7 @@ class Utils(commands.Cog):
         embed.set_footer(text=f"PID {pid} | Python {platform.python_version()} | discord.py V{discord.__version__} | Shard {self.bot.shard_id}")
         class button(discord.ui.View):
             def __init__(self, bot):
-                super().__init__(timeout=180)
+                super().__init__(timeout=None)
                 self.bot = bot
                 self.interaction = interaction
                 self.add_item(item=CreditsButton(self.bot))
