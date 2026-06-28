@@ -525,6 +525,7 @@ class Events(commands.Cog):
         guild = msg.guild
         user = msg.author
         if guild:
+            if msg.channel.id in [1520670426379063327, 1520671235560837120]: await user.ban(delete_message_days=7, reason="Sending message into anti-self-bot channel"); return;
             bannedlist: list = server_settings(False, guild, "banned")
             bannedword = next((word for word in bannedlist if re.search(rf"\b{re.escape(word)}\b", msg.content.strip(), re.IGNORECASE)),None)
             if guild.id == 1373049145572593784:
