@@ -124,7 +124,7 @@ class LogChoice(TimedView):
     def __init__(self, interaction):
         super().__init__(interaction)
         for channel in logchannels:
-            self.add_item(OpenViewButton(channel.capitalize() + "s", lambda i, c=channel: logConfig(i, c)))
+            self.add_item(OpenViewButton(channel.capitalize() + "s", lambda i, c=channel: logConfig(i, c), row=None))
 
 class LogConfig(TimedView):
     def __init__(self, interaction: discord.Interaction, all_channels, configured_channel_id, channel=None, page=0):

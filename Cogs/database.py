@@ -31,7 +31,8 @@ columns = {
         roles varchar(max),
         prefix varchar(max),
         casenum int,
-        appeal bigint""",
+        appeal bigint,
+        selfbot bigint""",
     "user_settings": """user BIGINT,
         xpmessage tinyint""",
     "server_channels": """guild_id BIGINT,
@@ -489,9 +490,9 @@ def server_settings(save, guild, stype=None, value=None):
         elif stype == "appeal":
             msg = f"Successfully set appeal channel to <#{value}>!"
             cur.execute(f"SELECT appeal FROM main.[server_settings] WHERE guild_id = {gid}")
-            current = cur.fetchone()[0]
-            if value == current:
-                msg = f"Removed appeal channel (<#{value}>) from database."
+            current = cur.fetchone()
+            if (current and value == current[0]) or not value:
+                msg = f"Removed appeal channel {"(<#{value}>) " if value else ""}from database."
                 value = "null"
 
             cur.execute(f"UPDATE main.[server_settings] SET appeal = {value} WHERE guild_id = {gid}")
@@ -602,7 +603,6 @@ def server_channels(save, guild, channel, data=None):
 
         cur.execute(f"SELECT {channel} FROM main.[server_channels] WHERE guild_id = {gid}")
         current = cur.fetchone()[0]
-
         if current == data:
             cur.execute(f"""
                         UPDATE main.[server_channels]
@@ -611,12 +611,13 @@ def server_channels(save, guild, channel, data=None):
                 """)
             msg = f"Deleted \"<#{data}>\" from the {channel} event server config."
         else:
+            if data is None: data = "null";
             cur.execute(f"""
                         UPDATE main.[server_channels]
                         SET {channel} = {data}
                         WHERE guild_id = {gid};
                 """)
-            msg = f"Your new {channel} event channel is: \"<#{data}>\"."
+            msg = f"Your new {channel} event channel is: {"\"<#{data}>\"" if data else str(None)}."
         con.commit()
         con.close()
         return msg

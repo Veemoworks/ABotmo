@@ -9,14 +9,16 @@ class Logs(Select):
             discord.SelectOption(label=c.name, value=str(c.id), default=(c.id == configured_channel_id))
             for c in channels
         ]
-        super().__init__(placeholder="Select a Text Channel", min_values=1, max_values=1, options=options)
+        super().__init__(placeholder="Select a Text Channel", min_values=0, max_values=1, options=options)
         self.channel = channel
 
     async def callback(self, interaction: discord.Interaction):
         from Cogs.Classes.DiscordViews import LogConfig
+        val = None
+        if self.values: val = int(self.values[0]);
         embed = discord.Embed(
             title="Log Channel Configuration",
-            description=server_channels(True, interaction.guild, self.channel, int(self.values[0])),
+            description=server_channels(True, interaction.guild, self.channel, val),
             color=discord.Color.green()
         )
         await interaction.response.edit_message(embed=embed,
@@ -35,13 +37,15 @@ class Appeals(Select):
             discord.SelectOption(label=c.name, value=c.id, default=(c.id == configured_channel_id))
             for c in channels
         ]
-        super().__init__(placeholder="Select a Text Channel", min_values=1, max_values=1, options=options)
+        super().__init__(placeholder="Select a Text Channel", min_values=0, max_values=1, options=options)
 
     async def callback(self, interaction: discord.Interaction):
         from Cogs.Classes.DiscordViews import AppealConfig
+        val = None
+        if self.values: val = int(self.values[0]);
         embed = discord.Embed(
             title="Log Channel Configuration",
-            description=server_settings(True, interaction.guild, "appeal", int(self.values[0])),
+            description=server_settings(True, interaction.guild, "appeal", val),
             color=discord.Color.green()
         )
         await interaction.response.edit_message(embed=embed,
