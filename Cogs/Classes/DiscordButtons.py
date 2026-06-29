@@ -113,7 +113,7 @@ class AppealButton(discord.ui.Button):
             await self.ogInteract.edit(content=f"# Status: __CLOSED__\n## Votes:\nAccept: **{self.votes[1]}**\nDecline: **{self.votes[0]}**\n\nModerators say: {modSay}", view=self.parView)
             del self.votes
             await interaction.response.send_message(f"Successfully closed the poll! Moderators say: {modSay}", ephemeral=True)
-            await self.user.send(f"Your appeal for case {self.case} {"was" if modSayP in ["accepted", "declined"] else "had"} {modSayP}!")
+            await self.user.send(f"Your appeal for case {self.case} {"was" if modSayP in ["accepted", "denied"] else "had"} {modSayP}!")
             del self.parView
             del self
         else:
