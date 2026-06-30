@@ -187,7 +187,7 @@ def modlog(save, interaction: discord.Interaction, data = None, user: discord.Us
             t = cur.fetchone()
             if t:
                 cur.execute(f"DELETE FROM main.modlogs WHERE id = ? AND guild_id = {gid}", data)
-                msg = (f"Successfully deleted Log '{data}' from the Discord Server's database!", True, t[0], len(cur.execute(f"""SELECT * FROM main.modlogs WHERE user = {t[0]} AND guild_id = {gid}""").fetchall()))
+                msg = (f"Successfully deleted Log '{data}' from the Discord Server's database!", True, t[0], len(cur.execute(f"""SELECT * FROM main.modlogs WHERE [user] = {t[0]} AND guild_id = {gid}""").fetchall()))
         con.commit()
     elif not save and rem:
         cur.execute(f"""
