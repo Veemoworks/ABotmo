@@ -60,7 +60,8 @@ cmduae = {
     "checkmod": ["{user} [ page ]", "AVeemo, 2"],
     "ban": ["{user} [ reason ] [ message ] [ delete_msgs ]", "AVeemo, Threatened to doxx a user, Permanent ban with no appeal"],
     "unban": ["{user} [ reason ]", "AVeemo, Shown proof of them being framed"],
-    "set_rank": ["{user} [ level ] [ xp ] [ add ]", "AVeemo, 5, 250, False"]
+    "set_rank": ["{user} [ level ] [ xp ] [ add ]", "AVeemo, 5, 250, False"],
+    "appeal": ["[ guild ]", "680125280412762115"],
 }
 custom_urls = {
     1373049145572593784: {

@@ -7,7 +7,7 @@ sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
     client_id=os.getenv("SPOTIFYID"),
     client_secret=os.getenv("SPOTIFYSECRET")
 ))
-version = "2.19.0"
+version = "2.19.1"
 pid = os.getpid()
 noMentions = discord.AllowedMentions(roles=False, users=False, replied_user=False)
 noRoleMentions = discord.AllowedMentions(roles=False, users=True, replied_user=True)
