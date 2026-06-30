@@ -30,19 +30,20 @@ class UtilsPREFIX(commands.Cog):
 
         for f in filters:
             f = f.lower()
-            if f.startswith("<@") and f.endswith(">"):
-                user_id = int(re.sub(r"[<@!>]", "", f))
-                user = ctx.guild.get_member(user_id)
-            elif f == "bots":
-                bots = True
-            elif f == "embeds":
-                embeds = True
-            elif f == "files":
-                files = True
-            elif f == "links":
-                links = True
-            elif f == "mentions":
-                mentions = True
+            match f:
+                case "bots":
+                    bots = True
+                case "embeds":
+                    embeds = True
+                case "files":
+                    files = True
+                case "links":
+                    links = True
+                case "mentions":
+                    mentions = True
+                case _ if f.startswith("<@") and f.endswith(">"):
+                    user_id = int(re.sub(r"[<@!>]", "", f))
+                    user = ctx.guild.get_member(user_id)
 
         def check(msg: discord.Message):
             if user and msg.author != user:

@@ -57,19 +57,20 @@ class Moderation(commands.Cog):
         unit = length[-1]
         amount = int(length[:-1])
 
-        if unit == "s":
-            delta = timedelta(seconds=amount)
-        elif unit == "m":
-            delta = timedelta(minutes=amount)
-        elif unit == "h":
-            delta = timedelta(hours=amount)
-        elif unit == "d":
-            delta = timedelta(days=amount)
-        elif unit == "w":
-            delta = timedelta(weeks=amount)
-        else:
-            await interaction.followup.send("Invalid time format! Use s/m/h/d/w.")
-            return
+        match unit:
+            case "s":
+                delta = timedelta(seconds=amount)
+            case "m":
+                delta = timedelta(minutes=amount)
+            case "h":
+                delta = timedelta(hours=amount)
+            case "d":
+                delta = timedelta(days=amount)
+            case "w":
+                delta = timedelta(weeks=amount)
+            case _:
+                await interaction.followup.send("Invalid time format! Use s/m/h/d/w.")
+                return
 
         now = discord.utils.utcnow()
         t = now + timedelta(days=28)

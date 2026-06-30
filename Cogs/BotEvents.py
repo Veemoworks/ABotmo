@@ -159,23 +159,24 @@ class Events(commands.Cog):
         for gid, _ in custom_urls.items():
             if guild.id == gid:
                 embed.set_image(url=custom_urls[guild.id]["welcome"])
-        if guild.id == 1373049145572593784:
-            channel = self.bot.get_channel(1373060852558598276)
-            emoji = self.bot.get_emoji(1415121249822179419)
-            msg = await channel.send(
-                f"Hello, ⁜{member.mention}※ and welcome to **Whispers of Robloxia! [WOR]** hope you enjoy.\nPlease look at <#1373059418845085817> so you understand what to do and not to do thank you!",
-                embed=embed)
-            await msg.add_reaction(emoji)
-        elif guild.id == 1418384480061624444:
-            await self.bot.get_channel(1418384488098037771).send(
-                f"Welcome to Stop N' Go, {member.mention}!! I hope you enjoy your stop :D",
-                allowed_mentions=discord.AllowedMentions(users=False))
-        elif guild.id == 1489081230455476246:
-            channel = self.bot.get_channel(1489096330495397989)
-            await channel.send(f"{member.mention} has joined! Make sure to punch Partygoer on your way in, and watch out for edgy maniacs with hacks.\nWe are now at {guild.member_count} members.")
-        elif guild.id == 1501806820254285905:
-            role = member.guild.get_role(1501860189291155476)
-            await member.add_roles(role)
+        match guild.id:
+            case 1373049145572593784:
+                channel = self.bot.get_channel(1373060852558598276)
+                emoji = self.bot.get_emoji(1415121249822179419)
+                msg = await channel.send(
+                    f"Hello, ⁜{member.mention}※ and welcome to **Whispers of Robloxia! [WOR]** hope you enjoy.\nPlease look at <#1373059418845085817> so you understand what to do and not to do thank you!",
+                    embed=embed)
+                await msg.add_reaction(emoji)
+            case 1418384480061624444:
+                await self.bot.get_channel(1418384488098037771).send(
+                    f"Welcome to Stop N' Go, {member.mention}!! I hope you enjoy your stop :D",
+                    allowed_mentions=discord.AllowedMentions(users=False))
+            case 1489081230455476246:
+                channel = self.bot.get_channel(1489096330495397989)
+                await channel.send(f"{member.mention} has joined! Make sure to punch Partygoer on your way in, and watch out for edgy maniacs with hacks.\nWe are now at {guild.member_count} members.")
+            case 1501806820254285905:
+                role = member.guild.get_role(1501860189291155476)
+                await member.add_roles(role)
             
 
     @commands.Cog.listener()
@@ -192,19 +193,20 @@ class Events(commands.Cog):
         for gid, _ in custom_urls.items():
             if guild.id == gid:
                 embed.set_image(url=custom_urls[guild.id]["goodbye"])
-        if guild.id == 1373049145572593784:
-            channel = self.bot.get_channel(1373060852558598276)
-            emoji = self.bot.get_emoji(1386741952040407112)
-            msg = await channel.send(
-                f"aw geez {member.mention} has left us... We are now {guild.member_count} friends :,<", embed=embed)
-            await msg.add_reaction(emoji)
-        elif guild.id == 1418384480061624444:
-            await self.bot.get_channel(1418384488098037771).send(
-                f"Oh...goodbye, {member.mention}...you have stopped and gone....",
-                allowed_mentions=discord.AllowedMentions(users=False))
-        elif guild.id == 1489081230455476246:
-            channel = self.bot.get_channel(1489096330495397989)
-            await channel.send(f"{member.mention} couldn't evade a ban. Well, they aren't BANNED, they just left and this is a humorous leave message due to the name of the game.\nWe are now at {guild.member_count} members.")
+        match guild.id:
+            case 1373049145572593784:
+                channel = self.bot.get_channel(1373060852558598276)
+                emoji = self.bot.get_emoji(1386741952040407112)
+                msg = await channel.send(
+                    f"aw geez {member.mention} has left us... We are now {guild.member_count} friends :,<", embed=embed)
+                await msg.add_reaction(emoji)
+            case 1418384480061624444:
+                await self.bot.get_channel(1418384488098037771).send(
+                    f"Oh...goodbye, {member.mention}...you have stopped and gone....",
+                    allowed_mentions=discord.AllowedMentions(users=False))
+            case 1489081230455476246:
+                channel = self.bot.get_channel(1489096330495397989)
+                await channel.send(f"{member.mention} couldn't evade a ban. Well, they aren't BANNED, they just left and this is a humorous leave message due to the name of the game.\nWe are now at {guild.member_count} members.")
 
     @commands.Cog.listener()
     async def on_member_update(self, old: discord.Member, new):

@@ -118,7 +118,7 @@ def to_text(data: dict, xpconfig=False):
         _type = type(value)
         skib = value
         plural = False
-        if _type == int:
+        if _type is int:
             if xpconfig:
                 if not key == "channel":
                     if value:
@@ -132,7 +132,7 @@ def to_text(data: dict, xpconfig=False):
                         skib = f"<#{value}>"
             else:
                 skib = "None" if value == 0 else f"<#{value}>"
-        elif _type == list:
+        elif _type is list:
             if xpconfig:
                 skib = f"{value[0]} to {value[1]}"
             else:
@@ -143,7 +143,7 @@ def to_text(data: dict, xpconfig=False):
                     temp = [val for val in value]
                 skib = ", ".join(temp)
                 plural = True
-        elif _type == dict:
+        elif _type is dict:
             if xpconfig:
                 temp = [f"{level}: <@&{roleid}>" for level, roleid in skib.items()]
                 skib = " | ".join(temp)

@@ -326,12 +326,12 @@ def xp_settings(save, guild: discord.Guild, data):
                     val = kirk["channelnums"][2].mention
                 else:
                     val = kirk["channelnums"][1]
-            elif _type == int:
+            elif _type is int:
                 if val:
                     val = "On"
                 else:
                     val = "Off"
-            elif _type == str:
+            elif _type is str:
                 temp = json.loads(val.strip("'"))
                 val = f"{temp[0]} to {temp[1]}"
             text.append(f"{kirk[key]} was set to {val}")
@@ -346,24 +346,25 @@ def xp_settings(save, guild: discord.Guild, data):
         data = cur.fetchone()
         con.close()
 
-        if data == "messagetoggle":
-            return data[1]
-        elif data == "channel":
-            return data[2]
-        elif data == "cd":
-            return data[3]
-        elif data == "range":
-            return json.loads(data[4])
-        elif data == "xpenabled":
-            return data[5]
-        else:
-            return {
-                "messagetoggle": data[1],
-                "channel": data[2],
-                "cd": data[3],
-                "range": json.loads(data[4]),
-                "xpenabled": data[5]
-            }
+        match data:
+            case "messagetoggle":
+                return data[1]
+            case "channel":
+                return data[2]
+            case "cd":
+                return data[3]
+            case "range":
+                return json.loads(data[4])
+            case "xpenabled":
+                return data[5]
+            case _:
+                return {
+                    "messagetoggle": data[1],
+                    "channel": data[2],
+                    "cd": data[3],
+                    "range": json.loads(data[4]),
+                    "xpenabled": data[5]
+                }
 
 def xp_roles(save, guild: discord.Guild, level=None, role=None):
     con, cur = connectToDB("xp")
@@ -425,83 +426,83 @@ def server_settings(save, guild, stype=None, value=None):
         con.commit()
 
     if save:
+        match stype:
+            case "roles":
+                cur.execute("SELECT roles FROM main.[server_settings] WHERE guild_id = ?", (gid,))
+                roles = json.loads(cur.fetchone()[0])
 
-        if stype == "roles":
-            cur.execute("SELECT roles FROM main.[server_settings] WHERE guild_id = ?", (gid,))
-            roles = json.loads(cur.fetchone()[0])
+                role = str(value)
 
-            role = str(value)
+                if role in roles:
+                    roles.remove(role)
+                    msg = f"Removed <@&{role}> from the server config."
+                else:
+                    roles.append(role)
+                    msg = f"Added <@&{role}> to the server config."
 
-            if role in roles:
-                roles.remove(role)
-                msg = f"Removed <@&{role}> from the server config."
-            else:
-                roles.append(role)
-                msg = f"Added <@&{role}> to the server config."
+                cur.execute("""
+                    UPDATE main.[server_settings]
+                    SET roles = ?
+                    WHERE guild_id = ?;
+                """, (json.dumps(roles), gid))
 
-            cur.execute("""
-                UPDATE main.[server_settings]
-                SET roles = ?
-                WHERE guild_id = ?;
-            """, (json.dumps(roles), gid))
+                con.commit()
+                con.close()
+                return msg
+            case "prefix":
+                cur.execute("""
+                    UPDATE main.[server_settings]
+                    SET prefix = ?
+                    WHERE guild_id = ?;
+                """, (value, gid))
 
-            con.commit()
-            con.close()
-            return msg
-        elif stype == "prefix":
-            cur.execute("""
-                UPDATE main.[server_settings]
-                SET prefix = ?
-                WHERE guild_id = ?;
-            """, (value, gid))
+                con.commit()
+                con.close()
+                return f"Your server configuration for bot prefix has been updated to \"{value}\"."
+            case "casenum":
+                cur.execute(f"""
+                    SELECT casenum FROM main.[server_settings] WHERE guild_id = {gid}""")
+                num = cur.fetchone()[0]
+                num += 1
+                cur.execute(f"""
+                    UPDATE main.[server_settings]
+                    SET casenum = ?
+                    WHERE guild_id = ?;
+                """, (num, gid))
+                con.commit()
+                con.close()
+                return num
+            case "banned":
+                cur.execute(f"SELECT banned FROM main.[server_settings] WHERE guild_id = {gid}")
+                banned: list = json.loads(cur.fetchone()[0])
 
-            con.commit()
-            con.close()
-            return f"Your server configuration for bot prefix has been updated to \"{value}\"."
-        elif stype == "casenum":
-            cur.execute(f"""
-                SELECT casenum FROM main.[server_settings] WHERE guild_id = {gid}""")
-            num = cur.fetchone()[0]
-            num += 1
-            cur.execute(f"""
-                UPDATE main.[server_settings]
-                SET casenum = ?
-                WHERE guild_id = ?;
-            """, (num, gid))
-            con.commit()
-            con.close()
-            return num
-        elif stype == "banned":
-            cur.execute(f"SELECT banned FROM main.[server_settings] WHERE guild_id = {gid}")
-            banned: list = json.loads(cur.fetchone()[0])
+                if value in banned:
+                    banned.remove(value)
+                    msg = f"Removed {value} from the banned word list."
+                else:
+                    banned.append(value)
+                    msg = f"Added {value} to the banned word list."
 
-            if value in banned:
-                banned.remove(value)
-                msg = f"Removed {value} from the banned word list."
-            else:
-                banned.append(value)
-                msg = f"Added {value} to the banned word list."
+                cur.execute(f"UPDATE main.[server_settings] SET banned = '{json.dumps(banned)}' WHERE guild_id = {gid}")
 
-            cur.execute(f"UPDATE main.[server_settings] SET banned = '{json.dumps(banned)}' WHERE guild_id = {gid}")
+                con.commit()
+                con.close()
+                return msg
+            case "appeal":
+                msg = f"Successfully set appeal channel to <#{value}>!"
+                cur.execute(f"SELECT appeal FROM main.[server_settings] WHERE guild_id = {gid}")
+                current = cur.fetchone()
+                if (current and value == current[0]) or not value:
+                    msg = f"Removed appeal channel {"(<#{value}>) " if value else ""}from database."
+                    value = "null"
 
-            con.commit()
-            con.close()
-            return msg
-        elif stype == "appeal":
-            msg = f"Successfully set appeal channel to <#{value}>!"
-            cur.execute(f"SELECT appeal FROM main.[server_settings] WHERE guild_id = {gid}")
-            current = cur.fetchone()
-            if (current and value == current[0]) or not value:
-                msg = f"Removed appeal channel {"(<#{value}>) " if value else ""}from database."
-                value = "null"
+                cur.execute(f"UPDATE main.[server_settings] SET appeal = {value} WHERE guild_id = {gid}")
 
-            cur.execute(f"UPDATE main.[server_settings] SET appeal = {value} WHERE guild_id = {gid}")
-
-            con.commit()
-            con.close()
-            return msg
-        else:
-            return "fella..."
+                con.commit()
+                con.close()
+                return msg
+            case _:
+                return "fella..."
     else:
         cur.execute("""
             SELECT roles, prefix, casenum, banned, appeal
@@ -511,24 +512,25 @@ def server_settings(save, guild, stype=None, value=None):
         data = cur.fetchone()
         con.close()
 
-        if stype == "roles":
-            return json.loads(data[0])
-        elif stype == "prefix":
-            return data[1]
-        elif stype == "casenum":
-            return data[2]
-        elif stype == "banned":
-            return json.loads(data[3])
-        elif stype == "appeal":
-            return data[4]
-        else:
-            return {
-                "roles": json.loads(data[0]),
-                "prefix": data[1],
-                "casenum": data[2],
-                "banned": json.loads(data[3]),
-                "appeal": data[4],
-            }
+        match stype:
+            case "roles":
+                return json.loads(data[0])
+            case "prefix":
+                return data[1]
+            case "casenum":
+                return data[2]
+            case "banned":
+                return json.loads(data[3])
+            case "appeal":
+                return data[4]
+            case _:
+                return {
+                    "roles": json.loads(data[0]),
+                    "prefix": data[1],
+                    "casenum": data[2],
+                    "banned": json.loads(data[3]),
+                    "appeal": data[4],
+                }
 
 def user_settings(save, userid: int, setting, data=None):
     returnval = False
@@ -630,30 +632,31 @@ def server_channels(save, guild, channel, data=None):
         data = cur.fetchone()
         con.close()
 
-        if channel == "modlog":
-            return data[1]
-        elif channel == "member":
-            return data[2]
-        elif channel == "message":
-            return data[3]
-        elif channel == "channel":
-            return data[4]
-        elif channel == "role":
-            return data[5]
-        elif channel == "voice":
-            return data[6]
-        elif channel == "guild":
-            return data[7]
-        else:
-            return {
-                "modlog": data[1],
-                "member": data[2],
-                "message": data[3],
-                "channel": data[4],
-                "role": data[5],
-                "voice": data[6],
-                "guild": data[7],
-            }
+        match channel:
+            case "modlog":
+                return data[1]
+            case "member":
+                return data[2]
+            case "message":
+                return data[3]
+            case "channel":
+                return data[4]
+            case "role":
+                return data[5]
+            case "voice":
+                return data[6]
+            case "guild":
+                return data[7]
+            case _:
+                return {
+                    "modlog": data[1],
+                    "member": data[2],
+                    "message": data[3],
+                    "channel": data[4],
+                    "role": data[5],
+                    "voice": data[6],
+                    "guild": data[7],
+                }
 # </editor-fold>
 
 def webhooks(save, guild, data):
