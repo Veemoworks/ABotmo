@@ -106,7 +106,7 @@ def handle_exception(exc_type, exc_value, exc_traceback, bot):
 # Log to a file
 def log(error, msg):
     log = f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] {"[ERROR   ]" if error else "[INFO    ]"} {msg}"
-    with open("output.txt", "a") as f: f.write(log)
+    with open("output.txt", "a") as f: f.write(log + "\n")
     return log
 
 # lowkirk forgot about this file
