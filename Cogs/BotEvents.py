@@ -527,14 +527,17 @@ class Events(commands.Cog):
         guild = msg.guild
         user = msg.author
         if guild:
-            if msg.channel.id in [1520670426379063327, 1520671235560837120]: await user.ban(delete_message_days=7, reason="Sending message into anti-self-bot channel"); return;
+            if msg.channel.id in [1520670426379063327, 1520671235560837120, 1527019763845562428]:
+                await msg.delete(delay=0)
+                await user.ban(delete_message_days=7, reason="Sending message into anti-self-bot channel")
+                return
             bannedlist: list = server_settings(False, guild, "banned")
             bannedword = next((word for word in bannedlist if re.search(rf"\b{re.escape(word)}\b", msg.content.strip(), re.IGNORECASE)),None)
             if guild.id == 1373049145572593784:
                 link = re.findall(r'https?://\S+', msg.content.strip(), re.IGNORECASE)
                 gg = re.findall(r'.gg/\S+', msg.content.strip(), re.IGNORECASE)
                 invite = re.findall(r'/invite/\S+', msg.content.strip(), re.IGNORECASE)
-                if not guild.get_member(user.id).guild_permissions.embed_links and (link or gg or invite):
+                if not guild.get_member(user.id).guild_permissions.embed_links and ((link and not msg.channel.id in [1378829299230183484]) or gg or invite):
                     chosen = link or gg or invite
                     channel = msg.channel
                     await msg.delete(delay=0)
