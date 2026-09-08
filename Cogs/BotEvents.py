@@ -198,15 +198,15 @@ class Events(commands.Cog):
                 channel = self.bot.get_channel(1373060852558598276)
                 emoji = self.bot.get_emoji(1386741952040407112)
                 msg = await channel.send(
-                    f"aw geez {member.mention} has left us... We are now {guild.member_count} friends :,<", embed=embed)
+                    f"aw geez {member.name} has left us... We are now {guild.member_count} friends :,<", embed=embed)
                 await msg.add_reaction(emoji)
             case 1418384480061624444:
                 await self.bot.get_channel(1418384488098037771).send(
-                    f"Oh...goodbye, {member.mention}...you have stopped and gone....",
+                    f"Oh...goodbye, {member.name}...you have stopped and gone....",
                     allowed_mentions=discord.AllowedMentions(users=False))
             case 1489081230455476246:
                 channel = self.bot.get_channel(1489096330495397989)
-                await channel.send(f"{member.mention} couldn't evade a ban. Well, they aren't BANNED, they just left and this is a humorous leave message due to the name of the game.\nWe are now at {guild.member_count} members.")
+                await channel.send(f"{member.name} couldn't evade a ban. Well, they aren't BANNED, they just left and this is a humorous leave message due to the name of the game.\nWe are now at {guild.member_count} members.")
 
     @commands.Cog.listener()
     async def on_member_update(self, old: discord.Member, new):
