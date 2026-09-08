@@ -17,24 +17,24 @@ async def status(bot):
         print(log(False, f"Failed to change status: {e}"))
 
 # Send pings to uptime kuma
-@tasks.loop(seconds=297)
-async def kuma(bot):
-    url = "https://status.veraveemo.uk/api/push/aUxU5PQwVA"
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(f"{url}?status=up&ping={round(bot.latency * 1000)}") as resp:
-                if resp.status == 200:
-                    print(log(False, "[KUMA] Status ping successful"))
-                else:
-                    print(log(True, f"[KUMA] Unexpected response: {resp.status}"))
-    except Exception as e:
-        print(log(True, f"[KUMA] Failed to ping: {e}"))
-        try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(f"{url}?status=down&msg={str(e)}") as resp:
-                    print(log(False, f"[KUMA] Sent fail status: {resp.status}"))
-        except Exception as e2:
-            print(log(True, f"[KUMA] Failed to send fail status: {e2}"))
+# @tasks.loop(seconds=297)
+# async def kuma(bot):
+#     url = "https://status.veraveemo.uk/api/push/aUxU5PQwVA"
+#     try:
+#         async with aiohttp.ClientSession() as session:
+#             async with session.get(f"{url}?status=up&ping={round(bot.latency * 1000)}") as resp:
+#                 if resp.status == 200:
+#                     print(log(False, "[KUMA] Status ping successful"))
+#                 else:
+#                     print(log(True, f"[KUMA] Unexpected response: {resp.status}"))
+#     except Exception as e:
+#         print(log(True, f"[KUMA] Failed to ping: {e}"))
+#         try:
+#             async with aiohttp.ClientSession() as session:
+#                 async with session.get(f"{url}?status=down&msg={str(e)}") as resp:
+#                     print(log(False, f"[KUMA] Sent fail status: {resp.status}"))
+#         except Exception as e2:
+#             print(log(True, f"[KUMA] Failed to send fail status: {e2}"))
 
 @tasks.loop(hours=1)
 async def ramthing():
