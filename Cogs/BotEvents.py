@@ -5,7 +5,7 @@ from Cogs.Methods.methods import crash, log, levelCard, permCheck, toDiscordTime
 from resources.dictionaries import custom_urls
 from resources.links import warm
 from resources.variables import pid, version, noMentions, noRoleMentions
-from Cogs.Methods.asynchronous.botStatus import status, kuma, ramthing
+from Cogs.Methods.asynchronous.botStatus import status, ramthing
 from Cogs.Methods.asynchronous.methods import event, get_prefix
 from Cogs.database import xp, user_settings, xp_settings, xp_roles, server_settings
 
@@ -49,7 +49,7 @@ class Events(commands.Cog):
                     # Bot Loops
                     ramthing.start()
                     status.start(self.bot)
-                    kuma.start(self.bot)
+                    # kuma.start(self.bot)
                     t = self.bot.get_channel(1403041372751265912)
                     await t.edit(name="[ 🟢 ] | Bot Status: Online")
                     print(log(False, f"READY TO KILL ALL FELLAS..."))
