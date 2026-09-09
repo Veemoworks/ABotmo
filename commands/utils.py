@@ -97,11 +97,6 @@ class Utils(commands.Cog):
                 self.interaction = interaction
                 self.add_item(item=CreditsButton(self.bot))
 
-            async def on_timeout(self):
-                for item in self.children:
-                    item.disabled = True
-                await self.interaction.edit_original_response(view=self)
-
         await interaction.response.send_message(embed=embed, view=button(self.bot))
 
     @app_commands.command(name="links", description="Get all links related to the bot")
