@@ -1,5 +1,6 @@
 import discord, requests, os, json
-from resources.dictionaries import headers, devs
+from resources.dictionaries import headers
+from Cogs.embeds import creditsEmbed
 
 currentPolls = {}
 
@@ -64,21 +65,14 @@ class CreditsButton(discord.ui.Button):
     def __init__(self, bot):
         super().__init__(style=discord.ButtonStyle.primary, label="Credits")
         self.bot = bot
+        self.done = False
 
     async def callback(self, interaction):
-        await interaction.response.defer()
-        embed = discord.Embed(title="ABotmo Credits", description="", color=discord.Colour.brand_green())
-        embed.set_author(name=self.bot.user.name, icon_url=self.bot.user.avatar.url)
-
-        for role, ppl in devs.items():
-            embed.description += f"\n## __{role}__:\n"
-            for dev in ppl:
-                dev = self.bot.get_user(dev)
-                embed.description += f"- {dev.mention} {dev.name}"
-
-        await interaction.followup.send(embed=embed)
-        self.disabled = True
-        await interaction.edit_original_response(view=self.view)
+        if not self.done:
+            done = True
+            await interaction.followup.send(embed=creditsEmbed)
+            self.disabled = True
+            await interaction.edit_original_response(view=self.view)
 
 class AppealButton(discord.ui.Button):
     def __init__(self, interaction: discord.Message, label: str, abType: int, style: discord.ButtonStyle = discord.ButtonStyle.primary, row: int = 1, view: discord.ui.View = None, user: discord.User | discord.Member = None, case: str = None):

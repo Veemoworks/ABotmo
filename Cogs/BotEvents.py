@@ -2,6 +2,7 @@ import discord, platform, time, os, re
 from datetime import datetime
 from discord.ext import commands
 from Cogs.Methods.methods import crash, log, levelCard, permCheck, toDiscordTimestamp
+from Cogs.embeds import setupBotEmbeds
 from resources.dictionaries import custom_urls
 from resources.links import warm
 from resources.variables import pid, version, noMentions, noRoleMentions
@@ -12,6 +13,7 @@ from Cogs.database import xp, user_settings, xp_settings, xp_roles, server_setti
 class Events(commands.Cog):
     def __init__(self, client: commands.Bot):
         self.bot = client
+        setupBotEmbeds(client)
 
     done = False
     errorembed = discord.Embed(title="Bot Error!",
