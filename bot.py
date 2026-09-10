@@ -5,6 +5,7 @@ from Cogs.Methods.asynchronous.methods import get_prefix
 startup = datetime.datetime.now()
 
 if __name__ == "__main__":
+    warnings.filterwarnings("ignore", category=DeprecationWarning)
     dotenv.load_dotenv()
     with open("output.txt", "w") as f:
         msg = f"[{startup.strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] Initilizaing..."
