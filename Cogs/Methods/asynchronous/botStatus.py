@@ -1,40 +1,24 @@
-import discord, aiohttp, os, psutil
-from discord.ext import tasks
+import discord, os, psutil
+from discord.ext import tasks, commands
+from Cogs.database import uptime
 from Cogs.Methods.asynchronous.methods import crash
 from Cogs.Methods.methods import log
 from resources.variables import pid
 
 # All bot status related things
 @tasks.loop(minutes=3)
-async def status(bot):
+async def customStatus(bot: commands.Bot):
     try:
-        stat = f"Helping {len(bot.guilds)} {'servers' if len(bot.guilds) > 1 else 'server'}"
-        # stat = f"Currently being updated! Please expect bugs and some things not to work."
+        # stat = f"Helping {len(bot.guilds)} {'servers' if len(bot.guilds) > 1 else 'server'}"
+        stat = f"Currently being updated! Please expect bugs and some things not to work."
         await bot.change_presence(activity=discord.CustomActivity(name=stat))
         print(log(False, f"Successfully changed status with {len(bot.guilds)} {"servers" if len(bot.guilds) > 1 else "server"}!"))
     except Exception as e:
         await crash(e)
         print(log(False, f"Failed to change status: {e}"))
 
-# Send pings to uptime kuma
-# @tasks.loop(seconds=297)
-# async def kuma(bot):
-#     url = "https://status.veraveemo.uk/api/push/aUxU5PQwVA"
-#     try:
-#         async with aiohttp.ClientSession() as session:
-#             async with session.get(f"{url}?status=up&ping={round(bot.latency * 1000)}") as resp:
-#                 if resp.status == 200:
-#                     print(log(False, "[KUMA] Status ping successful"))
-#                 else:
-#                     print(log(True, f"[KUMA] Unexpected response: {resp.status}"))
-#     except Exception as e:
-#         print(log(True, f"[KUMA] Failed to ping: {e}"))
-#         try:
-#             async with aiohttp.ClientSession() as session:
-#                 async with session.get(f"{url}?status=down&msg={str(e)}") as resp:
-#                     print(log(False, f"[KUMA] Sent fail status: {resp.status}"))
-#         except Exception as e2:
-#             print(log(True, f"[KUMA] Failed to send fail status: {e2}"))
+@tasks.loop(minutes=1)
+async def botStatus(bot: commands.Bot): uptime(True, bot.latency);
 
 @tasks.loop(hours=1)
 async def ramthing():

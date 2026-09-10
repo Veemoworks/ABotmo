@@ -3,6 +3,7 @@ from bot import startup
 from datetime import datetime
 from discord import app_commands
 from discord.ext import commands
+from Cogs.database import uptime, uptimeHours
 from Cogs.Methods.asynchronous.methods import get_prefix
 from Cogs.Methods.methods import canUse, imgcol_gen
 from Cogs.Classes.DiscordModals import BugReport, BotSuggest
@@ -18,6 +19,8 @@ ping3.EXCEPTIONS = True
 class Utils(commands.Cog):
     def __init__(self, bot: discord.Client):
         self.bot = bot
+
+    expectedBeats = uptimeHours * 60
 
     # Get a list of commands
     async def command_autocomplete(self, interaction: discord.Interaction, current: str):
@@ -98,6 +101,43 @@ class Utils(commands.Cog):
                 self.add_item(item=CreditsButton(self.bot))
 
         await interaction.response.send_message(embed=embed, view=button(self.bot))
+
+    @app_commands.command(name="uptime", description=f"Provides ABotmo's uptime in the last {uptimeHours} hours")
+    @app_commands.allowed_contexts(True, True, True)
+    async def uptime(self, interaction: discord.Interaction):
+        print(log(False,f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
+        await interaction.response.defer()
+        uptimeData = uptime(False)
+        if not uptimeData:
+            await interaction.followup.send("There is no uptime data saved currently!")
+            return
+
+        blocks = []
+
+        for hour in range(uptimeHours):
+            start = (datetime.now().timestamp() - (uptimeHours * 3600)) + (hour * 3600)
+            end = start + 3600
+
+            hours = [ row for row in uptimeData if start <= row["datetime"] < end ]
+
+            if not hours:
+                blocks.append("🟥")
+                continue
+
+            if len([ row for row in hours ]) >= len(hours) / 2:
+                blocks.append("🟩")
+            else: blocks.append("🟥");
+
+        if uptimeData[-1]:
+            status = "🟢 Online"
+        else: status = "🔴 Offline";
+
+        embed = discord.Embed(title="Bot Uptime", description=f"**Last {uptimeHours} Hours**\n\n" + "".join(blocks[:24]) + "\n" + "".join(blocks[24:]), color=discord.Color.green() if uptimeData[-1] else discord.Color.red())
+        embed.add_field(name="Current Status", value=status, inline=True)
+        embed.add_field(name="Uptime", value=f"{min((sum(1 for row in uptimeData) / self.expectedBeats) * 100, 100):.2f}%", inline=True)
+        embed.set_footer(text="Each block represents approximately 1 hour | 🟩 = Online 🟥 = Offline")
+
+        await interaction.followup.send(embed=embed)
 
     @app_commands.command(name="links", description="Get all links related to the bot")
     @app_commands.allowed_contexts(True, True, True)

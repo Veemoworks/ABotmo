@@ -6,7 +6,7 @@ from Cogs.embeds import setupBotEmbeds
 from resources.dictionaries import custom_urls
 from resources.links import warm
 from resources.variables import pid, version, noMentions, noRoleMentions
-from Cogs.Methods.asynchronous.botStatus import status, ramthing
+from Cogs.Methods.asynchronous.botStatus import customStatus, ramthing, botStatus
 from Cogs.Methods.asynchronous.methods import event, get_prefix
 from Cogs.database import xp, user_settings, xp_settings, xp_roles, server_settings
 
@@ -26,7 +26,7 @@ class Events(commands.Cog):
             try:
                 if not self.done:
                     # Load cogs
-                    cogs = ["fun", "utils", "moderation", "server", "prefix.utils", "prefix.server"]
+                    cogs = ["economy", "fun", "utils", "moderation", "server", "prefix.utils", "prefix.server"]
                     for cog in cogs:
                         await self.bot.load_extension(f"commands.{cog}")
                     # Sync self.bot tree.
@@ -49,8 +49,8 @@ class Events(commands.Cog):
                         print(log(False, f"Command {command.name} (</{command.name}:{command.id}>) Registered!"))
                     # Bot Loops
                     ramthing.start()
-                    status.start(self.bot)
-                    # kuma.start(self.bot)
+                    customStatus.start(self.bot)
+                    botStatus.start(self.bot)
                     setupBotEmbeds(self.bot)
                     t = self.bot.get_channel(1403041372751265912)
                     await t.edit(name="[ 🟢 ] | Bot Status: Online")

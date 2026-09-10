@@ -45,7 +45,11 @@ columns = {
     "webhooks": """id BIGINT,
         token varchar(max),
         channel BIGINT""",
+    "uptime": """datetime bigint,
+        latency tinyint
+    """,
 }
+uptimeHours = 48
 
 def connectToDB(database: str):
     if not database:
@@ -690,3 +694,33 @@ def webhooks(save, guild, data):
             return data
         con.close()
         return False
+
+def uptime(save: bool, latency: float | int = 0) -> list:
+    con, cur = connectToDB("botData")
+    checkTableExists(con, cur, "uptime")
+
+    cutoff = datetime.datetime.now().timestamp() - (uptimeHours * 3600)
+
+    if save:
+        cur.execute(f"""
+                INSERT INTO main.uptime (
+                    datetime, latency
+                ) VALUES ({datetime.datetime.now().timestamp()}, {latency})
+        """)
+        cur.execute(f"""
+            DELETE FROM main.uptime
+            WHERE datetime < {cutoff}
+        """)
+        con.commit()
+        con.close()
+        return []
+
+    cur.execute(f"""
+        SELECT *
+        FROM main.uptime
+        WHERE datetime >= {cutoff}
+        ORDER BY datetime ASC
+    """)
+    rval = cur.fetchall()
+    con.close()
+    return rval

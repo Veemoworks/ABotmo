@@ -1,4 +1,4 @@
-import discord, random, os, threading
+import discord, random, os, requests as req
 from discord import app_commands
 from discord.ext import commands
 from Cogs.Methods.asynchronous.methods import calculator
@@ -82,6 +82,26 @@ class Fun(commands.Cog):
             user = interaction.user
 
         await calculator(interaction, "evil", user.mention)
+
+    @app_commands.command(name="coinflip", description="Flip a coin with heads and tails being a 50/50 chance!")
+    @app_commands.allowed_contexts(True, True, True)
+    async def coinflip(self, interaction: discord.Interaction):
+        print(log(False,f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
+        await interaction.response.send_message(f"It's {["Heads", "Tails"][random.randint(0,1)]}!")
+
+    @app_commands.command(name="motd", description="Get the Message of the Day!")
+    @app_commands.allowed_contexts(True, True, True)
+    async def motd(self, interaction: discord.Interaction):
+        print(log(False,f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
+        motd = req.get("https://zenquotes.io/api/today")
+        if motd.ok:
+            motd = motd.json()[0]
+            embed = discord.Embed(title="Message of the Day", description=motd["q"])
+            embed.set_author(name=motd["a"], icon_url=motd["i"])
+            embed.set_footer(text="MotD provided by https://zenquotes.io/")
+            await interaction.response.send_message(embed=embed)
+        else:
+            await interaction.response.send_message(content="Failed to GET API\n"+f"{motd.status_code}: {motd.content}", ephemeral=True)
 
     @app_commands.command(name="system")
     @app_commands.allowed_contexts(True, False, True)
