@@ -13,7 +13,6 @@ from Cogs.database import xp, user_settings, xp_settings, xp_roles, server_setti
 class Events(commands.Cog):
     def __init__(self, client: commands.Bot):
         self.bot = client
-        setupBotEmbeds(client)
 
     done = False
     errorembed = discord.Embed(title="Bot Error!",
@@ -52,6 +51,7 @@ class Events(commands.Cog):
                     ramthing.start()
                     status.start(self.bot)
                     # kuma.start(self.bot)
+                    setupBotEmbeds(client)
                     t = self.bot.get_channel(1403041372751265912)
                     await t.edit(name="[ 🟢 ] | Bot Status: Online")
                     print(log(False, f"READY TO KILL ALL FELLAS..."))
