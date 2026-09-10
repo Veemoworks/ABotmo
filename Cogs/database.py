@@ -102,9 +102,16 @@ def modlog(save, interaction: discord.Interaction, data = None, user: discord.Us
     elif not save and not rem:
         if data[1]:
             msg = discord.Embed(color=discord.Color.dark_green())
-            msg.set_author(name=f"LOG '{data[1]}' DETAILS")
-            cur.execute(f"SELECT * FROM main.modlogs WHERE id = '{data[1]}' AND guild_id = {gid}")
+
+            name = data[1]
+            query = f"i = {data[1]} and [user] = '{user.id}'" if data[1].isnumeric() else f"id = '{data[1]}'"
+
+            cur.execute(f"SELECT * FROM main.modlogs WHERE {query} AND guild_id = {gid}")
             row = cur.fetchone()
+
+            if row and row[-2] and data[1].isnumeric(): name = row[-2]
+
+            msg.set_author(name=f"LOG '{name}' DETAILS")
             if row:
                 user = interaction.guild.get_member(row[1])
                 msg.author.icon_url = user.avatar.url if user and user.avatar else None
@@ -116,7 +123,7 @@ def modlog(save, interaction: discord.Interaction, data = None, user: discord.Us
                 msg.set_footer(text=f"User ID: {row[1]} | Mod ID: {row[2]}")
                 msg.timestamp = datetime.datetime.fromtimestamp(row[6])
             else:
-                msg.description = "Moderation Log not found! Ensure the ID is correct."
+                msg.description = "Moderation Log not found! Ensure the ID or Index is correct."
         elif data[2] and user:
             cur.execute(f"""
                             SELECT type, timestamp, [user], id
