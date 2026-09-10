@@ -69,7 +69,8 @@ class CreditsButton(discord.ui.Button):
 
     async def callback(self, interaction):
         if not self.done:
-            done = True
+            self.done = True
+            await interaction.response.defer()
             await interaction.followup.send(embed=creditsEmbed)
             self.disabled = True
             await interaction.edit_original_response(view=self.view)

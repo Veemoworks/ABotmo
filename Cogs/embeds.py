@@ -10,5 +10,6 @@ def setupBotEmbeds(client: commands.Bot):
     for role, ppl in devs.items():
         creditsEmbed.description += f"\n## __{role}__:\n"
         for dev in ppl:
-            dev = client.get_user(dev)
-            creditsEmbed.description += f"- {dev.mention} {dev.name}"
+            s = client.get_user(dev)
+            txt = f"- {s.mention} {s.name}" if s else f"- <@{dev}>"
+            creditsEmbed.description += txt
