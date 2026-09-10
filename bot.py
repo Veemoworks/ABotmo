@@ -1,6 +1,7 @@
 import os, asyncio, datetime, discord.ext, dotenv, warnings
 from Cogs.BotEvents import load
 from Cogs.Methods.asynchronous.methods import get_prefix
+from Cogs.Methods.methods import close_bot
 
 startup = datetime.datetime.now()
 
@@ -14,3 +15,4 @@ if __name__ == "__main__":
     bot = discord.ext.commands.Bot(get_prefix, intents=discord.Intents.all(), max_messages=500)
     asyncio.run(load(bot))
     bot.run(os.getenv("TOKEN"), log_handler=None)
+    close_bot()

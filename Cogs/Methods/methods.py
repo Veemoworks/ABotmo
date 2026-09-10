@@ -152,7 +152,6 @@ def to_text(data: dict, xpconfig=False):
     return "\n".join(msg)
 
 # Log to a file and close the bot
-def close_bot(bot):
-    with open("output.txt", "a") as f:
-        f.write(f"[{datetime.now().strftime("%d-%m-%Y %H:%M:%S")}] [INFO    ] Bot session was ended.\n")
+def close_bot():
+    log(False, "Bot session was ended.")
     requests.patch("https://discord.com/api/v10/channels/1403041372751265912", headers={"Authorization":"Bot " + os.getenv("TOKEN"), "Content-Type": "application/json"}, data=json.dumps({"name": "[ 🔴 ] | Bot Status: Offline"}))
