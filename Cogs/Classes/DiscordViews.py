@@ -1,7 +1,7 @@
 import discord
 from discord.ui import View, Button
 from Cogs.Classes.DiscordButtons import ModalButton, OpenViewButton, PageButton, BackButton, BugReportSend, AppealButton
-from Cogs.Classes.DiscordModals import PrefixChange, BannedModify
+from Cogs.Classes.DiscordModals import PrefixChange, BannedModify, ShowModlog
 from Cogs.Classes.DiscordSelects import Logs, Role, XPRole, Appeals
 from Cogs.database import server_settings, server_channels
 from resources.arrays import logchannels
@@ -231,3 +231,8 @@ class AppealEmbed(View):
         self.add_item(AppealButton(interaction, "Accept", 1))
         self.add_item(AppealButton(interaction, "Decline", 0))
         self.add_item(AppealButton(interaction, "Close", 2, discord.ButtonStyle.secondary, 2, self, user, case))
+
+class ModlogView(discord.ui.View):
+    def __init__(self, user):
+        super().__init__(timeout=None)
+        self.add_item(item=ModalButton("Get Modlog Info", ShowModlog, None, user, style=discord.ButtonStyle.primary))

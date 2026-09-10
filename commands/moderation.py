@@ -4,7 +4,7 @@ from discord.ext import commands
 from datetime import datetime, timedelta
 from Cogs.Methods.asynchronous.methods import logChannel, sendCase
 from Cogs.Methods.methods import canUse, log
-from Cogs.Classes.DiscordViews import AutoBugReport
+from Cogs.Classes.DiscordViews import AutoBugReport, ModlogView
 from Cogs.Classes.DiscordModals import AppealLog
 from Cogs.database import modlog, server_settings
 
@@ -300,6 +300,8 @@ class Moderation(commands.Cog):
             await interaction.followup.send("Please enter either a user to see their full logs or a Log ID to see details of that log.")
             return
         await interaction.followup.send(embed=modlog(False, interaction, [page, logid, False], user))
+        if user:
+            await interaction.edit_original_response(view=ModlogView(user))
 
     @app_commands.command(name="checkmod", description="View the moderation logs a moderator has done")
     @app_commands.describe(user="Enter a user", page="Page number (each page has a limit of 25 modlogs)")

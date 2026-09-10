@@ -1,6 +1,6 @@
 import discord, requests, json, os
 from datetime import datetime
-from Cogs.database import server_settings, xp_roles
+from Cogs.database import server_settings, xp_roles, modlog
 from resources.dictionaries import headers
 from discord.ui import Modal, TextInput
 
@@ -103,6 +103,22 @@ class PrefixChange(Modal):
     async def on_submit(self, interaction: discord.Interaction):
         for field in self.children:
             await interaction.response.send_message(server_settings(True, interaction.guild, "prefix", field.value), ephemeral=True)
+class ShowModlog(Modal):
+    def __init__(self, user):
+        super().__init__(title="Enter the Index of the modlog")
+        self.user = user
+        self.add_item(TextInput(
+            label="Index",
+            placeholder="Enter a number, if not a number or nothing is submitted it'll be ignored.",
+            style=discord.TextStyle.short
+        ))
+
+    async def on_submit(self, interaction: discord.Interaction):
+        field = self.children[-1].value
+        if field.isnumeric():
+            await interaction.response.send_message(embed=modlog(False, interaction, [None, field, False], self.user), ephemeral=True)
+        else:
+            await interaction.response.send_message("Value is not a number! Please enter a number.", ephemeral=True)
 
 class AppealLog(Modal):
     def __init__(self, guild: discord.Guild, case = None, view: discord.ui.View = None, ogInteract: discord.Message = None):
