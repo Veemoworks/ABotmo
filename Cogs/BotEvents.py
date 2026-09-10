@@ -51,7 +51,7 @@ class Events(commands.Cog):
                     ramthing.start()
                     status.start(self.bot)
                     # kuma.start(self.bot)
-                    setupBotEmbeds(client)
+                    setupBotEmbeds(self.bot)
                     t = self.bot.get_channel(1403041372751265912)
                     await t.edit(name="[ 🟢 ] | Bot Status: Online")
                     print(log(False, f"READY TO KILL ALL FELLAS..."))
