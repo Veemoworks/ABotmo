@@ -1,4 +1,4 @@
-import os, asyncio, datetime, discord.ext, dotenv
+import os, asyncio, datetime, discord.ext, dotenv, warnings
 from Cogs.BotEvents import load
 from Cogs.Methods.asynchronous.methods import get_prefix
 

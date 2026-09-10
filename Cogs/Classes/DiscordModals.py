@@ -101,8 +101,8 @@ class PrefixChange(Modal):
         ))
 
     async def on_submit(self, interaction: discord.Interaction):
-        for field in self.children:
-            await interaction.response.send_message(server_settings(True, interaction.guild, "prefix", field.value), ephemeral=True)
+        await interaction.response.send_message(server_settings(True, interaction.guild, "prefix", self.children[-1].value), ephemeral=True)
+
 class ShowModlog(Modal):
     def __init__(self, user):
         super().__init__(title="Enter the Index of the modlog")
