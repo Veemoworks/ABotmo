@@ -104,7 +104,7 @@ def modlog(save, interaction: discord.Interaction, data = None, user: discord.Us
             msg = discord.Embed(color=discord.Color.dark_green())
 
             name = data[1]
-            query = f"i = {data[1]} and [user] = '{user.id}'" if data[1].isnumeric() else f"id = '{data[1]}'"
+            query = f"i = {data[1]} and [user] = '{user.id}'" if data[1].isnumeric() and user else f"id = '{data[1]}'"
 
             cur.execute(f"SELECT * FROM main.modlogs WHERE {query} AND guild_id = {gid}")
             row = cur.fetchone()

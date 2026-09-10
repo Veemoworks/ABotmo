@@ -285,7 +285,7 @@ class Moderation(commands.Cog):
             await interaction.followup.send(f"An error occurred while running this command!\nError: {e}", view=AutoBugReport(interaction, e))
 
     @app_commands.command(name="modlogs", description="View the moderation logs of a member")
-    @app_commands.describe(user="Enter a user", logid="Log ID of a Moderation Log", page="Page number (each page has a limit of 25 modlogs)",)
+    @app_commands.describe(user="Enter a user (needed for page and index)", logid="Log ID of a Moderation Log or Index of a User's logs", page="Page number (each page has a limit of 25 modlogs)",)
     @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
     @canUse()
@@ -300,7 +300,7 @@ class Moderation(commands.Cog):
             await interaction.followup.send("Please enter either a user to see their full logs or a Log ID to see details of that log.")
             return
         await interaction.followup.send(embed=modlog(False, interaction, [page, logid, False], user))
-        if user:
+        if user and not logid:
             await interaction.edit_original_response(view=ModlogView(user))
 
     @app_commands.command(name="checkmod", description="View the moderation logs a moderator has done")
