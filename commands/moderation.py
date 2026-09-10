@@ -13,11 +13,11 @@ class Moderation(commands.Cog):
         self.bot = bot
 
     @app_commands.command(name="warn", description="Give a warning to a user")
-    @app_commands.describe(user="Enter a user", reason="Enter a reason", message="Optional Message")
+    @app_commands.describe(user="Enter a user", reason="Enter a reason", message="Optional Message", appealable="Makes the case appealable or not", silent="Whether or not to send a message to the user")
     @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
     @canUse()
-    async def warn(self, interaction: discord.Interaction, user: discord.Member, reason: str, message: str = None, appealable: bool = True):
+    async def warn(self, interaction: discord.Interaction, user: discord.Member, reason: str, message: str = "", appealable: bool = True, silent: bool = False):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.defer(ephemeral=True)
         if user.bot:
@@ -33,15 +33,17 @@ class Moderation(commands.Cog):
         data.append(msg[1])
         server_settings(True, interaction.guild, "casenum")
         await logChannel(self.bot, interaction, data, user)
-        success, msg2 = await sendCase(interaction, data, user, appealable)
-        await interaction.followup.send(msg[0] + "" if success else f"\n\nThe user has still recieved the {data[4]}, but not a DM\n-# Error: {msg2}")
+        success, msg2 = False, ""
+        if not silent:
+            success, msg2 = await sendCase(interaction, data, user, appealable)
+        await interaction.followup.send(msg[0] + "" if not silent and success else f"\n\nThe user has still recieved the {data[4]}, but not a DM\n-# Error: {msg2}")
 
     @app_commands.command(name="mute", description="Timeout a user for a specific duration")
-    @app_commands.describe(user="Enter a user", length="Enter a time (60s, 1m, 1h, 1d, 2w)", reason="Enter a reason")
+    @app_commands.describe(user="Enter a user", length="Enter a time (60s, 1m, 1h, 1d, 2w)", reason="Enter a reason", appealable="Makes the case appealable or not", silent="Whether or not to send a message to the user")
     @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
     @canUse()
-    async def mute(self, interaction: discord.Interaction, user: discord.Member, length: str, reason: str = None, appealable: bool = True):
+    async def mute(self, interaction: discord.Interaction, user: discord.Member, length: str, reason: str = "", appealable: bool = True, silent: bool = False):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f'{interaction.guild.id} ({interaction.guild.name})' if interaction.guild else 'DMs'}!"))
         await interaction.response.defer(ephemeral=True)
         if user.bot:
@@ -86,8 +88,10 @@ class Moderation(commands.Cog):
             data.append(msg[1])
             server_settings(True, interaction.guild, "casenum")
             await logChannel(self.bot, interaction, data, user)
-            success, msg2 = await sendCase(interaction, data, user, appealable)
-            await interaction.followup.send(msg[0] + "" if success else f"\n\nThe user has still recieved the {data[4]}, but not a DM\n-# Error: {msg2}")
+            success, msg2 = True, ""
+            if not silent:
+                success, msg2 = await sendCase(interaction, data, user, appealable)
+            await interaction.followup.send(msg[0] + "" if not silent and success else f"\n\nThe user has still recieved the {data[4]}, but not a DM\n-# Error: {msg2}")
         except Exception as e:
             await interaction.followup.send(f"An error occurred while running this command!\nError: {e}", view=AutoBugReport(interaction, e))
 
@@ -96,7 +100,7 @@ class Moderation(commands.Cog):
     @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
     @canUse()
-    async def unmute(self, interaction: discord.Interaction, user: discord.Member, reason: str = None):
+    async def unmute(self, interaction: discord.Interaction, user: discord.Member, reason: str = ""):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f'{interaction.guild.id} ({interaction.guild.name})' if interaction.guild else 'DMs'}!"))
         await interaction.response.defer(ephemeral=True)
         if user.bot:
@@ -111,19 +115,18 @@ class Moderation(commands.Cog):
                 data.append(msg[1])
                 server_settings(True, interaction.guild, "casenum")
                 await logChannel(self.bot, interaction, data, user)
-                success, msg = await sendCase(interaction, data, user, False)
-                await interaction.followup.send(f"Successfully unmuted {user.mention}!"+ "" if success else f"\n\nThe user has still recieved the {data[4]}, but not a DM\n-# Error: {msg}")
+                await interaction.followup.send(f"Successfully unmuted {user.mention}!")
             else:
                 await interaction.followup.send(f"{user.mention} is not muted!")
         except Exception as e:
             await interaction.followup.send(f"An error occurred while running this command!\nError: {e}", view=AutoBugReport(interaction, e))
 
     @app_commands.command(name="ban", description="Ban a user")
-    @app_commands.describe(user="Enter a user", reason="Enter a reason", message="Optional Message", delete_msgs="Delete messages from the user within a certain amount of days.")
+    @app_commands.describe(user="Enter a user", reason="Enter a reason", message="Optional Message", delete_msgs="Delete messages from the user within a certain amount of days.", appealable="Makes the case appealable or not", silent="Whether or not to send a message to the user")
     @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
     @canUse()
-    async def ban(self, interaction: discord.Interaction, user: discord.User, reason: str = None, message: str = None, delete_msgs: int = 0, appealable: bool = True):
+    async def ban(self, interaction: discord.Interaction, user: discord.User, reason: str = "", message: str = "", delete_msgs: int = 0, appealable: bool = True, silent: bool = False):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.defer(ephemeral=True)
         if user.bot:
@@ -141,7 +144,8 @@ class Moderation(commands.Cog):
                         return
                 msg = modlog(True, interaction, data)
                 server_settings(True, interaction.guild, "casenum")
-                success, msg2 = await sendCase(interaction, data, user, appealable)
+                if not silent:
+                    success, msg2 = await sendCase(interaction, data, user, appealable)
                 await t.ban(delete_message_days=delete_msgs, reason=reason)
             else:
                 msg = modlog(True, interaction, data)
@@ -150,16 +154,16 @@ class Moderation(commands.Cog):
                 await interaction.guild.ban(user, reason=reason, delete_message_days=delete_msgs)
             data.append(msg[1])
             await logChannel(self.bot, interaction, data, user)
-            await interaction.followup.send(msg[0] + "" if success else f"\n\nThe user has still recieved the {data[4]}, but not a DM\n-# Error: {msg2}")
+            await interaction.followup.send(msg[0] + "" if not silent and success else f"\n\nThe user has still recieved the {data[4]}, but not a DM\n-# Error: {msg2}")
         except Exception as e:
             await interaction.followup.send(f"An error occurred while running this command!\nError: {e}", view=AutoBugReport(interaction, e))
 
     @app_commands.command(name="softban", description="Ban and instantly unban someone to clear their messages.")
-    @app_commands.describe(user="Enter a user", reason="Enter a reason")
+    @app_commands.describe(user="Enter a user", reason="Enter a reason", silent="Whether or not to send a message to the user")
     @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
     @canUse()
-    async def softban(self, interaction: discord.Interaction, user: discord.User, reason: str = None):
+    async def softban(self, interaction: discord.Interaction, user: discord.User, reason: str = "", silent: bool = False):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.defer(ephemeral=True)
         if user.bot:
@@ -178,7 +182,8 @@ class Moderation(commands.Cog):
                         return
                 msg = modlog(True, interaction, data)
                 server_settings(True, interaction.guild, "casenum")
-                success, msg2 = await sendCase(interaction, data, user, False)
+                if not silent:
+                    success, msg2 = await sendCase(interaction, data, user, False)
                 await t.ban(delete_message_days=7, reason="Softban")
                 await asyncio.sleep(1)
                 await t.unban(reason="Unbanning from softban")
@@ -193,14 +198,14 @@ class Moderation(commands.Cog):
             await interaction.followup.send(f"An error occurred while running this command!\nError: {e}", view=AutoBugReport(interaction, e))
         data.append(msg[1])
         await logChannel(self.bot, interaction, data, user)
-        await interaction.followup.send(msg[0] + "" if success else f"\n\nThe user has still recieved the {data[4]}, but not a DM\n-# Error: {msg2}")
+        await interaction.followup.send(msg[0] + "" if not silent and success else f"\n\nThe user has still recieved the {data[4]}, but not a DM\n-# Error: {msg2}")
 
     @app_commands.command(name="kick", description="Kick a user")
-    @app_commands.describe(user="Enter a user", reason="Enter a reason", message="Optional Message")
+    @app_commands.describe(user="Enter a user", reason="Enter a reason", message="Optional Message", appealable="Makes the case appealable or not", silent="Whether or not to send a message to the user")
     @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
     @canUse()
-    async def kick(self, interaction: discord.Interaction, user: discord.Member, reason: str, message: str = None, appealable: bool = True):
+    async def kick(self, interaction: discord.Interaction, user: discord.Member, reason: str, message: str = "", appealable: bool = True, silent: bool = False):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.defer(ephemeral=True)
         if user.bot:
@@ -217,10 +222,12 @@ class Moderation(commands.Cog):
             msg = modlog(True, interaction, data)
             data.append(msg[1])
             server_settings(True, interaction.guild, "casenum")
-            success, msg2 = await sendCase(interaction, data, user, appealable)
+            success = True, ""
+            if not silent:
+                success, msg2 = await sendCase(interaction, data, user, appealable)
             await user.kick(reason=reason)
             await logChannel(self.bot, interaction, data, user)
-            await interaction.followup.send(msg[0] + "" if success else f"\n\nThe user has still recieved the {data[4]}, but not a DM\n-# Error: {msg2}")
+            await interaction.followup.send(msg[0] + "" if not silent and success else f"\n\nThe user has still recieved the {data[4]}, but not a DM\n-# Error: {msg2}")
         except Exception as e:
             await interaction.followup.send(f"An error occurred while running this command!\nError: {e}", view=AutoBugReport(interaction, e))
 
@@ -229,7 +236,7 @@ class Moderation(commands.Cog):
     @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
     @canUse()
-    async def unban(self, interaction: discord.Interaction, user: discord.User, reason: str = None):
+    async def unban(self, interaction: discord.Interaction, user: discord.User, reason: str = ""):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.defer(ephemeral=True)
         if user.bot:
@@ -289,7 +296,7 @@ class Moderation(commands.Cog):
     @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
     @canUse()
-    async def modlogs(self, interaction: discord.Interaction, user: discord.User = None, logid: str = None, page: int = 1):
+    async def modlogs(self, interaction: discord.Interaction, user: discord.User | None = None, logid: str = "", page: int = 1):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.defer(ephemeral=True)
         if user and user.bot:
@@ -325,7 +332,7 @@ class Moderation(commands.Cog):
     @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
     @canUse()
-    async def remlog(self, interaction: discord.Interaction, logid: str, user: discord.User = None, reason: str = None):
+    async def remlog(self, interaction: discord.Interaction, logid: str, user: discord.User | None = None, reason: str = ""):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         await interaction.response.defer(ephemeral=True)
         if user and user.bot:
@@ -354,7 +361,7 @@ class Moderation(commands.Cog):
     @app_commands.command(name="appeal", description="Appeal a moderation log!")
     @app_commands.describe(guild="Enter a Guild ID if you're using this in DMs or if its in another server!")
     @app_commands.allowed_contexts(True, True, True)
-    async def appeal(self, interaction: discord.Interaction, guild: str = None):
+    async def appeal(self, interaction: discord.Interaction, guild: str = ""):
         print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
         if guild and guild.isnumeric():
             guild = self.bot.get_guild(guild)
