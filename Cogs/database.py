@@ -1,4 +1,5 @@
 import datetime, mssql_python as sql, discord, random, json, string, os, dotenv
+from resources.enums import *
 dotenv.load_dotenv(".env")
 
 uuidFormat = "____-___-______-___"
@@ -47,6 +48,10 @@ columns = {
         channel BIGINT""",
     "uptime": """datetime bigint,
         latency tinyint
+    """,
+    "userMoney": """[user] bigint,
+        money float,
+        dailytime bigint
     """,
 }
 uptimeHours = 48
@@ -722,5 +727,51 @@ def uptime(save: bool, latency: float | int = 0) -> list:
         ORDER BY datetime ASC
     """)
     rval = cur.fetchall()
+    con.close()
+    return rval
+
+def economy(request: Economy, value: float | int | dict[str, int | float] | None, user: discord.User | discord.Member):
+    con, cur = connectToDB("economy")
+    checkTableExists(con, cur, "userMoney")
+
+    cur.execute(f"SELECT * FROM main.userMoney WHERE [user] = {user.id}")
+    row = cur.fetchone()
+
+    if not row:
+        cur.execute(f"""
+            INSERT INTO main.userMoney ([user], money, dailytime)
+            VALUES ({user.id}, 0, {int((datetime.datetime.now() - datetime.timedelta(days=1)).timestamp())});
+        """)
+        con.commit()
+
+    rval = True
+    match request:
+        case Economy.Add:
+            if isinstance(value, int | float):
+                cur.execute(f"select money from main.userMoney where [user] = {user.id}")
+                money = cur.fetchone()[0]
+                cur.execute(f"update main.userMoney set money = {money + value} where [user] = {user.id}")
+        case Economy.Take:
+            if isinstance(value, int | float):
+                cur.execute(f"select money from main.userMoney where [user] = {user.id}")
+                money = cur.fetchone()[0]
+                cur.execute(f"update main.userMoney set money = {money - value} where [user] = {user.id}")
+        case Economy.Set:
+            if isinstance(value, dict):
+                joint = []
+                for k, v in value.items():
+                    joint.append(f"{k} = {v}")
+                joint = ", ".join(joint)
+            else: joint = f"money = {value}";
+            cur.execute(f"update main.userMoney set {joint} where [user] = {user.id}")
+        case Economy.Get:
+            cur.execute(f"select money, dailytime from main.userMoney where [user] = {user.id}")
+            rval = cur.fetchone()
+            rval = {
+                "money": rval[0],
+                "dailytime": datetime.datetime.fromtimestamp(rval[1]),
+            }
+
+    con.commit()
     con.close()
     return rval
