@@ -1,7 +1,7 @@
 import discord, json, random
 from discord import app_commands
 from discord.ext import commands
-from Cogs.Methods.methods import log, to_text, canUse, xpEnabledOnly
+from Cogs.Methods.methods import logCommand, to_text, canUse, xpEnabledOnly
 from Cogs.Classes.DiscordViews import Config, XPConfig
 from resources.dictionaries import setting_users
 from Cogs.database import xp, server_settings, user_settings, xp_settings, server_channels, nextLevel, xp_roles
@@ -15,8 +15,7 @@ class Server(commands.Cog):
     @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
     async def serverconfig(self, interaction: discord.Interaction):
-        print(log(False,
-                  f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id} ({interaction.guild.name})!"))
+        print(logCommand(interaction))
         await interaction.response.defer(ephemeral=True)
         if not interaction.user.guild_permissions.administrator:
             await interaction.followup.send("You do not have permission to run this command!")
@@ -42,7 +41,7 @@ class Server(commands.Cog):
     @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
     async def xpconfig(self, interaction: discord.Interaction, message: bool = None, channel: discord.TextChannel = None, cd: int = None, xprange: str = None, xpenabled: bool = None):
-        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id} ({interaction.guild.name})!"))
+        print(logCommand(interaction))
         # soon a module like serverconfig
         await interaction.response.defer(ephemeral=True)
         if not interaction.user.guild_permissions.administrator:
@@ -122,7 +121,7 @@ class Server(commands.Cog):
     @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
     async def rank(self, interaction: discord.Interaction, user: discord.Member = None):
-        print(log(False,f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id} ({interaction.guild.name})!"))
+        print(logCommand(interaction))
         has_perms = app_commands.checks.bot_has_permissions(embed_links=True)
         embed = discord.Embed(color=discord.Color.brand_green())
         await interaction.response.defer()
@@ -162,8 +161,7 @@ class Server(commands.Cog):
     @canUse()
     @xpEnabledOnly()
     async def set_rank(self, interaction: discord.Interaction, user: discord.Member, newlevel: int = None, newxp: int = None, add: bool = False):
-        print(log(False,
-                      f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id} ({interaction.guild.name})!"))
+        print(logCommand(interaction))
         if not newlevel and not newxp:
             await interaction.response.send_message("Please enter either a Level or XP to modify!", ephemeral=True)
             return
@@ -200,7 +198,7 @@ class Server(commands.Cog):
     ])
     @app_commands.allowed_contexts(True, True, True)
     async def settings(self, interaction: discord.Interaction, xpmessages: app_commands.Choice[str] = None):
-        print(log(False,f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
+        print(logCommand(interaction))
         await interaction.response.defer(ephemeral=True)
         embed = discord.Embed(title="User Settings", color=discord.Color.brand_green())
         embed.set_footer(text=interaction.user.name, icon_url=interaction.user.avatar.url)

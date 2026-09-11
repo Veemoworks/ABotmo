@@ -151,7 +151,10 @@ def to_text(data: dict, xpconfig=False):
         msg.append(f"{kirk[key]} {"are" if plural else "is"} {skib}")
     return "\n".join(msg)
 
+def logCommand(interaction: discord.Interaction) -> str:
+    return log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!")
+
 # Log to a file and close the bot
-def close_bot():
+def close_bot() -> None:
     log(False, "Bot session was ended.")
     requests.patch("https://discord.com/api/v10/channels/1403041372751265912", headers={"Authorization":"Bot " + os.getenv("TOKEN"), "Content-Type": "application/json"}, data=json.dumps({"name": "[ 🔴 ] | Bot Status: Offline"}))

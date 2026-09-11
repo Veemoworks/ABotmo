@@ -12,7 +12,7 @@ from Cogs.Classes.DiscordButtons import CreditsButton
 from resources.arrays import veemoworksdevs, recnetdb
 from resources.dictionaries import botbadges, cmduae
 from resources.variables import version, pid
-from Cogs.Methods.methods import log
+from Cogs.Methods.methods import logCommand, log
 
 ping3.EXCEPTIONS = True
 
@@ -34,7 +34,7 @@ class Utils(commands.Cog):
     @app_commands.describe(user="User to get info from")
     @app_commands.allowed_contexts(True, True, True)
     async def whois(self, interaction: discord.Interaction, user: discord.User = None):
-        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
+        print(logCommand(interaction))
         if user == None:
             user = interaction.user
         try:
@@ -69,8 +69,7 @@ class Utils(commands.Cog):
     @app_commands.command(name="applications", description="Provides an application for Veemoworks")
     @app_commands.allowed_contexts(True, True, True)
     async def applications(self, interaction: discord.Interaction):
-        print(log(False,
-                  f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
+        print(logCommand(interaction))
         app_embed = discord.Embed(title="Veemoworks Applications",
                                   description="Hi there!\n"
                                               "We have have an always active application for the Veemoworks project! However sometimes we change the application likely becase we changed to a different provider or our system is full, so make sure to double check with AVeemo if you're unsure.",
@@ -83,7 +82,7 @@ class Utils(commands.Cog):
     @app_commands.command(name="stats", description="Get the bot's current stats")
     @app_commands.allowed_contexts(True, True, True)
     async def stats(self, interaction: discord.Interaction):
-        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
+        print(logCommand(interaction))
         embed = discord.Embed(color=discord.Color.brand_green())
         embed.set_author(name="ABotmo v" + version, icon_url=self.bot.user.avatar.url)
         embed.add_field(name="Latency:", value=f"{round(self.bot.latency * 1000)}ms")
@@ -105,7 +104,7 @@ class Utils(commands.Cog):
     @app_commands.command(name="uptime", description=f"Provides ABotmo's uptime in the last {uptimeHours} hours")
     @app_commands.allowed_contexts(True, True, True)
     async def uptime(self, interaction: discord.Interaction):
-        print(log(False,f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
+        print(logCommand(interaction))
         await interaction.response.defer()
         uptimeData = uptime(False)
         if not uptimeData:
@@ -142,19 +141,19 @@ class Utils(commands.Cog):
     @app_commands.command(name="links", description="Get all links related to the bot")
     @app_commands.allowed_contexts(True, True, True)
     async def invite(self, interaction: discord.Interaction):
-        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
+        print(logCommand(interaction))
         await interaction.response.send_message(f"[**`Install Link`**](<https://discord.com/oauth2/authorize?client_id=1399735099452424314> \"Install ABotmo as an External App\") | [**`Source Code`**](<https://github.com/Veemoworks/ABotmo> \"View the code of the bot!\")\n[`Discord Server`](<https://discord.gg/pwXfWfhH7k> \"Join the Discord Server and get access to all features and beta access!\") | [`Donate`](<https://paypal.me/veraveemo> \"Donate to AVeemo to help support them and their project(s)!\") | [`Bot Info`](<https://bot.veraveemo.uk> \"Get all the info from this bot that you need, or just run /help!\")")
 
     @app_commands.command(name="bugreport", description="Report an ABotmo Bot bug")
     @app_commands.allowed_contexts(True, True, True)
     async def bugreport(self, interaction: discord.Interaction):
-        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
+        print(logCommand(interaction))
         await interaction.response.send_modal(BugReport())
 
     @app_commands.command(name="suggestion", description="Give an ABotmo feature to add")
     @app_commands.allowed_contexts(True, True, True)
     async def suggestion(self, interaction: discord.Interaction):
-        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
+        print(logCommand(interaction))
         await interaction.response.send_modal(BotSuggest())
 
     @app_commands.command(name="help", description="Shows help info and commands")
@@ -162,7 +161,7 @@ class Utils(commands.Cog):
     @app_commands.autocomplete(command=command_autocomplete)
     @app_commands.allowed_contexts(True, True, True)
     async def help(self, interaction: discord.Interaction, command: str = None):
-        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
+        print(logCommand(interaction))
         await interaction.response.defer(ephemeral=True)
         cmdid = None
         embed = discord.Embed(color=discord.Color.brand_green())
@@ -204,7 +203,7 @@ class Utils(commands.Cog):
     @app_commands.guild_only()
     @canUse()
     async def purge_slash(self, interaction: discord.Interaction, amount: int, user: discord.User = None, bots: bool = False, embeds: bool = False, files: bool = False, links: bool = False, mentions: bool = False):
-        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
+        print(logCommand(interaction))
         await interaction.response.defer(ephemeral=True)
 
         if amount < 1 or amount > 100:
@@ -253,7 +252,7 @@ class Utils(commands.Cog):
     @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
     async def serverinfo(self, interaction: discord.Interaction):
-        print(log(False,f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id} ({interaction.guild.name})!"))
+        print(logCommand(interaction))
         await interaction.response.defer()
         guild = interaction.guild
 
@@ -284,7 +283,7 @@ class Utils(commands.Cog):
     @app_commands.allowed_contexts(True, False, False)
     @app_commands.guild_only()
     async def roleinfo(self, interaction: discord.Interaction, role: discord.Role):
-        print(log(False,f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {interaction.guild.id} ({interaction.guild.name})!"))
+        print(logCommand(interaction))
         perms = []
         for name, value in iter(role.permissions):
             if value:

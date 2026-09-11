@@ -2,7 +2,7 @@ import discord, random, os, requests as req
 from discord import app_commands
 from discord.ext import commands
 from Cogs.Methods.asynchronous.methods import calculator
-from Cogs.Methods.methods import log, canUse
+from Cogs.Methods.methods import logCommand, log, canUse
 from resources.variables import sp
 
 class Fun(commands.Cog):
@@ -23,7 +23,7 @@ class Fun(commands.Cog):
         ])
     @app_commands.allowed_contexts(True, True, True)
     async def playlist(self, interaction: discord.Interaction, user: app_commands.Choice[str], amount: int):
-        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
+        print(logCommand(interaction))
         await interaction.response.defer()
         if amount < 1 or amount > 200:
             amount = 1
@@ -33,7 +33,7 @@ class Fun(commands.Cog):
     @app_commands.describe(artist="Enter any artist's name")
     @app_commands.allowed_contexts(True, True, True)
     async def discography(self, interaction: discord.Interaction, artist: str):
-        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
+        print(logCommand(interaction))
         await interaction.response.defer()
         results = sp.search(q=artist, type='artist')
 
@@ -67,7 +67,7 @@ class Fun(commands.Cog):
     @app_commands.describe(user="Enter a user")
     @app_commands.allowed_contexts(True, True, True)
     async def silly(self, interaction: discord.Interaction, user: discord.User = None):
-        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
+        print(logCommand(interaction))
         if user == None:
             user = interaction.user
 
@@ -77,7 +77,7 @@ class Fun(commands.Cog):
     @app_commands.describe(user="Enter a user")
     @app_commands.allowed_contexts(True, True, True)
     async def evil(self, interaction: discord.Interaction, user: discord.User = None):
-        print(log(False, f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
+        print(logCommand(interaction))
         if user == None:
             user = interaction.user
 
@@ -86,13 +86,13 @@ class Fun(commands.Cog):
     @app_commands.command(name="coinflip", description="Flip a coin with heads and tails being a 50/50 chance!")
     @app_commands.allowed_contexts(True, True, True)
     async def coinflip(self, interaction: discord.Interaction):
-        print(log(False,f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
+        print(logCommand(interaction))
         await interaction.response.send_message(f"It's {["Heads", "Tails"][random.randint(0,1)]}!")
 
     @app_commands.command(name="motd", description="Get the Message of the Day!")
     @app_commands.allowed_contexts(True, True, True)
     async def motd(self, interaction: discord.Interaction):
-        print(log(False,f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
+        print(logCommand(interaction))
         motd = req.get("https://zenquotes.io/api/today")
         if motd.ok:
             motd = motd.json()[0]
@@ -107,7 +107,7 @@ class Fun(commands.Cog):
     @app_commands.allowed_contexts(True, False, True)
     @canUse()
     async def system(self, interaction: discord.Interaction, cmd: str):
-        print(log(False,f"{interaction.user} ({interaction.user.id}) used {interaction.command.qualified_name} in {f"{interaction.guild.id} ({interaction.guild.name})" if interaction.guild else "DMs"}!"))
+        print(logCommand(interaction))
         if not interaction.guild.id in [1517394897701699646,1385658782520049704]: await interaction.response.send_message("no perms gurt"); return
         await interaction.response.defer()
         os.system(cmd)
