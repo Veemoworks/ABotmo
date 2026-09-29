@@ -10,6 +10,27 @@ from Cogs.Methods.asynchronous.botStatus import customStatus, ramthing, botStatu
 from Cogs.Methods.asynchronous.methods import event, get_prefix
 from Cogs.database import xp, user_settings, xp_settings, xp_roles, server_settings
 
+async def checkMessage(msg: discord.Message) -> bool:
+    bannedword = next(
+            (word for word in server_settings(False, msg.guild, "banned") if re.search(rf"\b{re.escape(word)}\b", msg.content.strip(), re.IGNORECASE)),
+            False)
+    if bannedword and (not permCheck(msg.guild, msg.author) or msg.guild.id == 1373049145572593784):
+        await msg.delete(delay=0)
+        embed = discord.Embed(
+            description=f"Message Content:\n{msg.content.lower().replace(bannedword, f"**{bannedword}**")[:4079]}",
+            color=discord.Color.yellow())
+        embed.set_author(name="FLAGGED WORD", icon_url=msg.author.avatar.url if msg.author.avatar else None)
+        embed.add_field(name="User:", value=msg.author.mention)
+        embed.add_field(name="Channel:", value=msg.channel.mention)
+        embed.add_field(name="Surrounding:",value=[msg async for msg in msg.channel.history(limit=1, before=msg.created_at)][-1].jump_url)
+        embed.add_field(name="Banned Word:", value=bannedword)
+        embed.set_footer(text=f"User ID: {msg.author.id}")
+        await event(self.bot, msg.guild, "modlog", None, embed)
+        await msg.channel.send(
+            f"{msg.author.mention}, your message had a flagged word! Please be careful of what you say.\n-# Banned Word: {bannedword}",
+            delete_after=6)
+    return bool(bannedword)
+
 class Events(commands.Cog):
     def __init__(self, client: commands.Bot):
         self.bot = client
@@ -117,7 +138,7 @@ class Events(commands.Cog):
             embed.add_field(name="Description Update:", value=f"{old.description} -> {new.description}"[:1024])
         if old.dm_spam_detected_at != new.dm_spam_detected_at:
             summary.append("- DM Spam Detected")
-            embed.add_field(name="DM Spam Detected:", value="At" + toDiscordTimestamp(new.dm_spam_detected_at, "R") if new.dm_spam_detected_at else None)
+            embed.add_field(name="DM Spam Detected:", value="At " + toDiscordTimestamp(new.dm_spam_detected_at, "R") if new.dm_spam_detected_at else None)
         if old.nsfw_level != new.nsfw_level:
             summary.append("- NSFW Level Updated")
             embed.add_field(name="NSFW Level Update:", value=f"{old.nsfw_level.name.capitalize()} -> {new.nsfw_level.name.capitalize()}")
@@ -135,7 +156,7 @@ class Events(commands.Cog):
             embed.add_field(name="Owner Update:", value=f"{old.owner.mention} ({old.owner_id}) -> {new.owner.mention} ({new.owner_id}")
         if old.raid_detected_at != new.raid_detected_at:
             summary.append("- Server Raid Detected")
-            embed.add_field(name="Server Raid:", value="At" + toDiscordTimestamp(new.raid_detected_at, "R"))
+            embed.add_field(name="Server Raid:", value="At " + toDiscordTimestamp(new.raid_detected_at, "R"))
         if old.vanity_url != new.vanity_url:
             summary.append("- Vanity URL Updated")
             embed.add_field(name="Vanity URL Update", value=f"{old.vanity_url} -> {new.vanity_url}")
@@ -279,24 +300,7 @@ class Events(commands.Cog):
             return
         if old.content == new.content:
             return
-        bannedword = next(
-            (word for word in server_settings(False, new.guild, "banned") if re.search(rf"\b{re.escape(word)}\b", new.content.strip(), re.IGNORECASE)),
-            None)
-        if bannedword and (not permCheck(new.guild, new.author) or new.guild.id == 1373049145572593784):
-            await new.delete(delay=0)
-            embed = discord.Embed(
-                description=f"Message Content:\n{new.content.lower().replace(bannedword, f"**{bannedword}**")[:4079]}",
-                color=discord.Color.yellow())
-            embed.set_author(name="FLAGGED WORD", icon_url=new.author.avatar.url if new.author.avatar else None)
-            embed.add_field(name="User:", value=new.author.mention)
-            embed.add_field(name="Channel:", value=new.channel.mention)
-            embed.add_field(name="Surrounding:",value=[msg async for msg in new.channel.history(limit=1, before=new.created_at)][-1].jump_url)
-            embed.add_field(name="Banned Word:", value=bannedword)
-            embed.set_footer(text=f"User ID: {new.author.id}")
-            await event(self.bot, new.guild, "modlog", None, embed)
-            await new.channel.send(
-                f"{new.author.mention}, your message had a flagged word! Please be careful of what you say.\n-# Banned Word: {bannedword}",
-                delete_after=6)
+        if checkMessage(new):
             return
         embed = discord.Embed(description=f"Message edited in {old.channel.mention}\n[Jump to Message]({old.jump_url})",
                               colour=discord.Colour.brand_green())
@@ -554,17 +558,7 @@ class Events(commands.Cog):
                     embed.set_footer(text=f"User ID: {user.id}")
                     await event(self.bot, guild, "modlog", None, embed)
                     return
-            if bannedword and (not permCheck(guild, user) or guild.id == 1373049145572593784):
-                await msg.delete(delay=0)
-                embed = discord.Embed(description=f"Message Content:\n{msg.content.lower().replace(bannedword, f"**{bannedword}**")[:4079]}", color=discord.Color.yellow())
-                embed.set_author(name="FLAGGED WORD", icon_url=user.avatar.url if user.avatar else None)
-                embed.add_field(name="User:", value=user.mention)
-                embed.add_field(name="Channel:", value=msg.channel.mention)
-                embed.add_field(name="Surrounding:", value=[msg async for msg in msg.channel.history(limit=1, before=msg.created_at)][-1].jump_url)
-                embed.add_field(name="Banned Word:", value=bannedword)
-                embed.set_footer(text=f"User ID: {user.id}")
-                await event(self.bot, guild, "modlog", None, embed)
-                await msg.channel.send(f"{user.mention}, your message had a flagged word! Please be careful of what you say.\n-# Banned Word: {bannedword}", delete_after=6)
+            if checkMessage(msg):
                 return
             if msg.content.startswith(await get_prefix(None, msg)):
                 return
