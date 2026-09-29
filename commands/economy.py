@@ -9,7 +9,6 @@ from Cogs.Methods.methods import logCommand
 
 dailyReward = 100
 lost = .95
-otherLost = .05
 gain = [60, 100]
 claimCD = timedelta(days=1)
 
@@ -71,18 +70,16 @@ class Eco(app_commands.Group):
 
         percent = random.randint(gain[0], gain[1])
         ylost = amount * lost
-        tlost = min(otherMoney * otherLost, 500)
         tGot  = amount * (percent / 100)
 
         ecoCmd(Economy.Take, ylost, interaction.user)
-        ecoCmd(Economy.Take, tlost, user)
         ecoCmd(Economy.Add,  tGot,  user)
 
-        await interaction.followup.send(f"You lost ${ylost:.2f} and {user.mention} lost ${tlost:.2f} but gained ${tGot:.2f} ({percent}%)!", allowed_mentions=noMentions)
+        await interaction.followup.send(f"You lost ${ylost:.2f}, but {user.mention} gained ${tGot:.2f} ({percent}%)!", allowed_mentions=noMentions)
         if interaction.guild is None:
             if isinstance(interaction.channel, discord.DMChannel):
                 if interaction.channel.recipient != user:
-                    await user.send(f"{interaction.user.mention} ({interaction.user.name}) made you lose ${tlost:.2f}, but you gained ${tGot:.2f} from their thrown money!")
+                    await user.send(f"{interaction.user.mention} ({interaction.user.name}) threw ${tGot:.2f} at you!")
 
     @app_commands.command(name="donate", description="Donate money to someone!")
     @app_commands.describe(user="The user to donate money to", amount="Amount of money to donate")
@@ -124,7 +121,7 @@ class Eco(app_commands.Group):
         await interaction.response.defer()
 
         data = ecoCmd(Economy.Get, None, interaction.user)
-        money: int = data["money"]
+        money: float = data["money"]
 
         if bet > money or bet <= 0:
             await interaction.followup.send("Invalid bet amount.")
@@ -148,8 +145,8 @@ class Eco(app_commands.Group):
                     return
                 outcome = random.choice(["red", "black", "green"])
                 won = value == outcome
-                if outcome == "green": wonAmount = bet * 10
-                rslt = f"Ball landed on **{outcome}**"
+                if outcome == "green": won = True; wonAmount = bet * 10
+                rslt = f"Ball landed on **{outcome.capitalize()}**"
             case GambleGames.Coinflip:
                 if value not in ["heads", "tails"]:
                     await interaction.followup.send('Please choose "Heads" or "Tails" as your value option!')
@@ -202,7 +199,7 @@ class Eco(app_commands.Group):
                 wonAmount = bet * 8
                 rslt = f"You guessed **{value}**. The secret number was **{number}**."
 
-        ecoCmd(Economy.Get if won else Economy.Take, wonAmount if won else bet, interaction.user)
+        ecoCmd(Economy.Add if won else Economy.Take, wonAmount if won else bet, interaction.user)
         await interaction.followup.send(rslt + "\n" + (f"You won ${wonAmount:.2f}!" if won else f"You lost ${bet:.2f}!"))
 
     @app_commands.command(name="balance", description="Check your balance!")
