@@ -768,7 +768,7 @@ def economy(request: Economy, value: float | int | dict[str, int | float] | None
             cur.execute(f"select money, dailytime from main.userMoney where [user] = {user.id}")
             rval = cur.fetchone()
             rval = {
-                "money": rval[0],
+                "money": rval[0] + .01,
                 "dailytime": datetime.datetime.fromtimestamp(rval[1]),
             }
 
