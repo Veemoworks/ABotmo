@@ -771,6 +771,8 @@ def economy(request: Economy, value: float | int | dict[str, int | float] | None
                 "money": rval[0] + .01,
                 "dailytime": datetime.datetime.fromtimestamp(rval[1]),
             }
+        case _:
+            rval = False
 
     con.commit()
     con.close()
