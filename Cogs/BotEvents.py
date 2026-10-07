@@ -77,6 +77,19 @@ class Events(commands.Cog):
                     await t.edit(name="[ 🟢 ] | Bot Status: Online")
                     print(log(False, f"READY TO KILL ALL FELLAS..."))
                     self.done = True
+                else:
+                    if not ramthing.is_running():
+                        ramthing.start()
+                    else:
+                        ramthing.restart()
+                    if not customStatus.is_running():
+                        customStatus.start(self.bot)
+                    else:
+                        customStatus.restart()
+                    if not botStatus.is_running():
+                        botStatus.start(self.bot)
+                    else:
+                        botStatus.restart()
             except Exception as e:
                 print(log(True, f"Sync Error: {e}"))
         except Exception as e:
