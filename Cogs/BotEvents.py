@@ -11,18 +11,28 @@ from Cogs.Methods.asynchronous.methods import event, get_prefix
 from Cogs.database import xp, user_settings, xp_settings, xp_roles, server_settings
 
 async def checkMessage(msg: discord.Message) -> bool:
+    content = msg.content.strip()
     bannedword = next(
-            (word for word in server_settings(False, msg.guild, "banned") if re.search(rf"\b{re.escape(word)}\b", msg.content.strip(), re.IGNORECASE)),
+            (word for word in server_settings(False, msg.guild, "banned") if re.search(rf"\b{re.escape(word)}\b", content, re.IGNORECASE)),
             False)
     if bannedword and (not permCheck(msg.guild, msg.author) or msg.guild.id == 1373049145572593784):
+        i = content.lower().find(bannedword.lower())
+
+        desc = "Message Content:\n"
+
+        content[i:len(loweredBan)] = f"**{content[i:len(loweredBan)]}**"
+        content = content[:4096 - len(desc)]
+        desc += content
+
+        history = [msg async for msg in msg.channel.history(limit=1, before=msg.created_at)]
+
         await msg.delete(delay=0)
-        embed = discord.Embed(
-            description=f"Message Content:\n{msg.content.lower().replace(bannedword, f"**{bannedword}**")[:4079]}",
-            color=discord.Color.yellow())
+        embed = discord.Embed(description=desc, color=discord.Color.yellow())
         embed.set_author(name="FLAGGED WORD", icon_url=msg.author.avatar.url if msg.author.avatar else None)
         embed.add_field(name="User:", value=msg.author.mention)
         embed.add_field(name="Channel:", value=msg.channel.mention)
-        embed.add_field(name="Surrounding:",value=[msg async for msg in msg.channel.history(limit=1, before=msg.created_at)][-1].jump_url)
+        if history:
+            embed.add_field(name="Surrounding:",value=history[-1].jump_url)
         embed.add_field(name="Banned Word:", value=bannedword)
         embed.set_footer(text=f"User ID: {msg.author.id}")
         await event(self.bot, msg.guild, "modlog", None, embed)
